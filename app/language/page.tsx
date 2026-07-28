@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ChevronLeft, Globe, Check } from "lucide-react"
-import { ProtectedRoute } from "./route-protection"
+import { ProtectedRoute } from "../../components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
-import { useUserPreferences } from "../hooks/use-user-preferences"
+import { useUserPreferences } from "../../hooks/use-user-preferences"
 
 const languages = [
   { code: "en", name: "English (US)" },

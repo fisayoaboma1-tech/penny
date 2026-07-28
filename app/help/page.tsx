@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ChevronLeft, ChevronDown, ChevronRight, HelpCircle, Search, MessageCircle, BookOpen, Phone, Mail } from "lucide-react"
-import { ProtectedRoute } from "./route-protection"
+import { ProtectedRoute } from "../../components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
 
 const faqs = [

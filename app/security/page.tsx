@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ChevronLeft, Shield, Lock, ChevronRight } from "lucide-react"
-import { ProtectedRoute } from "./route-protection"
+import { ProtectedRoute } from "../../components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
-import { ForgotPasswordModal } from "./forgot-password-modal"
+import { ForgotPasswordModal } from "../../components/forgot-password-modal"
 
 export default function SecurityPage() {
   const router = useRouter()

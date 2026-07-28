@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ChevronLeft, Bell, Smartphone, Mail, MessageSquare, Check } from "lucide-react"
-import { ProtectedRoute } from "./route-protection"
+import { ProtectedRoute } from "../../components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
-import { useUserPreferences } from "../hooks/use-user-preferences"
+import { useUserPreferences } from "../../hooks/use-user-preferences"
 
 export default function NotificationsPage() {
   const router = useRouter()

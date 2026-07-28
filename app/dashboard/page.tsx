@@ -25,9 +25,9 @@ import {
   User
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
-import { EditBalanceModal } from "./edit-balance-modal"
-import { DeleteUserModal } from "./delete-user-modal"
-import { ProtectedRoute } from "./route-protection"
+import { EditBalanceModal } from "../../components/edit-balance-modal"
+import { DeleteUserModal } from "../../components/delete-user-modal"
+import { ProtectedRoute } from "../../components/route-protection"
 
 interface User {
   id: string
