@@ -1,43 +1,127 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { ChevronDown } from "lucide-react"
+import { useEffect, useState } from "react"
 
 const DARK_GREEN = "#0B3D2E"
-const LEMON_GREEN = "#AFFF00"
+const galleryImages = [
+  "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785314707/download_8_ybz4ul.jpg",
+  "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785314707/download_7_hmeqog.webp",
+  "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785314378/download_7_xtllwh.jpg",
+]
 
 export function AboutUs() {
+  const [activeImage, setActiveImage] = useState(0)
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setActiveImage((prev) => (prev + 1) % galleryImages.length)
+    }, 4000)
+
+    return () => window.clearInterval(interval)
+  }, [])
   return (
-    <section id="about" className="relative py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-            <span className="inline-block font-mono text-sm tracking-widest" style={{ color: DARK_GREEN, backgroundColor: `${DARK_GREEN}10` }}>
-              ABOUT US
-            </span>
+    <section id="about" className="relative overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(245,250,240,0.8))] py-20">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(175,255,0,0.12),transparent_45%)]" />
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/5 via-black/5 to-transparent blur-2xl" />
 
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-4">Trusted digital banking since 2013</h2>
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <div className="flex flex-col gap-8 md:grid md:grid-cols-[1.05fr_0.95fr] md:items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="order-2 rounded-[2rem] border border-white/70 bg-white/55 p-8 shadow-[0_20px_60px_rgba(11,61,46,0.08)] backdrop-blur-xl md:order-none md:p-10"
+          >
+            <motion.span
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.45 }}
+              className="inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em]"
+              style={{ color: DARK_GREEN, backgroundColor: `${DARK_GREEN}14` }}
+            >
+              About us
+            </motion.span>
 
-            <p className="text-gray-700 mt-4 leading-relaxed max-w-xl">
+            <motion.h2
+              initial={{ opacity: 0, x: 32 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mt-4 text-2xl font-semibold leading-tight text-gray-900 md:text-3xl lg:text-4xl"
+            >
+              Trusted <span style={{ color: "#4f6b12" }}>digital banking</span> since 2013
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.12 }}
+              className="mt-4 max-w-xl text-base leading-relaxed text-gray-700"
+            >
               Since 2013, Pennywise has focused on building a modern banking platform that makes money management simple, fast, and secure.
               We combine smart savings, instant transfers, and intuitive tools tailored for both everyday users and growing businesses.
-            </p>
+            </motion.p>
 
-            <p className="text-gray-700 mt-4 leading-relaxed max-w-xl">
-              Our products deliver transparent pricing, industry-grade security, and 24/7 support — empowering customers to reach their financial goals.
-            </p>
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.16 }}
+              className="mt-4 max-w-xl text-base leading-relaxed text-gray-700"
+            >
+              Our products deliver transparent pricing, industry grade security, and 24/7 support, empowering customers to reach their financial goals.
+            </motion.p>
 
-            <div className="mt-6">
-              <button className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-semibold text-white" style={{ backgroundColor: LEMON_GREEN, color: "#081" }}>
-                Learn more
-              </button>
-            </div>
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="order-1 mt-6 flex justify-center md:order-none md:mt-0"
+            >
+              <div className="w-full max-w-md overflow-hidden rounded-[2rem] border border-white/70 bg-white/50 p-2 shadow-[0_20px_60px_rgba(11,61,46,0.08)] backdrop-blur-xl">
+                <div className="relative h-64 overflow-hidden rounded-[1.25rem] md:h-80">
+                  {galleryImages.map((image, index) => {
+                    const isActive = index === activeImage
 
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}>
-            <div className="w-full h-64 md:h-80 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center">
-              {/* Image placeholder — replace with your image or <Image /> component */}
-              <span className="text-gray-400">Your image here</span>
-            </div>
+                    return (
+                      <motion.img
+                        key={image}
+                        src={image}
+                        alt={`About Pennywise view ${index + 1}`}
+                        className="absolute inset-0 h-full w-full rounded-[1.25rem] object-cover"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: isActive ? 1 : 0 }}
+                        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    )
+                  })}
+                  <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-white/70 via-white/25 to-transparent blur-[10px]" />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mt-8 flex justify-start md:justify-center"
+            >
+              <motion.button
+                whileHover={{ y: -2, scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-white/60 px-6 py-3.5 text-sm font-semibold text-[#0B3D2E] shadow-[0_12px_30px_rgba(11,61,46,0.12)] backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-[#0B3D2E]"
+              >
+                <span>Learn more</span>
+                <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-1" />
+              </motion.button>
+            </motion.div>
           </motion.div>
         </div>
       </div>
