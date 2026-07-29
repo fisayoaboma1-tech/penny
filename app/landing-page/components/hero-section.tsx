@@ -158,7 +158,7 @@ export function HeroSection() {
               </motion.h1>
               <motion.h1
                 style={{ x: textX2 }}
-                className="text-5xl md:text-7xl font-light tracking-tighter leading-[0.9] text-gray-700"
+                className="text-5xl md:text-7xl font-medium tracking-tighter leading-[0.9] text-gray-700"
               >
                 <motion.span
                   variants={fadeUpVariants}
@@ -190,12 +190,9 @@ export function HeroSection() {
               className="flex flex-wrap gap-3 pt-2"
             >
               <motion.button
-                className="text-white px-6 py-3 rounded-full font-bold text-sm tracking-wide flex items-center gap-2 group relative overflow-hidden border-2"
-                style={{
-                  backgroundColor: "#1d631d",
-                  borderColor: "#1d631d"
-                }}
-                whileHover={{ scale: 1.02, backgroundColor: "#24b624" }}
+                className="px-6 py-3 rounded-full font-bold text-sm tracking-wide flex items-center gap-2 group relative overflow-hidden cursor-pointer border border-white/20 text-white"
+                style={{ backgroundColor: "#0B3D2E" }}
+                whileHover={{ scale: 1.02, backgroundColor: "#AFFF00", color: "#0B3D2E" }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
@@ -218,12 +215,8 @@ export function HeroSection() {
                 </motion.svg>
               </motion.button>
               <motion.button
-                className="border-2 px-6 py-3 rounded-full font-bold text-sm tracking-wide relative overflow-hidden"
-                style={{
-                  borderColor: GREEN_417548,
-                  color: GREEN_417548
-                }}
-                whileHover={{ scale: 1.02, backgroundColor: GREEN_417548, color: "white" }}
+                className="px-6 py-3 rounded-full font-bold text-sm tracking-wide relative overflow-hidden cursor-pointer border border-white/40 bg-transparent text-white"
+                whileHover={{ scale: 1.02, color: "#AFFF00" }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >

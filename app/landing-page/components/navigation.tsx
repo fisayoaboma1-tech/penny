@@ -47,6 +47,8 @@ export function Navigation() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const lenis = useLenis()
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -104,6 +106,28 @@ export function Navigation() {
     return () => observerRef.current?.disconnect()
   }, [])
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node
+      if (menuRef.current?.contains(target)) return
+      if (toggleButtonRef.current?.contains(target)) return
+      setMobileMenuOpen(false)
+    }
+
+    const handleScroll = () => {
+      setMobileMenuOpen(false)
+    }
+
+    document.addEventListener("mousedown", handlePointerDown)
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown)
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [mobileMenuOpen])
+
   return (
     <motion.nav
       initial={{ y: -100 }}
@@ -114,9 +138,9 @@ export function Navigation() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className={`flex items-center gap-2 ${mobileMenuOpen ? "md:hidden" : ""}`}>
           <motion.span
-            className="text-2xl font-normal tracking-tighter"
+            className={`text-2xl font-normal tracking-tighter ${mobileMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
@@ -134,7 +158,7 @@ export function Navigation() {
               <motion.button
                 key={item.label}
                 onClick={() => scrollToSection(item.href)}
-                className={`text-sm font-normal tracking-wide transition-colors relative ${
+                className={`text-sm font-normal tracking-wide transition-colors relative cursor-pointer ${
                   scrolled ? "text-white/80 hover:text-white" : "text-white/80 hover:text-white"
                 }`}
                 style={{ color: undefined }}
@@ -159,7 +183,8 @@ export function Navigation() {
         </div>
 
         <motion.button
-          className="md:hidden p-2"
+          ref={toggleButtonRef}
+          className="md:hidden p-2.5 cursor-pointer rounded-full text-white"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           whileTap={{ scale: 0.9 }}
         >
@@ -191,19 +216,29 @@ export function Navigation() {
 
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
-            className="md:hidden bg-[#121212]/95 backdrop-blur-md border-t border-white/10 overflow-hidden"
-          >
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md md:hidden"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              ref={menuRef}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
+              className="relative z-50 md:hidden mx-3 mt-2 overflow-hidden rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
+            >
             <div className="px-6 py-4 space-y-4">
               {navLinks.map((item, i) => (
                 <motion.button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left text-white/80 hover:text-white text-lg font-normal py-2"
+                  className="block w-full text-left text-white/70 hover:text-white text-lg font-light py-2 cursor-pointer"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
@@ -211,17 +246,28 @@ export function Navigation() {
                   {item.label}
                 </motion.button>
               ))}
-              <motion.button
-                className="w-full text-white px-6 py-3 rounded-full font-bold text-sm tracking-wide mt-4"
-                style={{ backgroundColor: DARK_GREEN }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                Open an Account
-              </motion.button>
+              <div className="flex flex-col gap-3 pt-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+                <motion.button
+                  className="w-full text-white px-6 py-3 rounded-full font-bold text-sm tracking-wide cursor-pointer border border-white/20"
+                  style={{ backgroundColor: DARK_GREEN }}
+                  whileHover={{ scale: 1.01, backgroundColor: "#AFFF00", color: "#0B3D2E" }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  Open an Account
+                </motion.button>
+                <motion.button
+                  className="w-full px-6 py-3 rounded-full font-bold text-sm tracking-wide cursor-pointer border border-white/20 bg-transparent text-white"
+                  whileHover={{ scale: 1.01, color: "#AFFF00" }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  Login
+                </motion.button>
+              </div>
             </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </motion.nav>

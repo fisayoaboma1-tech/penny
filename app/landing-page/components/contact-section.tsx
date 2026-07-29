@@ -118,7 +118,7 @@ export function ContactSection() {
             <button
               type="submit"
               disabled={status === "sending"}
-              className="inline-flex items-center gap-2 bg-[#1d631d] px-6 py-3 rounded-full font-bold text-sm text-white"
+              className="inline-flex items-center gap-2 bg-[#0B3D2E] border border-[#AFFF00]/70 px-6 py-3 rounded-full font-bold text-sm text-white cursor-pointer transition-all duration-200 hover:bg-[#AFFF00] hover:text-[#0B3D2E]"
             >
               {status === "sending" ? "Sending..." : status === "sent" ? "Sent" : "Send message"}
             </button>

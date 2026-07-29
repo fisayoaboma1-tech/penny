@@ -171,6 +171,8 @@ export function AccountsSection() {
 
   return (
     <section id="accounts" className="relative py-20 bg-gradient-to-b from-gray-50 via-white to-gray-50 overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-white/80 to-transparent blur-2xl" />
+
       {/* Subtle background pattern */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-30" />
@@ -180,46 +182,36 @@ export function AccountsSection() {
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         {/* Section Header */}
-        <div ref={ref} className="text-center mb-14">
+        <div ref={ref} className="mb-14 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
           >
             <motion.span
-              className="inline-block font-mono text-[10px] tracking-[0.3em] uppercase font-semibold px-3 py-1.5 rounded-full"
+              className="inline-flex items-center rounded-full px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em]"
               style={{ color: DARK_GREEN_LIGHT, backgroundColor: `${DARK_GREEN_LIGHT}10` }}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
               transition={{ delay: 0.1 }}
             >
-              OUR ACCOUNTS
+              Our accounts
             </motion.span>
           </motion.div>
 
-          <div className="overflow-hidden mt-3">
+          <div className="mt-4 overflow-hidden">
             <motion.h2
-              className="text-3xl md:text-5xl font-bold text-gray-900 tracking-tighter"
+              className="text-3xl font-semibold leading-tight tracking-tighter text-gray-900 md:text-5xl"
               initial={{ y: 60 }}
               animate={isInView ? { y: 0 } : { y: 60 }}
               transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1], delay: 0.15 }}
             >
-              CHOOSE YOUR{" "}
-              <span className="relative">
-                <span style={{ color: DARK_GREEN_LIGHT }}>ACCOUNT</span>
-                <motion.div
-                  className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full"
-                  style={{ backgroundColor: DARK_GREEN_LIGHT }}
-                  initial={{ scaleX: 0 }}
-                  animate={isInView ? { scaleX: 1 } : { scaleX: 0 }}
-                  transition={{ duration: 0.6, delay: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
-                />
-              </span>
+              Choose your <span style={{ color: DARK_GREEN_LIGHT }}>account</span>
             </motion.h2>
           </div>
 
           <motion.p
-            className="text-sm text-gray-500 font-mono mt-3 max-w-xl mx-auto"
+            className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-gray-600"
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : { opacity: 0 }}
             transition={{ delay: 0.3 }}

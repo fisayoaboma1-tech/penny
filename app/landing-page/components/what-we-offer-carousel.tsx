@@ -288,11 +288,11 @@ export function WhatWeOfferCarousel() {
 
                       {!currentOffering.mystery && (
                         <motion.button
-                          className="px-6 py-3 rounded-full font-bold text-sm tracking-wide w-full md:w-auto relative overflow-hidden text-white"
-                          whileHover={{ scale: 1.02 }}
+                          className="px-6 py-3 rounded-full font-bold text-sm tracking-wide w-full md:w-auto relative overflow-hidden text-white cursor-pointer border border-[#AFFF00]/70"
+                          whileHover={{ scale: 1.02, backgroundColor: "#AFFF00", color: "#0B3D2E" }}
                           whileTap={{ scale: 0.98 }}
                           transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                          style={{ backgroundColor: currentOffering.accentColor }}
+                          style={{ backgroundColor: "#0B3D2E" }}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                         >
@@ -330,7 +330,7 @@ export function WhatWeOfferCarousel() {
 
             <motion.button
               onClick={nextOffering}
-              className="hidden md:flex w-12 h-12 rounded-full border-2 border-[#121212] items-center justify-center hover:bg-[#121212] hover:text-white transition-colors"
+              className="hidden md:flex w-12 h-12 rounded-full border-2 border-[#AFFF00]/70 items-center justify-center hover:bg-[#AFFF00] hover:text-[#0B3D2E] transition-colors cursor-pointer"
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -342,14 +342,14 @@ export function WhatWeOfferCarousel() {
           <div className="flex md:hidden justify-center gap-4 mt-6">
             <motion.button
               onClick={prevOffering}
-              className="w-10 h-10 rounded-full border-2 border-[#121212] flex items-center justify-center"
+              className="w-10 h-10 rounded-full border-2 border-[#AFFF00]/70 flex items-center justify-center cursor-pointer"
               whileTap={{ scale: 0.9 }}
             >
               <ChevronLeft className="w-4 h-4" />
             </motion.button>
             <motion.button
               onClick={nextOffering}
-              className="w-10 h-10 rounded-full border-2 border-[#121212] flex items-center justify-center"
+              className="w-10 h-10 rounded-full border-2 border-[#AFFF00]/70 flex items-center justify-center cursor-pointer"
               whileTap={{ scale: 0.9 }}
             >
               <ChevronRight className="w-4 h-4" />

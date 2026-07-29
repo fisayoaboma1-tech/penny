@@ -140,7 +140,7 @@ export function Footer() {
                     <motion.div whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
                       <button
                         onClick={() => handleFooterClick(item)}
-                        className="text-white/60 hover:text-[#AFFF00] font-mono text-xs transition-colors inline-block"
+                        className="text-white/60 hover:text-[#AFFF00] font-mono text-xs transition-colors inline-block cursor-pointer"
                       >
                         {item}
                       </button>
@@ -198,7 +198,7 @@ export function Footer() {
           >
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <h3 className="text-lg font-semibold text-gray-900">{showPrivacy ? "Privacy Policy" : "Terms of Service"}</h3>
-              <button className="text-gray-600" onClick={() => { setShowPrivacy(false); setShowTerms(false); }}>Close</button>
+              <button className="text-gray-600 hover:text-[#AFFF00] cursor-pointer" onClick={() => { setShowPrivacy(false); setShowTerms(false); }}>Close</button>
             </div>
 
             <div className="px-6 py-4 overflow-y-auto max-h-[70vh] text-sm text-gray-700">
