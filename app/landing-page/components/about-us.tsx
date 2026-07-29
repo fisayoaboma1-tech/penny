@@ -106,22 +106,6 @@ export function AboutUs() {
               </div>
             </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-8 flex justify-start md:justify-center"
-            >
-              <motion.button
-                whileHover={{ y: -2, scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                className="group inline-flex items-center justify-center gap-2 rounded-full border border-white/40 bg-white/60 px-6 py-3.5 text-sm font-semibold text-[#0B3D2E] shadow-[0_12px_30px_rgba(11,61,46,0.12)] backdrop-blur-md transition-all duration-300 hover:bg-white hover:text-[#0B3D2E]"
-              >
-                <span>Learn more</span>
-                <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:translate-y-1" />
-              </motion.button>
-            </motion.div>
           </motion.div>
         </div>
       </div>

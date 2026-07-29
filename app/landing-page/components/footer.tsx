@@ -95,6 +95,12 @@ export function Footer() {
       return
     }
 
+    if (item === "About") {
+      if (lenis) lenis.scrollTo(document.querySelector("#about") as HTMLElement, { offset: -100 })
+      else document.querySelector("#about")?.scrollIntoView({ behavior: "smooth" })
+      return
+    }
+
     if (item === "Contact") {
       if (lenis) lenis.scrollTo(document.querySelector("#contact") as HTMLElement, { offset: -100 })
       else document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })
@@ -201,17 +207,32 @@ export function Footer() {
               <button className="text-gray-600 hover:text-[#AFFF00] cursor-pointer" onClick={() => { setShowPrivacy(false); setShowTerms(false); }}>Close</button>
             </div>
 
-            <div className="px-6 py-4 overflow-y-auto max-h-[70vh] text-sm text-gray-700">
-              {/* Placeholder policy content — replace with real text as needed */}
-              <p className="mb-2">{showPrivacy ? (
-                <>This is the privacy policy. Your privacy is important to us. We collect minimal data and store it securely. Replace this placeholder with your full privacy policy content.</>
+            <div className="px-6 py-4 overflow-y-auto max-h-[70vh] text-sm text-gray-700 space-y-4">
+              {showPrivacy ? (
+                <>
+                  <p className="font-semibold text-gray-900">Privacy Policy</p>
+                  <p>At Pennywise, protecting your personal information is critical to how we operate. We collect only the information required to deliver banking services, maintain regulatory compliance, and protect your account from fraud and unauthorized access.</p>
+                  <p>Information collected may include identity verification data, contact details, transaction history, device metadata, and any documents required for anti-money laundering (AML) and know-your-customer (KYC) checks. We do not sell or trade your personal data to third parties.</p>
+                  <p>We use industry-standard encryption to secure data at rest and in transit, and we limit access to sensitive information to authorized personnel only. Your information may be shared with service providers, regulatory authorities, or auditors when necessary to fulfill our legal obligations or to process payments and service requests.</p>
+                  <p>Cookies and similar technologies are used to enable secure sign-in, analyze site performance, and improve the customer experience. You may opt out of non-essential cookies, but critical functionality may require them to remain enabled.</p>
+                  <p>By using Pennywise, you consent to the collection and processing of your information as described in this policy. You may request access, correction, or deletion of your data where permitted by applicable law, and we will respond to such requests in a timely and compliant manner.</p>
+                  <p className="font-semibold text-gray-900">Data retention and security</p>
+                  <p>We retain your information for as long as necessary to provide services, satisfy legal requirements, and resolve disputes. Archived records may be retained for audit and compliance purposes even after an account is closed.</p>
+                  <p>Your continued use of our platform confirms acceptance of this policy and any future updates. We recommend reviewing this policy periodically for changes.</p>
+                </>
               ) : (
-                <>These are the terms of service. By using Pennywise you agree to the terms described here. Replace this placeholder with your full terms of service content.</>
-              )}</p>
-
-              <p className="mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor.</p>
-              <p className="mt-4">Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
-              <p className="mt-4">Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat.</p>
+                <>
+                  <p className="font-semibold text-gray-900">Terms of Service</p>
+                  <p>These Terms of Service govern your access to and use of Pennywise, a digital banking platform designed for institutional-grade workflows and modern investment banking clients. By using our service, you agree to comply with applicable laws, provide accurate information, and maintain the confidentiality of your account credentials.</p>
+                  <p>Pennywise provides electronic payment services, deposit accounts, secure reporting, and advisory tools. All services are subject to applicable regulatory requirements, and your access may be restricted or suspended if we believe your activity poses a risk to financial integrity, security, or compliance.</p>
+                  <p>Account holders are responsible for all transactions initiated through their accounts, including those authorized by delegated users. You must notify us immediately of any unauthorized access, suspicious activity, or breaches of your account controls.</p>
+                  <p>We may update or modify these terms as needed to reflect changes in law, business practices, or platform functionality. Continued use after notice of changes constitutes acceptance of the revised terms.</p>
+                  <p className="font-semibold text-gray-900">Service limitations and liability</p>
+                  <p>Pennywise is provided on an "as available" basis. We do not guarantee uninterrupted access, and we are not liable for losses resulting from service outages, transmission delays, market fluctuations, or the actions of third-party providers.</p>
+                  <p>We reserve the right to suspend, terminate, or limit access to services for any user who violates these terms, engages in fraudulent behavior, or fails to comply with legal or regulatory requirements.</p>
+                  <p>By registering for Pennywise, you agree to resolve disputes through arbitration where permitted by law and to abide by applicable jurisdictional terms in your agreement.</p>
+                </>
+              )}
             </div>
           </motion.div>
         </div>
