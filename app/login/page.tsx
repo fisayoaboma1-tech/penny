@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Eye, EyeOff } from "lucide-react"
+import { ChevronLeft, Eye, EyeOff } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { ForgotPasswordModal } from "@/components/forgot-password-modal"
 
@@ -63,135 +63,115 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] overflow-hidden relative flex items-center justify-center">
-      {/* Ambient glow background, matching wallet hero card */}
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#1a2e24] via-[#111814] to-[#0a0a0a]" />
-      <div className="pointer-events-none absolute -top-24 -right-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 -left-20 w-80 h-80 bg-emerald-700/10 rounded-full blur-3xl" />
-     
-      <motion.div
-        className="relative z-10 w-full max-w-md mx-4 px-6 py-10 rounded-3xl border border-[#1a1a1a] bg-[#111111]/60 backdrop-blur-xl"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 1 }}
-      >
-        <motion.div
-          variants={fadeUpVariants}
-          initial="hidden"
-          animate="visible"
-          custom={0}
-          className="mb-8"
+    <div className="min-h-screen bg-white relative overflow-hidden">
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-[28vh] bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="absolute left-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
+          aria-label="Go back"
         >
-          <Link href="/" className="inline-block">
-            <span className="text-3xl font-semibold tracking-tighter text-emerald-400">
-              Pennywise
-            </span>
-          </Link>
-        </motion.div>
-
-        <form onSubmit={handleLogin} className="space-y-6">
-          <motion.div
-            variants={fadeUpVariants}
-            initial="hidden"
-            animate="visible"
-            custom={1}
-          >
-            <h1 className="text-4xl font-medium text-white tracking-tight mb-2">
-              Sign in to your Account
-            </h1>
-            <p className="text-gray-400 text-sm font-light">
-              Enter your email and password to log in to your account
-            </p>
-          </motion.div>
-
-          <motion.div
-            variants={fadeUpVariants}
-            initial="hidden"
-            animate="visible"
-            custom={2}
-            className="space-y-5"
-          >
-            <div className="space-y-2">
-              <label className="text-gray-300 text-sm font-medium block">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="mail@gmail.com"
-                className="w-full px-4 py-3 appearance-none bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-white placeholder:text-gray-500 text-sm font-normal focus:outline-none focus:border-emerald-500/30 transition-all"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-gray-300 text-sm font-medium block">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 appearance-none bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-white placeholder:text-gray-500 text-sm font-normal focus:outline-none focus:border-emerald-500/30 transition-all pr-12"
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        <motion.div
+          className="mt-10 w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.8 }}
+        >
+          <div className="px-8 py-10 sm:px-10">
+            <div className="mb-8 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
+                <img
+                  src="https://res.cloudinary.com/qz5m8bhg/image/upload/v1785353346/Pngtree_letter_p_icon_8622509_grhaye.png"
+                  alt="Pennywise logo"
+                  className="h-10 w-10 object-contain"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
+              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
+                PENNY<span className="text-[#0f6cff]">WISE</span>
+              </p>
+              <h1 className="mt-4 text-3xl font-semibold text-slate-900">Login your account</h1>
+              <p className="mt-3 text-xs leading-5 text-slate-400">
+                Username or phone number and password to access your wallet.
+              </p>
             </div>
 
-            <div className="flex items-center justify-between">
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Username or Phone No</label>
+                <input
+                  type="text"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Username or Phone No"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-slate-700">Password</label>
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPasswordOpen(true)}
+                    className="text-sm font-medium text-[#0f6cff] hover:text-[#0b57d3]"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {error ? (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              ) : null}
+
               <button
-                type="button"
-                onClick={() => setIsForgotPasswordOpen(true)}
-                className="text-emerald-400 text-sm font-medium hover:underline"
+                type="submit"
+                disabled={loading}
+                className="flex w-full items-center justify-center rounded-full bg-[#0f6cff] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(15,23,42,0.18)] transition hover:bg-[#0b57d3] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Forgot Password ?
+                {loading ? "Signing in..." : "Sign in"}
               </button>
+            </form>
+          </div>
+
+          <div className="border-t border-slate-200 bg-slate-50 px-8 py-6 text-center">
+            <div className="mb-4">
+              <Link href="/signup" className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
+                Create an account
+              </Link>
             </div>
-
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm"
-              >
-                {error}
-              </motion.div>
-            )}
-
-            <motion.button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-emerald-950/40 relative overflow-hidden flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <span className="relative z-10">{loading ? "Logging in..." : "Log In"}</span>
-            </motion.button>
-          </motion.div>
-        </form>
-
-        <motion.div
-          variants={fadeUpVariants}
-          initial="hidden"
-          animate="visible"
-          custom={3}
-          className="mt-6 text-center"
-        >
-          <p className="text-gray-400 text-sm">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-emerald-400 font-medium hover:underline">
-              Sign Up
-            </Link>
-          </p>
+            <p className="text-xs leading-5 text-slate-500">
+              By clicking on “Create Profile”, you agree to Moniepoint’s{' '}
+              <Link href="/terms" className="font-medium text-[#0f6cff] hover:text-[#0b57d3]">Terms and Conditions</Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="font-medium text-[#0f6cff] hover:text-[#0b57d3]">Privacy Policy</Link>.
+            </p>
+          </div>
         </motion.div>
+      </div>
 
-      </motion.div>
-
-      {/* Forgot Password Modal */}
       <ForgotPasswordModal
         isOpen={isForgotPasswordOpen}
         onClose={() => setIsForgotPasswordOpen(false)}
