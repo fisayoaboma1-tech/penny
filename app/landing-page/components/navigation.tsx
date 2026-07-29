@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { useLenis } from "lenis/react"
@@ -56,20 +56,53 @@ export function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  const [activeSection, setActiveSection] = useState<string>("#hero")
+  const observerRef = useRef<IntersectionObserver | null>(null)
+
   const scrollToSection = (id: string) => {
     const element = document.querySelector(id) as HTMLElement | null
+    if (id === "#hero") {
+      if (lenis) lenis.scrollTo(0)
+      else window.scrollTo({ top: 0, behavior: "smooth" })
+      setMobileMenuOpen(false)
+      return
+    }
+
     if (element && lenis) {
       lenis.scrollTo(element, { offset: -100 })
+    } else if (element) {
+      element.scrollIntoView({ behavior: "smooth" })
     }
     setMobileMenuOpen(false)
   }
 
   const navLinks = [
     { label: "Home", href: "#hero" },
-    { label: "Our accounts", href: "#flavours" },
-    { label: "Services", href: "#creators" },
-    { label: "Contact", href: "#careers" },
+    { label: "About", href: "#about" },
+    { label: "Accounts", href: "#accounts" },
+    { label: "Services", href: "#what-we-offer" },
+    { label: "Contact", href: "#contact" },
   ]
+
+  useEffect(() => {
+    const ids = ["#hero", "#about", "#accounts", "#what-we-offer", "#contact"]
+    const options = { root: null, rootMargin: "-20% 0px -60% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(`#${(entry.target as HTMLElement).id}`)
+        }
+      })
+    }, options)
+
+    ids.forEach((selector) => {
+      const el = document.querySelector(selector)
+      if (el) obs.observe(el)
+    })
+
+    observerRef.current = obs
+    return () => observerRef.current?.disconnect()
+  }, [])
 
   return (
     <motion.nav
@@ -95,30 +128,34 @@ export function Navigation() {
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((item, i) => (
-            <motion.button
-              key={item.label}
-              onClick={() => scrollToSection(item.href)}
-              className={`text-sm font-normal tracking-wide transition-colors relative ${
-                scrolled ? "text-white/80 hover:text-white" : "text-white/80 hover:text-white"
-              }`}
-              style={{ color: undefined }}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.4, ease: [0.25, 0.4, 0.25, 1] }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {item.label}
-              <motion.span
-                className="absolute -bottom-1 left-0 w-full h-0.5 origin-left"
-                style={{ backgroundColor: LEMON_GREEN }}
-                initial={{ scaleX: 0 }}
-                whileHover={{ scaleX: 1 }}
-                transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
-              />
-            </motion.button>
-          ))}
+          {navLinks.map((item, i) => {
+            const isActive = activeSection === item.href
+            return (
+              <motion.button
+                key={item.label}
+                onClick={() => scrollToSection(item.href)}
+                className={`text-sm font-normal tracking-wide transition-colors relative ${
+                  scrolled ? "text-white/80 hover:text-white" : "text-white/80 hover:text-white"
+                }`}
+                style={{ color: undefined }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.4, ease: [0.25, 0.4, 0.25, 1] }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {item.label}
+                <motion.span
+                  className="absolute -bottom-1 left-0 w-full h-0.5 origin-left"
+                  style={{ backgroundColor: LEMON_GREEN }}
+                  initial={{ scaleX: isActive ? 1 : 0 }}
+                  animate={{ scaleX: isActive ? 1 : 0 }}
+                  whileHover={{ scaleX: 1 }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.4, 0.25, 1] }}
+                />
+              </motion.button>
+            )
+          })}
         </div>
 
         <motion.button

@@ -144,7 +144,7 @@ export function HeroSection() {
             <div className="space-y-1 overflow-hidden">
               <motion.h1
                 style={{ x: textX1 }}
-                className="text-5xl md:text-7xl font-bold tracking-tighter text-white leading-[0.9]"
+                className="text-5xl md:text-7xl font-light tracking-tighter text-white leading-[0.9]"
               >
                 <motion.span
                   variants={fadeUpVariants}
@@ -158,7 +158,7 @@ export function HeroSection() {
               </motion.h1>
               <motion.h1
                 style={{ x: textX2 }}
-                className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.9] text-gray-700"
+                className="text-5xl md:text-7xl font-light tracking-tighter leading-[0.9] text-gray-700"
               >
                 <motion.span
                   variants={fadeUpVariants}
