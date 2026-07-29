@@ -2,6 +2,7 @@ import { Navigation } from "./components/navigation"
 import { HeroSection } from "./components/hero-section"
 import { WhatWeOfferCarousel } from "./components/what-we-offer-carousel"
 import { AccountsSection } from "./components/accounts-section"
+import { ContactSection } from "./components/contact-section"
 import { Footer } from "./components/footer"
 
 export default function LandingPage() {
@@ -11,6 +12,7 @@ export default function LandingPage() {
       <HeroSection />
       <AccountsSection />
       <WhatWeOfferCarousel />
+      <ContactSection />
       <Footer />
     </main>
   )

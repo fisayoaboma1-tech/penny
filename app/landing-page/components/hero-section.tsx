@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import Image from "next/image"
 
 const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 }
@@ -62,6 +62,9 @@ export function HeroSection() {
 
   const rawOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
   const opacity = useSpring(rawOpacity, springConfig)
+  const [imgLoaded, setImgLoaded] = useState(false)
+  const lqipUrl =
+    "https://res.cloudinary.com/qz5m8bhg/image/upload/e_blur:200,q_auto,w_40/v1785244814/WhatsApp_Image_2026-07-28_at_2.14.45_PM-Photoroom_ivlpqw.png"
 
   return (
     <section
@@ -76,10 +79,12 @@ export function HeroSection() {
           loop
           muted
           playsInline
+          preload="metadata"
+          poster="https://res.cloudinary.com/qz5m8bhg/video/upload/f_auto,q_auto,w_120/v1785255405/From_Klickpin.com-_Classic_sewing_room_tips_and_clever_inspiration_with_easy_charm_for_stylish_handmade_days-pin-id-69735494224036154_szbl9i.png"
           className="w-full h-full object-cover"
         >
           <source
-            src="https://res.cloudinary.com/qz5m8bhg/video/upload/v1785255405/From_Klickpin.com-_Classic_sewing_room_tips_and_clever_inspiration_with_easy_charm_for_stylish_handmade_days-pin-id-69735494224036154_szbl9i.mp4"
+            src="https://res.cloudinary.com/qz5m8bhg/video/upload/f_auto,q_auto/v1785255405/From_Klickpin.com-_Classic_sewing_room_tips_and_clever_inspiration_with_easy_charm_for_stylish_handmade_days-pin-id-69735494224036154_szbl9i.mp4"
             type="video/mp4"
           />
         </video>
@@ -271,14 +276,32 @@ export function HeroSection() {
                   ease: "easeInOut",
                 }}
               >
-                <Image
-                  src="https://res.cloudinary.com/qz5m8bhg/image/upload/v1785244814/WhatsApp_Image_2026-07-28_at_2.14.45_PM-Photoroom_ivlpqw.png"
-                  alt="Digital Banking App"
-                  width={350}
-                  height={525}
-                  className="relative z-10 drop-shadow-2xl"
-                  priority
-                />
+                <div className="relative w-[350px] h-[525px]">
+                  <div
+                    aria-hidden
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      backgroundImage: `url(${lqipUrl})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      filter: "blur(8px)",
+                      transform: "scale(1.05)",
+                      transition: "opacity 700ms ease",
+                      opacity: imgLoaded ? 0 : 1,
+                    }}
+                  />
+
+                  <Image
+                    src="https://res.cloudinary.com/qz5m8bhg/image/upload/f_auto,q_auto,w_700/v1785244814/WhatsApp_Image_2026-07-28_at_2.14.45_PM-Photoroom_ivlpqw.png"
+                    alt="Digital Banking App"
+                    width={350}
+                    height={525}
+                    className="relative z-10 drop-shadow-2xl"
+                    priority
+                    onLoadingComplete={() => setImgLoaded(true)}
+                  />
+                </div>
               </motion.div>
             </motion.div>
           </motion.div>

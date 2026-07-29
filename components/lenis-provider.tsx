@@ -12,11 +12,12 @@ export function LenisProvider({ children }: LenisProviderProps) {
     <ReactLenis
       root
       options={{
-        lerp: 0.1,
-        duration: 1.2,
+        // tuned for smoother, more responsive scrolling
+        lerp: 0.08,
+        duration: 0.8,
         smoothWheel: true,
-        wheelMultiplier: 1,
-        touchMultiplier: 2,
+        wheelMultiplier: 0.9,
+        touchMultiplier: 1.6,
         infinite: false,
       }}
     >
