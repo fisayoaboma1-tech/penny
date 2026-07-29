@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { motion, AnimatePresence, useSpring } from "framer-motion"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -109,16 +109,18 @@ export function WhatWeOfferCarousel() {
   const nextOffering = () => paginate(1)
   const prevOffering = () => paginate(-1)
 
-  return (
-    <section id="what-we-offer" className="relative py-16 bg-white overflow-hidden">
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-br ${currentOffering.bgColor}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        key={currentOffering.id}
-      />
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      paginate(1)
+    }, 6000)
 
+    return () => {
+      window.clearInterval(interval)
+    }
+  }, [currentIndex])
+
+  return (
+    <section id="what-we-offer" className="relative py-16 bg-gray-50 overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -127,44 +129,37 @@ export function WhatWeOfferCarousel() {
           transition={{ duration: 0.8, ease: [0.25, 0.4, 0.25, 1] }}
           className="text-center mb-10"
         >
-            <motion.span
-              className="font-mono text-[#121212]/60 text-xs tracking-widest"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
-              WHAT WE OFFER
-            </motion.span>
-          <h2 className="text-3xl md:text-5xl font-bold text-[#121212] tracking-tighter mt-2 overflow-hidden">
-            <motion.span
-              className="inline-block"
-              initial={{ y: 80 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
-            >
-              CHOOSE YOUR{" "}
-            </motion.span>
-            <motion.span
-              className="inline-block relative"
-              style={{ color: currentOffering.accentColor }}
-              initial={{ y: 80 }}
-              whileInView={{ y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1], delay: 0.1 }}
-            >
-              SERVICES
-              <motion.div
-                className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full"
-                style={{ backgroundColor: currentOffering.accentColor }}
-                initial={{ scaleX: 0 }}
-                whileInView={{ scaleX: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
-              />
-            </motion.span>
-          </h2>
+          <motion.span
+            className="inline-flex items-center rounded-full px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em]"
+            style={{ color: DARK_GREEN_LIGHT, backgroundColor: `${DARK_GREEN_LIGHT}10` }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+          >
+            What We Offer
+          </motion.span>
+
+
+          <motion.h3
+            className="mx-auto mt-4 max-w-xl text-3xl font-semibold leading-tight tracking-tighter text-gray-900 md:text-5xl"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.25 }}
+          >
+            Discover <span style={{ color: DARK_GREEN_LIGHT }}>service options</span>
+          </motion.h3>
+
+          <motion.p
+            className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-gray-600"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            Find the perfect service for your financial goals. Each offering comes with powerful features.
+          </motion.p>
         </motion.div>
 
         {/* Carousel */}
@@ -172,7 +167,7 @@ export function WhatWeOfferCarousel() {
           <div className="flex items-center justify-center gap-6">
             <motion.button
               onClick={prevOffering}
-              className="hidden md:flex w-12 h-12 rounded-full border-2 border-[#121212] items-center justify-center hover:bg-[#121212] hover:text-white transition-colors"
+              className="hidden md:flex w-12 h-12 rounded-full border border-black bg-transparent text-black items-center justify-center hover:bg-black hover:text-white transition-colors"
               whileHover={{ scale: 1.1, rotate: -5 }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -192,7 +187,7 @@ export function WhatWeOfferCarousel() {
                 style={{ perspective: 1000 }}
               >
                 <motion.div
-                  className={`bg-white rounded-3xl p-6 md:p-8 border-2 border-[#121212]/10 shadow-xl ${currentOffering.mystery ? "relative overflow-hidden" : ""}`}
+                  className={`bg-gradient-to-br from-white via-[#f7fdf3]/80 to-white rounded-3xl p-6 md:p-8 border border-[#cfe5ce]/80 shadow-xl ${currentOffering.mystery ? "relative overflow-hidden" : ""}`}
                   style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
                   onMouseMove={handleMouseMove}
                   onMouseLeave={handleMouseLeave}
@@ -286,25 +281,6 @@ export function WhatWeOfferCarousel() {
                         </motion.div>
                       )}
 
-                      {!currentOffering.mystery && (
-                        <motion.button
-                          className="px-6 py-3 rounded-full font-bold text-sm tracking-wide w-full md:w-auto relative overflow-hidden text-white cursor-pointer border border-[#AFFF00]/70"
-                          whileHover={{ scale: 1.02, backgroundColor: "#AFFF00", color: "#0B3D2E" }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                          style={{ backgroundColor: "#0B3D2E" }}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                        >
-                          <motion.span
-                            className="absolute inset-0 bg-white/20"
-                            initial={{ x: "-100%" }}
-                            whileHover={{ x: "100%" }}
-                            transition={{ duration: 0.5 }}
-                          />
-                          <span className="relative z-10">Learn More</span>
-                        </motion.button>
-                      )}
 
                       {currentOffering.mystery && (
                         <motion.div
@@ -330,7 +306,7 @@ export function WhatWeOfferCarousel() {
 
             <motion.button
               onClick={nextOffering}
-              className="hidden md:flex w-12 h-12 rounded-full border-2 border-[#AFFF00]/70 items-center justify-center hover:bg-[#AFFF00] hover:text-[#0B3D2E] transition-colors cursor-pointer"
+              className="hidden md:flex w-12 h-12 rounded-full border border-black bg-transparent text-black items-center justify-center hover:bg-black hover:text-white transition-colors cursor-pointer"
               whileHover={{ scale: 1.1, rotate: 5 }}
               whileTap={{ scale: 0.9 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -342,14 +318,14 @@ export function WhatWeOfferCarousel() {
           <div className="flex md:hidden justify-center gap-4 mt-6">
             <motion.button
               onClick={prevOffering}
-              className="w-10 h-10 rounded-full border-2 border-[#AFFF00]/70 flex items-center justify-center cursor-pointer"
+              className="w-10 h-10 rounded-full border border-black bg-transparent text-black flex items-center justify-center cursor-pointer hover:bg-black hover:text-white"
               whileTap={{ scale: 0.9 }}
             >
               <ChevronLeft className="w-4 h-4" />
             </motion.button>
             <motion.button
               onClick={nextOffering}
-              className="w-10 h-10 rounded-full border-2 border-[#AFFF00]/70 flex items-center justify-center cursor-pointer"
+              className="w-10 h-10 rounded-full border border-black bg-transparent text-black flex items-center justify-center cursor-pointer hover:bg-black hover:text-white"
               whileTap={{ scale: 0.9 }}
             >
               <ChevronRight className="w-4 h-4" />

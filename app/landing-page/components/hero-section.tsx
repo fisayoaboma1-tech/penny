@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { useRef, useState } from "react"
 import Image from "next/image"
+import Link from "next/link"
 
 const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 }
 
@@ -189,13 +190,7 @@ export function HeroSection() {
               custom={4}
               className="flex flex-wrap gap-3 pt-2"
             >
-              <motion.button
-                className="px-6 py-3 rounded-full font-bold text-sm tracking-wide flex items-center gap-2 group relative overflow-hidden cursor-pointer border border-white/20 text-white"
-                style={{ backgroundColor: "#0B3D2E" }}
-                whileHover={{ scale: 1.02, backgroundColor: "#AFFF00", color: "#0B3D2E" }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
+              <Link href="/signup" className="relative inline-flex items-center px-6 py-3 rounded-full font-bold text-sm tracking-wide gap-2 overflow-hidden border border-white/20 text-white" style={{ backgroundColor: "#0B3D2E" }}>
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
                   whileHover={{ x: "200%" }}
@@ -213,15 +208,10 @@ export function HeroSection() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </motion.svg>
-              </motion.button>
-              <motion.button
-                className="px-6 py-3 rounded-full font-bold text-sm tracking-wide relative overflow-hidden cursor-pointer border border-white/40 bg-transparent text-white"
-                whileHover={{ scale: 1.02, color: "#AFFF00" }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
+              </Link>
+              <Link href="/login" className="px-6 py-3 rounded-full font-bold text-sm tracking-wide relative overflow-hidden border border-white/40 bg-transparent text-white inline-flex items-center justify-center">
                 Login
-              </motion.button>
+              </Link>
             </motion.div>
 
             <motion.div

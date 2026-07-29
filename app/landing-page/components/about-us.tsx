@@ -22,9 +22,9 @@ export function AboutUs() {
     return () => window.clearInterval(interval)
   }, [])
   return (
-    <section id="about" className="relative overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(245,250,240,0.8))] py-20">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(175,255,0,0.12),transparent_45%)]" />
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/5 via-black/5 to-transparent blur-2xl" />
+    <section id="about" className="relative overflow-hidden bg-[linear-gradient(135deg,rgba(255,255,255,0.95),rgba(245,250,240,0.8))] py-24">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(175,255,0,0.14),transparent_48%)]" />
+      <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/6 via-black/5 to-transparent blur-2xl" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6">
         <div className="flex flex-col gap-8 md:grid md:grid-cols-[1.05fr_0.95fr] md:items-center">
@@ -33,7 +33,7 @@ export function AboutUs() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="order-2 rounded-[2rem] border border-white/70 bg-white/55 p-8 shadow-[0_20px_60px_rgba(11,61,46,0.08)] backdrop-blur-xl md:order-none md:p-10"
+            className="order-2 rounded-[1.75rem] border border-white/70 bg-white/55 p-8 shadow-[0_22px_64px_rgba(11,61,46,0.08)] backdrop-blur-xl md:order-none md:p-10 text-center md:text-center mx-auto max-w-lg"
           >
             <motion.span
               initial={{ opacity: 0, scale: 0.95, y: 12 }}

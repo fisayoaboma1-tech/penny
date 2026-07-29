@@ -51,11 +51,32 @@ export function Navigation() {
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
+    const handleNativeScroll = () => setScrolled(window.scrollY > 50)
+    window.addEventListener("scroll", handleNativeScroll, { passive: true })
+
+    // If Lenis is active, listen to its scroll events too so state stays in sync
+    let lenisListener: any = null
+    if (lenis && typeof (lenis as any).on === "function") {
+      lenisListener = (e: any) => {
+        const pos = typeof e === "object" && e?.scroll != null ? e.scroll : (lenis as any).scroll || 0
+        setScrolled(pos > 50)
+      }
+      ;(lenis as any).on("scroll", lenisListener)
+      // set initial state from Lenis if available
+      try {
+        const current = (lenis as any).scroll
+        if (typeof current === "number") setScrolled(current > 50)
+      } catch (err) {
+        /* ignore */
+      }
     }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+
+    return () => {
+      window.removeEventListener("scroll", handleNativeScroll)
+      if (lenisListener && lenis && typeof (lenis as any).off === "function") {
+        ;(lenis as any).off("scroll", lenisListener)
+      }
+    }
   }, [])
 
   const [activeSection, setActiveSection] = useState<string>("#hero")
@@ -122,11 +143,24 @@ export function Navigation() {
 
     document.addEventListener("mousedown", handlePointerDown)
     window.addEventListener("scroll", handleScroll, { passive: true })
+
+    // Also listen to Lenis scroll events to close menu when using smooth-scroller
+    let lenisClose: any = null
+    if (lenis && typeof (lenis as any).on === "function") {
+      lenisClose = () => setMobileMenuOpen(false)
+      ;(lenis as any).on("scroll", lenisClose)
+    }
+
     return () => {
       document.removeEventListener("mousedown", handlePointerDown)
       window.removeEventListener("scroll", handleScroll)
+      if (lenisClose && lenis && typeof (lenis as any).off === "function") {
+        ;(lenis as any).off("scroll", lenisClose)
+      }
     }
   }, [mobileMenuOpen])
+
+  const effectiveScrolled = mobileMenuOpen ? false : scrolled
 
   return (
     <motion.nav
@@ -134,18 +168,20 @@ export function Navigation() {
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? "bg-[#121212]/80 backdrop-blur-md border-b border-white/10" : "bg-transparent"
+          effectiveScrolled
+            ? "bg-white/80 backdrop-blur-md border-b border-white/25 text-gray-900 shadow-sm"
+            : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className={`max-w-7xl mx-auto px-6 ${effectiveScrolled ? 'py-2' : 'py-4'} flex items-center justify-between`}>
         <Link href="/" className={`flex items-center gap-2 ${mobileMenuOpen ? "md:hidden" : ""}`}>
           <motion.span
             className={`text-2xl font-normal tracking-tighter ${mobileMenuOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
-            <span className={scrolled ? "text-white" : "text-white"}>
-              <span className={scrolled ? "text-white" : "text-white"}>Penny</span>
+            <span className={effectiveScrolled ? "text-gray-900" : "text-white"}>
+              <span className={effectiveScrolled ? "text-gray-900" : "text-white"}>Penny</span>
               <span style={{ color: LEMON_GREEN }}>wise</span>
             </span>
           </motion.span>
@@ -154,13 +190,16 @@ export function Navigation() {
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((item, i) => {
             const isActive = activeSection === item.href
+            const baseText = effectiveScrolled ? "text-gray-800/90 hover:text-gray-900" : "text-white/80 hover:text-white"
+            const activeRect = effectiveScrolled
+              ? "bg-gray-100/60 text-gray-900 rounded-md px-3 py-1"
+              : "bg-white/20 text-white rounded-md px-3 py-1"
+
             return (
               <motion.button
                 key={item.label}
                 onClick={() => scrollToSection(item.href)}
-                className={`text-sm font-normal tracking-wide transition-colors relative cursor-pointer ${
-                  scrolled ? "text-white/80 hover:text-white" : "text-white/80 hover:text-white"
-                }`}
+                className={`text-sm font-normal tracking-wide transition-colors relative cursor-pointer ${baseText} ${isActive ? activeRect : ""}`}
                 style={{ color: undefined }}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -170,7 +209,7 @@ export function Navigation() {
               >
                 {item.label}
                 <motion.span
-                  className="absolute -bottom-1 left-0 w-full h-0.5 origin-left"
+                  className="absolute -bottom-1 left-0 w-full h-0.5 origin-left md:hidden"
                   style={{ backgroundColor: LEMON_GREEN }}
                   initial={{ scaleX: isActive ? 1 : 0 }}
                   animate={{ scaleX: isActive ? 1 : 0 }}
@@ -184,7 +223,7 @@ export function Navigation() {
 
         <motion.button
           ref={toggleButtonRef}
-          className="md:hidden p-2.5 cursor-pointer rounded-full text-white"
+          className={`md:hidden p-2.5 cursor-pointer rounded-full ${effectiveScrolled ? 'text-gray-900 bg-white/10' : 'text-white'}`}
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           whileTap={{ scale: 0.9 }}
         >
@@ -197,7 +236,7 @@ export function Navigation() {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <X className="text-white" />
+                <X className={effectiveScrolled ? "text-gray-900" : "text-white"} />
               </motion.div>
             ) : (
               <motion.div
@@ -207,7 +246,7 @@ export function Navigation() {
                 exit={{ rotate: -90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Menu className="text-white" />
+                <Menu className={effectiveScrolled ? "text-gray-900" : "text-white"} />
               </motion.div>
             )}
           </AnimatePresence>
@@ -221,8 +260,8 @@ export function Navigation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-md md:hidden"
+              transition={{ duration: 0.12 }}
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-md md:hidden"
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
@@ -231,39 +270,33 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
-              className="relative z-50 md:hidden mx-3 mt-2 overflow-hidden rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
+              className="relative z-60 md:hidden mx-3 mt-2 overflow-hidden rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
             >
             <div className="px-6 py-4 space-y-4">
-              {navLinks.map((item, i) => (
-                <motion.button
-                  key={item.label}
-                  onClick={() => scrollToSection(item.href)}
-                  className="block w-full text-left text-white/70 hover:text-white text-lg font-light py-2 cursor-pointer"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  {item.label}
-                </motion.button>
-              ))}
+              {navLinks.map((item, i) => {
+                const isActive = activeSection === item.href
+                const mobileActive = isActive ? (effectiveScrolled ? 'bg-gray-100/30 text-gray-900 rounded-lg px-3 py-2' : 'bg-white/10 text-white rounded-lg px-3 py-2') : ''
+
+                return (
+                  <motion.button
+                    key={item.label}
+                    onClick={() => scrollToSection(item.href)}
+                    className={`block w-full text-left ${effectiveScrolled ? 'text-gray-800/80' : 'text-white/70'} hover:text-white text-lg font-light py-2 cursor-pointer ${mobileActive}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    {item.label}
+                  </motion.button>
+                )
+              })}
               <div className="flex flex-col gap-3 pt-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                <motion.button
-                  className="w-full text-white px-6 py-3 rounded-full font-bold text-sm tracking-wide cursor-pointer border border-white/20"
-                  style={{ backgroundColor: DARK_GREEN }}
-                  whileHover={{ scale: 1.01, backgroundColor: "#AFFF00", color: "#0B3D2E" }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
+                <Link href="/signup" className="w-full text-white px-6 py-3 rounded-full font-bold text-sm tracking-wide inline-flex items-center justify-center border border-white/20" style={{ backgroundColor: DARK_GREEN }}>
                   Open an Account
-                </motion.button>
-                <motion.button
-                  className="w-full px-6 py-3 rounded-full font-bold text-sm tracking-wide cursor-pointer border border-white/20 bg-transparent text-white"
-                  whileHover={{ scale: 1.01, color: "#AFFF00" }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                >
+                </Link>
+                <Link href="/login" className="w-full px-6 py-3 rounded-full font-bold text-sm tracking-wide inline-flex items-center justify-center border border-white/20 bg-transparent text-white">
                   Login
-                </motion.button>
+                </Link>
               </div>
             </div>
             </motion.div>
