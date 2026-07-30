@@ -2,29 +2,29 @@
 
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ChevronLeft, CreditCard, Shield, CheckCircle, Sparkles, ArrowRight } from "lucide-react"
+import { ChevronLeft, CreditCard, ShieldCheck, BadgeCheck, Sparkles, ArrowRight, Lock, ReceiptText } from "lucide-react"
 
 export default function WalletCardPage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-[#f4f7ff] text-slate-900 pb-28">
+    <div className="min-h-screen bg-[#f4f7ff] pb-28 text-slate-900">
       <div className="sticky top-0 z-30 border-b border-blue-100 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center gap-2.5 px-3 py-3 sm:px-4">
+        <div className="mx-auto flex max-w-5xl items-center gap-2.5 px-3 py-3 sm:px-4 lg:px-6">
           <button
             onClick={() => router.back()}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#0f6cff] transition hover:bg-[#e2eeff]"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-sm font-semibold">Cards</h1>
-            <p className="text-xs text-slate-500">Manage your virtual and physical cards.</p>
+            <h1 className="text-sm font-semibold sm:text-base">Cards</h1>
+            <p className="text-xs text-slate-500 sm:text-sm">Manage your virtual and physical cards.</p>
           </div>
         </div>
       </div>
 
-      <main className="mx-auto max-w-5xl px-3 py-3 space-y-3 sm:px-4 sm:py-4">
+      <main className="mx-auto max-w-5xl space-y-3 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -33,10 +33,10 @@ export default function WalletCardPage() {
           <div className="relative overflow-hidden bg-gradient-to-br from-[#0f6cff] via-[#0d5fe4] to-[#0a54cc] p-4 text-white sm:p-5">
             <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/10 blur-3xl" />
             <div className="absolute bottom-0 left-0 h-20 w-20 rounded-full bg-sky-300/20 blur-3xl" />
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.24em] text-sky-200">Virtual Card</p>
-                <h2 className="mt-2 text-2xl font-semibold">Meet Your Virtual Card</h2>
+                <h2 className="mt-2 text-[clamp(1.2rem,3vw,1.7rem)] font-semibold">Meet your virtual card</h2>
               </div>
               <div className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.24em] text-sky-100">
                 Active
@@ -63,15 +63,15 @@ export default function WalletCardPage() {
                 <CreditCard className="h-4.5 w-4.5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">Card ready in 1 minute</p>
+                <p className="text-sm font-semibold text-slate-900">Ready in under 1 minute</p>
                 <p className="text-xs text-slate-500">Start spending immediately.</p>
               </div>
             </div>
 
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-                <p className="text-sm font-semibold text-slate-900">Accepted by 100k+ merchants</p>
-                <p className="mt-1 text-xs text-slate-500">For shopping and subscriptions worldwide.</p>
+                <p className="text-sm font-semibold text-slate-900">Accepted everywhere</p>
+                <p className="mt-1 text-xs text-slate-500">For shopping and subscriptions online and in-store.</p>
               </div>
               <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
                 <p className="text-sm font-semibold text-slate-900">No hidden fees</p>

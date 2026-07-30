@@ -6,7 +6,6 @@ import { motion } from "framer-motion"
 import {
   Bell,
   CreditCard,
-  ArrowRight,
   ArrowUpRight,
   Clock3,
   Headphones,
@@ -14,25 +13,30 @@ import {
   Plus,
   ShieldCheck,
   Sparkles,
-  Wallet,
   ArrowDown,
-  ChevronRight,
   Home,
   Grid,
   Sparkles as SparkleIcon,
+  Banknote,
+  Send,
+  CircleDollarSign,
+  ReceiptText,
+  UserRound,
+  LifeBuoy,
+  Gift,
 } from "lucide-react"
 import { ProtectedRoute } from "@/components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
 
 const services = [
-  { label: "Transfer", icon: Repeat, path: "/wallet/transfer" },
+  { label: "Transfer", icon: Send, path: "/wallet/transfer" },
   { label: "Card", icon: CreditCard, path: "/wallet/card" },
-  { label: "Add money", icon: Plus, path: "/wallet/add-money" },
+  { label: "Add money", icon: Banknote, path: "/wallet/add-money" },
   { label: "Services", icon: Grid, path: "/wallet/services" },
   { label: "Notifications", icon: Bell, path: "/notifications" },
-  { label: "Profile", icon: ShieldCheck, path: "/profile" },
-  { label: "Help", icon: SparkleIcon, path: "/help" },
-  { label: "Rewards", icon: Sparkles, path: "/wallet/rewards" },
+  { label: "Profile", icon: UserRound, path: "/profile" },
+  { label: "Help", icon: LifeBuoy, path: "/help" },
+  { label: "Rewards", icon: Gift, path: "/wallet/rewards" },
 ]
 
 const transactions = [
@@ -77,17 +81,8 @@ export default function WalletPage() {
 
   const userName = useMemo(() => {
     if (!user) return "Chukwudi Enoch"
-    return (
-      user.user_metadata?.full_name || user.email?.split("@")[0] || "Chukwudi Enoch"
-    )
+    return user.user_metadata?.full_name || user.email?.split("@")[0] || "Chukwudi Enoch"
   }, [user])
-
-  const initials = useMemo(() => {
-    const parts = userName.split(" ")
-    return parts.length > 1
-      ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
-      : userName.slice(0, 2).toUpperCase()
-  }, [userName])
 
   const profileImageUrl =
     user?.user_metadata?.avatar_url ||
@@ -96,32 +91,28 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-[#0f6cff]">Loading wallet…</div>
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="text-sm font-semibold text-[#0f6cff]">Loading wallet…</div>
       </div>
     )
   }
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-white pb-28 text-slate-900">
-        <header className="sticky top-0 z-30 border-b border-blue-100 bg-white">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-3 sm:px-6">
-            <div className="flex items-center gap-3">
+      <div className="min-h-screen bg-slate-50 pb-28 text-slate-900">
+        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-3 sm:px-5 lg:px-6">
+            <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => router.push("/profile")}
-                className="h-10 w-10 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
               >
-                <img
-                  src={profileImageUrl}
-                  alt={userName}
-                  className="h-full w-full object-cover"
-                />
+                <img src={profileImageUrl} alt={userName} className="h-full w-full object-cover" />
               </button>
-              <div>
+              <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Good Evening!</p>
-                <h1 className="text-sm font-semibold text-slate-900">{userName}</h1>
+                <h1 className="truncate text-sm font-semibold text-slate-900">{userName}</h1>
               </div>
             </div>
 
@@ -144,21 +135,21 @@ export default function WalletPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-3 py-3 sm:px-6 sm:py-5">
+        <main className="mx-auto max-w-6xl px-3 py-3 sm:px-5 sm:py-5 lg:px-6">
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="mt-3 overflow-hidden rounded-[28px] bg-slate-900 p-3 shadow-none"
+            className="mt-2 overflow-hidden rounded-[30px] bg-slate-900 p-2 shadow-[0_20px_50px_rgba(15,23,42,0.12)] sm:p-3"
           >
-            <div className="relative overflow-hidden rounded-[24px] bg-slate-900 p-4 text-white sm:p-5">
+            <div className="relative overflow-hidden rounded-[24px] bg-slate-900 p-4 text-white sm:p-5 lg:p-6">
               <div className="pointer-events-none absolute -right-12 top-6 h-28 w-28 rounded-full bg-white/10 blur-3xl" />
               <div className="pointer-events-none absolute left-0 top-10 h-20 w-20 rounded-full bg-sky-300/15 blur-3xl" />
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.3em] text-slate-300/75">9162919586 | Chukwudi Enoch</p>
-                    <p className="mt-2 text-[2.25rem] font-semibold tracking-tight text-white">₦13,079.16</p>
+                    <p className="mt-2 text-[clamp(1.8rem,4vw,2.7rem)] font-semibold tracking-tight text-white">₦13,079.16</p>
                     <p className="mt-1 text-sm text-slate-300">Last updated just now</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -170,13 +161,12 @@ export default function WalletPage() {
                     </button>
                     <button
                       onClick={() => router.push("/wallet/transfer")}
-                      className="inline-flex items-center justify-center rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/15"
+                      className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/15"
                     >
                       <Clock3 className="mr-1.5 h-3.5 w-3.5" /> History
                     </button>
                   </div>
                 </div>
-
               </div>
             </div>
           </motion.section>
@@ -185,21 +175,22 @@ export default function WalletPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="mt-3 rounded-[24px] bg-white p-3 shadow-sm sm:p-4"
+            className="mt-3 rounded-[24px] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
           >
             <div className="mb-3 flex items-center justify-between gap-3">
               <div>
                 <h2 className="text-sm font-semibold text-slate-900">Services</h2>
+                <p className="text-xs text-slate-500">Popular actions and shortcuts</p>
               </div>
               <button
                 type="button"
                 className="text-xs font-semibold text-[#0f6cff]"
                 onClick={() => router.push("/wallet/services")}
               >
-                Edit
+                View all
               </button>
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {services.slice(0, 8).map((service) => {
                 const Icon = service.icon
                 return (
@@ -207,7 +198,7 @@ export default function WalletPage() {
                     key={service.label}
                     type="button"
                     onClick={() => router.push(service.path)}
-                    className="group flex flex-col items-center gap-2 rounded-[20px] bg-[#f7faff] p-2 text-center transition hover:bg-[#eef5ff]"
+                    className="group flex flex-col items-center gap-2 rounded-[20px] bg-[#f7faff] p-2.5 text-center transition hover:bg-[#eef5ff]"
                   >
                     <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#0f6cff] shadow-sm">
                       <Icon className="h-5 w-5" />
@@ -223,7 +214,7 @@ export default function WalletPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12 }}
-            className="mt-3 grid gap-2 sm:grid-cols-2"
+            className="mt-3 grid gap-3 md:grid-cols-2"
           >
             <div className="rounded-[24px] border border-[#dfe6ff] bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between gap-3">
@@ -239,7 +230,7 @@ export default function WalletPage() {
             <div className="rounded-[24px] border border-[#dfe6ff] bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between gap-3">
                 <div className="rounded-2xl bg-[#eef5ff] p-3 text-[#0f6cff]">
-                  <SparkleIcon className="h-5 w-5" />
+                  <CircleDollarSign className="h-5 w-5" />
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-slate-500">Referrals</p>
@@ -253,10 +244,10 @@ export default function WalletPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="mt-3 rounded-[24px] bg-white p-3 shadow-sm sm:p-4"
+            className="mt-3 rounded-[24px] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
           >
-            <div className="rounded-[24px] bg-white p-3 shadow-sm sm:p-4">
-              <div className="mb-3 flex items-center justify-between">
+            <div className="rounded-[24px] bg-white p-2 sm:p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-slate-900">Recent transactions</p>
                   <p className="text-xs text-slate-500">Latest activity on your wallet.</p>
@@ -269,14 +260,17 @@ export default function WalletPage() {
                   View All
                 </button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {transactions.map((tx) => {
                   const Icon = tx.icon
                   const isCredit = tx.amount.startsWith("+")
                   return (
-                    <div key={tx.id} className="flex items-center justify-between gap-3 rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
+                    <div
+                      key={tx.id}
+                      className="flex flex-col gap-2 rounded-[20px] border border-slate-200 bg-[#f7faff] p-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
                       <div className="flex items-center gap-2.5">
-                        <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-[#0f6cff] shadow-sm">
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#0f6cff] shadow-sm">
                           <Icon className="h-4.5 w-4.5" />
                         </span>
                         <div>
@@ -284,7 +278,7 @@ export default function WalletPage() {
                           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">{tx.subtitle}</p>
                         </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-left sm:text-right">
                         <p className={`text-sm font-semibold ${isCredit ? "text-emerald-600" : "text-rose-600"}`}>{tx.amount}</p>
                         <p className="text-[11px] text-slate-500">{tx.time}</p>
                       </div>
@@ -294,7 +288,7 @@ export default function WalletPage() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="mt-3 space-y-3">
               <div className="rounded-[24px] bg-white p-3 shadow-sm sm:p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
@@ -353,7 +347,7 @@ export default function WalletPage() {
               { label: "Card", icon: CreditCard, path: "/wallet/card" },
               { label: "Services", icon: Grid, path: "/wallet/services" },
               { label: "Rewards", icon: Sparkles, path: "/wallet/rewards" },
-            ].map((item, index) => {
+            ].map((item) => {
               const Icon = item.icon
               const isActive = item.path === "/wallet"
               return (
