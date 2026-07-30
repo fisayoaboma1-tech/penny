@@ -65,7 +65,7 @@ export default function WalletServicesPage() {
   const router = useRouter()
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col bg-[#f4f7ff] text-slate-900">
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f7ff] text-slate-900">
       <div className="sticky top-0 z-30 border-b border-blue-100 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center gap-2.5 px-3 py-3 sm:px-4 lg:px-6">
           <button

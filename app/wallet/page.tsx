@@ -151,7 +151,7 @@ export default function WalletPage() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col bg-slate-50 text-slate-900">
+      <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900">
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-3 sm:px-5 lg:px-6">
             <div className="flex min-w-0 items-center gap-3">

@@ -9,7 +9,7 @@ export default function WalletAddMoneyPage() {
   const router = useRouter()
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col bg-slate-50 text-slate-900">
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900">
       <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-start px-3 py-4 sm:px-4 lg:px-6">
           <button
