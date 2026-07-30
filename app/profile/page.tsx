@@ -53,6 +53,15 @@ export default function ProfilePage() {
     user.user_metadata?.profile_image ||
     "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785158069/unnamed_f9ug3t.png"
 
+  const currentHour = new Date().getHours()
+  const greeting =
+    currentHour >= 12 && currentHour <= 15
+      ? "Good Afternoon"
+      : currentHour >= 17 && currentHour <= 23
+        ? "Good Evening"
+        : "Good Morning"
+  const displayName = user.user_metadata?.full_name || user.email || "User"
+
   const quickLinks = [
     { label: "Refer & Earn", icon: Wallet, path: "/refer" },
     { label: "Next of Kin", icon: User, path: "/next-of-kin" },
@@ -96,9 +105,9 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="text-center">
-              <p className="text-sm uppercase tracking-[0.24em] text-slate-400">Good Evening!</p>
-              <h2 className="text-xl font-semibold text-slate-900">
-                {user.user_metadata?.full_name || user.email || "User"}
+              <p className="text-sm uppercase tracking-[0.24em] text-slate-400">{greeting}!</p>
+              <h2 className="text-xl font-medium text-slate-900">
+                {displayName},
               </h2>
             </div>
           </div>

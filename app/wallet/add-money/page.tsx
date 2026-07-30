@@ -10,17 +10,13 @@ export default function WalletAddMoneyPage() {
   return (
     <div className="min-h-screen bg-slate-50 pb-28 text-slate-900">
       <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-3 py-3 sm:px-4 lg:px-6">
+        <div className="mx-auto flex max-w-5xl items-start px-3 py-4 sm:px-4 lg:px-6">
           <button
             onClick={() => router.back()}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <div>
-            <h1 className="text-base font-semibold sm:text-lg">Add money</h1>
-            <p className="text-sm text-slate-500">Share your account details to receive funds securely.</p>
-          </div>
         </div>
       </div>
 
