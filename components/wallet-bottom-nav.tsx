@@ -15,7 +15,7 @@ export default function WalletBottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-xl shadow-[0_-10px_30px_rgba(15,23,42,0.08)] pb-20">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-xl shadow-[0_-10px_30px_rgba(15,23,42,0.08)] pb-10">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-1 px-3 py-2 sm:px-4">
         {items.map((item) => {
           const Icon = item.icon
