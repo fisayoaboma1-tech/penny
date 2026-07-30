@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { LenisProvider } from "@/components/lenis-provider"
+import { Toaster } from "@/components/ui/toaster"
 import ClickSpark from "@/components/click-spark"
 import { AuthProvider } from "@/contexts/auth-context"
 import { QueryProvider } from "@/components/query-provider"
@@ -54,6 +55,7 @@ export default function RootLayout({
             <AuthProvider>
               <LenisProvider>
                 <PageTransition>{children}</PageTransition>
+                <Toaster />
               </LenisProvider>
             </AuthProvider>
           </QueryProvider>

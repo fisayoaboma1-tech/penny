@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
   Bell,
-  CreditCard,
   ArrowUpRight,
   Eye,
   EyeOff,
@@ -14,28 +13,19 @@ import {
   Headphones,
   Repeat,
   Plus,
-  ShieldCheck,
-  Sparkles,
   ArrowDown,
-  Home,
-  Grid,
-  Sparkles as SparkleIcon,
   Banknote,
   Send,
-  CircleDollarSign,
-  ReceiptText,
-  UserRound,
-  LifeBuoy,
-  Gift,
 } from "lucide-react"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
+import { toast } from "@/hooks/use-toast"
 import { ProtectedRoute } from "@/components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
 
 const services = [
   { label: "Transfer", icon: Send, path: "/wallet/transfer" },
   { label: "Add money", icon: Banknote, path: "/wallet/add-money" },
-  { label: "Convert", icon: Repeat, path: "/wallet/card" },
+  { label: "Convert", icon: Repeat, path: "/wallet/card", comingSoon: true },
 ]
 
 const transactions = [
@@ -151,14 +141,15 @@ export default function WalletPage() {
 
   return (
     <ProtectedRoute>
-      <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900">
-        <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-3 sm:px-5 lg:px-6">
+      <div className="min-h-screen bg-slate-50 text-slate-900">
+        {/* ─── HEADER ─── */}
+        <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:gap-3 sm:px-6 lg:pl-28 lg:pr-6">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => router.push("/profile")}
-                className="h-11 w-11 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                className="h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 sm:h-11 sm:w-11"
               >
                 <img src={profileImageUrl} alt={userName} className="h-full w-full object-cover" />
               </button>
@@ -168,205 +159,244 @@ export default function WalletPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 sm:h-10 sm:w-10"
                 onClick={() => router.push("/help")}
               >
-                <Headphones className="h-4.5 w-4.5" />
+                <Headphones className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
               </button>
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 sm:h-10 sm:w-10"
                 onClick={() => router.push("/notifications")}
               >
-                <Bell className="h-4.5 w-4.5" />
+                <Bell className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
               </button>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-6xl px-3 py-3 sm:px-5 sm:py-5 lg:px-6">
+        {/* ─── MAIN CONTENT ─── */}
+        <main className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pb-28 pt-20 sm:px-6 md:gap-5 md:pt-24 lg:pl-28 lg:pr-6 lg:pt-6 xl:px-8">
+          {/* ── BALANCE CARD ── */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="mt-2 overflow-hidden rounded-[30px] bg-slate-900 p-2 shadow-[0_20px_50px_rgba(15,23,42,0.12)] sm:p-3"
           >
-            <div className="relative overflow-hidden rounded-[24px] bg-slate-900 p-4 text-white sm:p-5 lg:p-6">
-              <div className="pointer-events-none absolute -right-12 top-6 h-28 w-28 rounded-full bg-white/10 blur-3xl" />
-              <div className="pointer-events-none absolute left-0 top-10 h-20 w-20 rounded-full bg-sky-300/15 blur-3xl" />
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-slate-300/75">Available balance</p>
-                    </div>
-                    <div className="mt-2 flex items-center gap-2">
-                      <p className="text-[clamp(1.8rem,4vw,2.7rem)] font-semibold tracking-tight text-white">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-[#0f6cff] p-1 shadow-lg shadow-slate-900/20">
+              <div className="relative rounded-2xl p-5 sm:p-6 md:p-7 md:pb-8">
+                {/* Decorative blurs */}
+                <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-10 left-10 h-24 w-24 rounded-full bg-sky-300/15 blur-3xl" />
+
+                <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+                  {/* Balance info */}
+                  <div className="space-y-1">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">Available balance</p>
+                    <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+                      <p className="truncate text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl lg:text-5xl">
                         {showBalance ? `$${balance.toLocaleString("en-US")}` : "••••••"}
                       </p>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium uppercase tracking-[0.2em] text-slate-300">
+                      <div className="flex shrink-0 items-center gap-1">
+                        <span className="text-[11px] font-medium uppercase tracking-wider text-slate-300">
                           USD
                         </span>
                         <button
                           type="button"
                           onClick={() => setShowBalance((prev) => !prev)}
-                          className="rounded-full border border-white/20 bg-white/10 p-1 text-slate-200 transition hover:bg-white/15"
+                          className="p-1 text-slate-300 transition hover:text-white"
                           aria-label={showBalance ? "Hide balance" : "Show balance"}
                         >
                           {showBalance ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
                         </button>
                       </div>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-300 sm:text-sm">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-400 sm:gap-2">
                       <span>{lastUpdatedLabel}</span>
                       <button
                         type="button"
                         onClick={refreshBalance}
-                        className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-2 text-slate-200 transition hover:bg-white/15"
+                        className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 p-1.5 text-slate-300 transition hover:bg-white/20"
                         aria-label="Refresh balance"
                       >
-                        <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                        <RefreshCw className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`} />
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => router.push("/wallet/add-money")}
-                      className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/15"
-                    >
-                      <Plus className="mr-1.5 h-3.5 w-3.5" /> Add money
-                    </button>
-                    <button
-                      onClick={() => router.push("/wallet/transfer")}
-                      className="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-white/15"
-                    >
-                      <Clock3 className="mr-1.5 h-3.5 w-3.5" /> History
-                    </button>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-3 md:items-end">
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      <button
+                        onClick={() => router.push("/wallet/add-money")}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white transition hover:bg-white/20 sm:px-4 sm:py-2 sm:text-xs"
+                      >
+                        <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Add money
+                      </button>
+                      <button
+                        onClick={() => router.push("/wallet/transfer")}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white transition hover:bg-white/20 sm:px-4 sm:py-2 sm:text-xs"
+                      >
+                        <Clock3 className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> History
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </motion.section>
 
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mt-3 rounded-[24px] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
-          >
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-semibold text-slate-900">Services</h2>
-                <p className="text-xs text-slate-500">Popular actions and shortcuts</p>
-              </div>
-            </div>
-            <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(90px,1fr))] sm:gap-3">
-              {services.slice(0, 8).map((service) => {
-                const Icon = service.icon
-                return (
-                  <button
-                    key={service.label}
-                    type="button"
-                    onClick={() => router.push(service.path)}
-                    className="group flex min-h-[96px] w-full flex-col items-center justify-center gap-2 rounded-[20px] bg-[#f7faff] p-2 text-center transition hover:bg-[#eef5ff] sm:min-h-[110px] sm:p-3"
-                  >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-transparent text-slate-700 shadow-sm sm:h-11 sm:w-11">
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <span className="text-[10px] font-semibold leading-tight text-slate-900 sm:text-[11px]">
-                      {service.label}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </motion.section>
-
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mt-3 rounded-[24px] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
-          >
-            <div className="rounded-[24px] bg-white p-2 sm:p-4">
-              <div className="mb-3 flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">Recent transactions</p>
-                  <p className="text-xs text-slate-500">Latest activity on your wallet.</p>
+          {/* ── SERVICES + TRANSACTIONS GRID ── */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:gap-5">
+            {/* SERVICES */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:p-6">
+                <div className="mb-4">
+                  <h2 className="text-sm font-semibold text-slate-900">Services</h2>
+                  <p className="text-xs text-slate-500">Popular actions and shortcuts</p>
                 </div>
-                <button
-                  type="button"
-                  className="shrink-0 text-sm font-semibold text-slate-900"
-                  onClick={() => router.push("/wallet/transfer")}
-                >
-                  View All
-                </button>
-              </div>
-              <div className="space-y-2.5">
-                {transactions.map((tx) => {
-                  const Icon = tx.icon
-                  const isCredit = tx.amount.startsWith("+")
-                  return (
-                    <div
-                      key={tx.id}
-                      className="flex items-center justify-between gap-3 rounded-[20px] border border-slate-200 bg-[#f7faff] p-3"
-                    >
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white text-[#0f6cff] shadow-sm">
-                          <Icon className="h-4.5 w-4.5" />
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {services.map((service) => {
+                    const Icon = service.icon
+                    return (
+                      <button
+                        key={service.label}
+                        type="button"
+                        onClick={() => {
+                          if (service.comingSoon) {
+                            toast({
+                              title: "Feature available soon",
+                              description: "Convert will be available soon.",
+                            })
+                            return
+                          }
+                          router.push(service.path)
+                        }}
+                        aria-disabled={service.comingSoon}
+                        className={`group flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200/70 bg-slate-50/50 p-2 text-center transition sm:p-4 sm:gap-2.5 ${
+                          service.comingSoon
+                            ? "cursor-not-allowed opacity-70"
+                            : "hover:-translate-y-0.5 hover:border-[#0f6cff]/20 hover:bg-blue-50/60 hover:shadow-md"
+                        }`}
+                      >
+                        <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/60 sm:h-11 sm:w-11">
+                          <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
                         </span>
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-slate-900">{tx.title}</p>
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{tx.subtitle}</p>
+                        <span className="text-[9px] font-semibold leading-tight text-slate-900 sm:text-[11px]">
+                          {service.label}
+                        </span>
+                        {service.comingSoon && (
+                          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-amber-700">
+                            Soon
+                          </span>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </motion.section>
+
+            {/* TRANSACTIONS */}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 md:p-6">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-sm font-semibold text-slate-900">Recent transactions</h2>
+                    <p className="text-xs text-slate-500">Latest activity on your wallet.</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="shrink-0 text-xs font-semibold text-[#0f6cff] hover:underline"
+                    onClick={() => router.push("/wallet/transfer")}
+                  >
+                    View All
+                  </button>
+                </div>
+                <div className="space-y-2.5">
+                  {transactions.map((tx) => {
+                    const Icon = tx.icon
+                    const isCredit = tx.amount.startsWith("+")
+                    return (
+                      <div
+                        key={tx.id}
+                        className="flex items-center justify-between gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 transition hover:border-slate-300/80 hover:bg-slate-50 sm:gap-3 sm:p-3"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f6cff] shadow-sm ring-1 ring-slate-200/60 sm:h-10 sm:w-10">
+                            <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                          </span>
+                          <div className="min-w-0 max-w-[140px] sm:max-w-none">
+                            <p className="truncate text-[13px] font-medium text-slate-900 sm:text-sm">{tx.title}</p>
+                            <p className="text-[9px] uppercase tracking-wider text-slate-500 sm:text-[10px]">{tx.subtitle}</p>
+                          </div>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end text-right">
+                          <p className={`text-[13px] font-semibold sm:text-sm ${isCredit ? "text-emerald-600" : "text-rose-600"}`}>
+                            {tx.amount}
+                          </p>
+                          <p className="text-[9px] text-slate-500 sm:text-[10px]">{tx.time}</p>
                         </div>
                       </div>
-                      <div className="flex min-w-[100px] flex-col items-end text-right">
-                        <p className={`text-sm font-semibold ${isCredit ? "text-emerald-600" : "text-rose-600"}`}>{tx.amount}</p>
-                        <p className="text-[10px] text-slate-500">{tx.time}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="mt-3 space-y-3">
-              <div className="rounded-[24px] bg-white p-3 shadow-sm sm:p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">Spending trends</p>
-                    <p className="text-xs text-slate-500">Analyze your weekly and monthly flow.</p>
-                  </div>
-                  <div className="inline-flex w-full rounded-full bg-[#eef5ff] p-1 sm:w-auto">
-                    <button
-                      type="button"
-                      className={`flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:flex-none ${trend === "week" ? "bg-[#0f6cff] text-white" : "text-[#4f63a1]"}`}
-                      onClick={() => setTrend("week")}
-                    >
-                      Week
-                    </button>
-                    <button
-                      type="button"
-                      className={`flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:flex-none ${trend === "month" ? "bg-[#0f6cff] text-white" : "text-[#4f63a1]"}`}
-                      onClick={() => setTrend("month")}
-                    >
-                      Month
-                    </button>
-                  </div>
+                    )
+                  })}
                 </div>
-                <div className="mt-3 grid gap-2">
-                  <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-                    <p className="text-sm font-semibold text-slate-900">Money in</p>
-                    <p className="mt-1 text-xl font-semibold text-slate-900">$6,800.00</p>
-                  </div>
-                  <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-                    <p className="text-sm font-semibold text-slate-900">Money out</p>
-                    <p className="mt-1 text-xl font-semibold text-rose-600">$21,693.00</p>
-                  </div>
+              </div>
+            </motion.section>
+          </div>
+
+          {/* ── SPENDING TRENDS ── */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5 md:p-6">
+                <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-900">Spending trends</h2>
+                  <p className="text-xs text-slate-500">Analyze your weekly and monthly flow.</p>
+                </div>
+                <div className="inline-flex w-full rounded-xl bg-slate-100 p-1 sm:w-auto">
+                  <button
+                    type="button"
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition sm:flex-none sm:px-4 ${
+                      trend === "week" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    onClick={() => setTrend("week")}
+                  >
+                    Week
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition sm:flex-none sm:px-4 ${
+                      trend === "month" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                    onClick={() => setTrend("month")}
+                  >
+                    Month
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-4">
+                  <p className="text-[11px] font-medium text-slate-500 sm:text-xs">Money in</p>
+                  <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">$6,800.00</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-4">
+                  <p className="text-[11px] font-medium text-slate-500 sm:text-xs">Money out</p>
+                  <p className="mt-1 text-lg font-bold text-rose-600 sm:text-xl">$21,693.00</p>
                 </div>
               </div>
             </div>

@@ -7,6 +7,7 @@ import { ChevronLeft, Bell, Smartphone, Mail, MessageSquare, Check } from "lucid
 import { ProtectedRoute } from "../../components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
 import { useUserPreferences } from "../../hooks/use-user-preferences"
+import WalletBottomNav from "@/components/wallet-bottom-nav"
 
 export default function NotificationsPage() {
   const router = useRouter()
@@ -19,8 +20,8 @@ export default function NotificationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="text-white text-lg">Loading...</div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-sm font-semibold text-[#0f6cff]">Loading…</div>
       </div>
     )
   }
@@ -29,154 +30,156 @@ export default function NotificationsPage() {
   if (isLoading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[#0a0a0a]">
-          <div className="bg-[#111111] border-b border-[#1a1a1a] sticky top-0 z-10">
+        <div className="min-h-screen bg-slate-50">
+          <div className="bg-white/95 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center h-20">
+              <div className="flex items-center h-16 sm:h-20">
                 <button
                   onClick={() => router.back()}
-                  className="p-2 hover:bg-[#1a1a1a] rounded-xl transition-colors mr-4"
+                  className="p-2 -ml-2 hover:bg-slate-100 rounded-xl transition-colors mr-3 sm:mr-4"
                 >
-                  <ChevronLeft className="w-5 h-5 text-gray-400" />
+                  <ChevronLeft className="w-5 h-5 text-slate-500" />
                 </button>
-                <h1 className="text-xl font-bold text-white">Notifications</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-slate-900">Notifications</h1>
               </div>
             </div>
           </div>
-          <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-            <div className="bg-[#111111] border border-[#1a1a1a] rounded-3xl p-12 text-center">
-              <div className="text-white text-lg">Loading preferences...</div>
+          <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 space-y-5 sm:space-y-6 pb-24 sm:pb-8">
+            <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-sm">
+              <div className="text-slate-500 text-base sm:text-lg">Loading preferences...</div>
             </div>
-          </div>
         </div>
-      </ProtectedRoute>
+        <WalletBottomNav />
+      </div>
+    </ProtectedRoute>
     )
   }
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#0a0a0a]">
+      <div className="min-h-screen bg-slate-50 text-slate-900">
         {/* Header */}
-      <div className="bg-[#111111] border-b border-[#1a1a1a] sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-20">
-            <button
-              onClick={() => router.back()}
-              className="p-2 hover:bg-[#1a1a1a] rounded-xl transition-colors mr-4"
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-400" />
-            </button>
-            <h1 className="text-xl font-bold text-white">Notifications</h1>
+        <div className="bg-white/95 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center h-16 sm:h-20">
+              <button
+                onClick={() => router.back()}
+                className="p-2 -ml-2 hover:bg-slate-100 rounded-xl transition-colors mr-3 sm:mr-4"
+              >
+                <ChevronLeft className="w-5 h-5 text-slate-500" />
+              </button>
+              <h1 className="text-lg sm:text-xl font-bold text-slate-900">Notifications</h1>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        {/* No Notifications Message */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-[#111111] border border-[#1a1a1a] rounded-3xl p-12 text-center"
-        >
-          <div className="w-16 h-16 bg-gray-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Bell className="w-8 h-8 text-gray-500" />
-          </div>
-          <h2 className="text-xl font-bold text-white mb-2">No notifications</h2>
-          <p className="text-sm text-gray-500">You're all caught up! Check back later for updates.</p>
-        </motion.div>
-
-        {/* Notification Preferences */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-[#111111] border border-[#1a1a1a] rounded-3xl p-6"
-        >
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-purple-500/10 rounded-2xl flex items-center justify-center">
-              <Bell className="w-6 h-6 text-purple-400" />
+        <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 space-y-5 sm:space-y-6 pb-24 sm:pb-8">
+          {/* No Notifications Message */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-sm"
+          >
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+              <Bell className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
             </div>
-            <div>
-              <h2 className="text-lg font-bold text-white">Notification Preferences</h2>
-              <p className="text-sm text-gray-500">Manage how you receive notifications</p>
-            </div>
-          </div>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-1 sm:mb-2">No notifications</h2>
+            <p className="text-xs sm:text-sm text-slate-500">You're all caught up! Check back later for updates.</p>
+          </motion.div>
 
-          <div className="space-y-4">
-            {/* Push Notifications */}
-            <div className="flex items-center justify-between p-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
-                  <Smartphone className="w-5 h-5 text-purple-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-200">Push Notifications</p>
-                  <p className="text-xs text-gray-500">Receive notifications on your device</p>
-                </div>
+          {/* Notification Preferences */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm"
+          >
+            <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
+                <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-[#0f6cff]" />
               </div>
-              <button
-                onClick={() => updatePreference("push_notifications", !pushEnabled)}
-                disabled={isLoading}
-                className="relative w-12 h-6 rounded-full transition-colors disabled:opacity-50"
-                style={{ backgroundColor: pushEnabled ? "#10b981" : "#374151" }}
-              >
-                <div
-                  className="absolute top-1 w-4 h-4 bg-white rounded-full transition-transform"
-                  style={{ left: pushEnabled ? "26px" : "6px" }}
-                />
-              </button>
+              <div className="min-w-0">
+                <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate">Notification Preferences</h2>
+                <p className="text-xs sm:text-sm text-slate-500">Manage how you receive notifications</p>
+              </div>
             </div>
 
-            {/* Email Notifications */}
-            <div className="flex items-center justify-between p-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-blue-400" />
+            <div className="space-y-3 sm:space-y-4">
+              {/* Push Notifications */}
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
+                    <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 text-[#0f6cff]" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className="text-sm sm:text-base font-medium text-slate-900 truncate">Push Notifications</p>
+                    <p className="text-xs text-slate-500 truncate">Receive notifications on your device</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-200">Email Notifications</p>
-                  <p className="text-xs text-gray-500">Receive updates via email</p>
-                </div>
+                <button
+                  onClick={() => updatePreference("push_notifications", !pushEnabled)}
+                  disabled={isLoading}
+                  className="relative w-11 h-5 sm:w-12 sm:h-6 rounded-full transition-colors disabled:opacity-50 shrink-0"
+                  style={{ backgroundColor: pushEnabled ? "#10b981" : "#cbd5e1" }}
+                >
+                  <div
+                    className="absolute top-0.5 sm:top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                    style={{ left: pushEnabled ? "calc(100% - 18px)" : "2px" }}
+                  />
+                </button>
               </div>
-              <button
-                onClick={() => updatePreference("email_notifications", !emailEnabled)}
-                disabled={isLoading}
-                className="relative w-12 h-6 rounded-full transition-colors disabled:opacity-50"
-                style={{ backgroundColor: emailEnabled ? "#10b981" : "#374151" }}
-              >
-                <div
-                  className="absolute top-1 w-4 h-4 bg-white rounded-full transition-transform"
-                  style={{ left: emailEnabled ? "26px" : "6px" }}
-                />
-              </button>
-            </div>
 
-            {/* SMS Notifications */}
-            <div className="flex items-center justify-between p-4 bg-[#0a0a0a] border border-[#1a1a1a] rounded-2xl">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5 text-emerald-400" />
+              {/* Email Notifications */}
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-[#0f6cff]" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className="text-sm sm:text-base font-medium text-slate-900 truncate">Email Notifications</p>
+                    <p className="text-xs text-slate-500 truncate">Receive updates via email</p>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-200">SMS Notifications</p>
-                  <p className="text-xs text-gray-500">Receive text message alerts</p>
-                </div>
+                <button
+                  onClick={() => updatePreference("email_notifications", !emailEnabled)}
+                  disabled={isLoading}
+                  className="relative w-11 h-5 sm:w-12 sm:h-6 rounded-full transition-colors disabled:opacity-50 shrink-0"
+                  style={{ backgroundColor: emailEnabled ? "#10b981" : "#cbd5e1" }}
+                >
+                  <div
+                    className="absolute top-0.5 sm:top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                    style={{ left: emailEnabled ? "calc(100% - 18px)" : "2px" }}
+                  />
+                </button>
               </div>
-              <button
-                onClick={() => updatePreference("sms_notifications", !smsEnabled)}
-                disabled={isLoading}
-                className="relative w-12 h-6 rounded-full transition-colors disabled:opacity-50"
-                style={{ backgroundColor: smsEnabled ? "#10b981" : "#374151" }}
-              >
-                <div
-                  className="absolute top-1 w-4 h-4 bg-white rounded-full transition-transform"
-                  style={{ left: smsEnabled ? "26px" : "6px" }}
-                />
-              </button>
+
+              {/* SMS Notifications */}
+              <div className="flex items-center justify-between p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shrink-0">
+                    <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className="text-sm sm:text-base font-medium text-slate-900 truncate">SMS Notifications</p>
+                    <p className="text-xs text-slate-500 truncate">Receive text message alerts</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => updatePreference("sms_notifications", !smsEnabled)}
+                  disabled={isLoading}
+                  className="relative w-11 h-5 sm:w-12 sm:h-6 rounded-full transition-colors disabled:opacity-50 shrink-0"
+                  style={{ backgroundColor: smsEnabled ? "#10b981" : "#cbd5e1" }}
+                >
+                  <div
+                    className="absolute top-0.5 sm:top-1 w-4 h-4 bg-white rounded-full transition-transform shadow-sm"
+                    style={{ left: smsEnabled ? "calc(100% - 18px)" : "2px" }}
+                  />
+                </button>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
         </div>
+        <WalletBottomNav />
       </div>
     </ProtectedRoute>
   )

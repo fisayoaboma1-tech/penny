@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
-  ChevronLeft,
   Search,
   Send,
   CreditCard,
@@ -25,6 +24,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
+import { WalletPageHeader } from "@/components/wallet/page-header"
 
 const serviceGroups = [
   {
@@ -66,20 +66,7 @@ export default function WalletServicesPage() {
 
   return (
     <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f7ff] text-slate-900">
-      <div className="sticky top-0 z-30 border-b border-blue-100 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center gap-2.5 px-3 py-3 sm:px-4 lg:px-6">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#0f6cff] transition hover:bg-[#e2eeff]"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-sm font-semibold sm:text-base">All services</h1>
-            <p className="text-xs text-slate-500 sm:text-sm">Search and access every wallet service.</p>
-          </div>
-        </div>
-      </div>
+      <WalletPageHeader onBack={() => router.back()} />
 
       <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl space-y-3 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
         <motion.section

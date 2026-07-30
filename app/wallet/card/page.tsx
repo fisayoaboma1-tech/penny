@@ -1,103 +1,173 @@
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ChevronLeft, CreditCard, ShieldCheck, BadgeCheck, Sparkles, ArrowRight, Lock, ReceiptText, Home, Grid } from "lucide-react"
+import { CreditCard, Plus } from "lucide-react"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
+import { WalletPageHeader } from "@/components/wallet/page-header"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+type Card = {
+  id: string
+  name: string
+  number: string
+  expiry: string
+  cvc: string
+}
 
 export default function WalletCardPage() {
   const router = useRouter()
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [cards, setCards] = useState<Card[]>([])
+  const [cardName, setCardName] = useState("")
+  const [cardNumber, setCardNumber] = useState("")
+  const [expiry, setExpiry] = useState("")
+  const [cvc, setCvc] = useState("")
+
+  const handleAddCard = () => {
+    if (!cardName || !cardNumber || !expiry || !cvc) {
+      return
+    }
+
+    setCards((prev) => [
+      ...prev,
+      {
+        id: crypto?.randomUUID?.() ?? Date.now().toString(),
+        name: cardName,
+        number: cardNumber,
+        expiry,
+        cvc,
+      },
+    ])
+
+    setIsDialogOpen(false)
+    setCardName("")
+    setCardNumber("")
+    setExpiry("")
+    setCvc("")
+  }
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f7ff] text-slate-900">
-      <div className="sticky top-0 z-30 border-b border-blue-100 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center gap-2.5 px-3 py-3 sm:px-4 lg:px-6">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[#eef5ff] text-[#0f6cff] transition hover:bg-[#e2eeff]"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-sm font-semibold sm:text-base">Cards</h1>
-            <p className="text-xs text-slate-500 sm:text-sm">Manage your virtual and physical cards.</p>
-          </div>
-        </div>
-      </div>
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900">
+      <WalletPageHeader onBack={() => router.back()} />
 
-      <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl space-y-3 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+      <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl space-y-3 px-3 py-4 sm:px-4 sm:py-6 lg:px-6">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm"
+          className="rounded-[28px] border border-[#0f6cff]/20 bg-white/90 p-4 shadow-sm sm:p-6"
         >
-          <div className="relative overflow-hidden bg-gradient-to-br from-[#0f6cff] via-[#0d5fe4] to-[#0a54cc] p-4 text-white sm:p-5">
-            <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full bg-white/10 blur-3xl" />
-            <div className="absolute bottom-0 left-0 h-20 w-20 rounded-full bg-sky-300/20 blur-3xl" />
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.24em] text-sky-200">Virtual Card</p>
-                <h2 className="mt-2 text-[clamp(1.2rem,3vw,1.7rem)] font-semibold">Meet your virtual card</h2>
-              </div>
-              <div className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.24em] text-sky-100">
-                Active
-              </div>
+          <div className="flex flex-col gap-4 rounded-[24px] bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Cards</p>
+              <h1 className="mt-2 text-2xl font-semibold text-slate-900">Add your card</h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-500">
+                Store your card securely and start using it for payments in the Wallet.
+              </p>
             </div>
-
-            <div className="mt-5 rounded-[22px] border border-white/10 bg-white/10 p-4 shadow-[0_16px_40px_rgba(15,23,42,0.16)]">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-sky-200">Card number</p>
-                  <p className="mt-2 text-base font-semibold">****  ****  ****  6821</p>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563eb] px-4 py-3 text-sm font-semibold text-white shadow-[0_20px_40px_rgba(37,99,235,0.24)] transition hover:bg-[#1d4ed8] sm:w-auto"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add card
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="overflow-hidden rounded-[2rem] border border-[#0f6cff]/20 p-0 shadow-[0_40px_80px_rgba(15,23,42,0.18)] sm:max-w-md">
+                <div className="relative bg-white">
+                  <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#eff7ff] to-transparent" />
+                  <div className="absolute inset-x-0 top-0 h-28 bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
+                  <div className="relative px-6 py-6 sm:px-8 sm:py-8">
+                    <DialogHeader className="text-left">
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
+                        <CreditCard className="h-5 w-5 text-[#0f6cff]" />
+                      </div>
+                      <DialogTitle className="text-xl font-semibold text-slate-900">Add new card</DialogTitle>
+                      <DialogDescription className="mt-2 text-sm leading-6 text-slate-500">
+                        Enter the card details to add a card to your Wallet.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form autoComplete="off" className="mt-6 grid gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="demo-name" className="text-sm font-medium text-slate-700">Cardholder name</Label>
+                        <Input
+                          id="demo-name"
+                          name="demo-name"
+                          autoComplete="off"
+                          value={cardName}
+                          onChange={(event) => setCardName(event.target.value)}
+                          placeholder="John Doe"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus-visible:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10 focus-visible:ring-[#0f6cff]/10"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="demo-number" className="text-sm font-medium text-slate-700">Card number</Label>
+                        <Input
+                          id="demo-number"
+                          name="demo-number"
+                          autoComplete="off"
+                          inputMode="numeric"
+                          value={cardNumber}
+                          onChange={(event) => setCardNumber(event.target.value)}
+                          placeholder="1234 5678 9012 3456"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus-visible:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10 focus-visible:ring-[#0f6cff]/10"
+                        />
+                      </div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="grid gap-2">
+                          <Label htmlFor="demo-expiry" className="text-sm font-medium text-slate-700">Expiry</Label>
+                          <Input
+                            id="demo-expiry"
+                            name="demo-expiry"
+                            autoComplete="off"
+                            inputMode="numeric"
+                            value={expiry}
+                            onChange={(event) => setExpiry(event.target.value)}
+                            placeholder="MM/YY"
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus-visible:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10 focus-visible:ring-[#0f6cff]/10"
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="demo-cvc" className="text-sm font-medium text-slate-700">CVC</Label>
+                          <Input
+                            id="demo-cvc"
+                            name="demo-cvc"
+                            autoComplete="off"
+                            inputMode="numeric"
+                            value={cvc}
+                            onChange={(event) => setCvc(event.target.value)}
+                            placeholder="123"
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus-visible:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10 focus-visible:ring-[#0f6cff]/10"
+                          />
+                        </div>
+                      </div>
+                    </form>
+                    <DialogFooter className="mt-6 flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                      <DialogClose asChild>
+                        <Button variant="outline" className="w-full rounded-full border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto">Cancel</Button>
+                      </DialogClose>
+                      <Button onClick={handleAddCard} className="w-full rounded-full bg-[#0f6cff] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(15,23,42,0.18)] transition hover:bg-[#0b57d3] sm:w-auto">Save card</Button>
+                    </DialogFooter>
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-1 text-right">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-sky-200">Expires</p>
-                  <p className="text-sm font-semibold">09/29</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2.5 p-3 sm:p-4">
-            <div className="flex items-center gap-3 rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#0f6cff] text-white">
-                <CreditCard className="h-4.5 w-4.5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900">Ready in under 1 minute</p>
-                <p className="text-xs text-slate-500">Start spending immediately.</p>
-              </div>
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-                <p className="text-sm font-semibold text-slate-900">Accepted everywhere</p>
-                <p className="mt-1 text-xs text-slate-500">For shopping and subscriptions online and in-store.</p>
-              </div>
-              <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-                <p className="text-sm font-semibold text-slate-900">No hidden fees</p>
-                <p className="mt-1 text-xs text-slate-500">No monthly fees or recurring charges.</p>
-              </div>
-            </div>
-
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-                <p className="text-sm font-semibold text-slate-900">Stay in control</p>
-                <p className="mt-1 text-xs text-slate-500">Freeze or unfreeze your card anytime.</p>
-              </div>
-              <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-                <p className="text-sm font-semibold text-slate-900">Secure payments</p>
-                <p className="mt-1 text-xs text-slate-500">Protected with 3D Secure and fraud monitoring.</p>
-              </div>
-            </div>
-
-            <button
-              onClick={() => router.push("/wallet/card")}
-              className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#0f6cff] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b5be2]"
-            >
-              <Sparkles className="h-4 w-4" />
-              Get Virtual Card
-            </button>
+              </DialogContent>
+            </Dialog>
           </div>
         </motion.section>
 
@@ -105,26 +175,43 @@ export default function WalletCardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="rounded-[24px] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+          className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm"
         >
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Card limits</p>
-              <p className="text-xs text-slate-500">Manage how much you spend online.</p>
+          {cards.length > 0 ? (
+            <div className="space-y-4">
+              {cards.map((card) => (
+                <div key={card.id} className="rounded-[20px] border border-[#0f6cff]/30 bg-slate-50 p-4 shadow-[0_10px_24px_rgba(15,99,255,0.08)]">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Cardholder</p>
+                      <p className="mt-1 font-semibold text-slate-900">{card.name}</p>
+                    </div>
+                    <CreditCard className="h-5 w-5 text-slate-500" />
+                  </div>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Card number</p>
+                      <p className="mt-1 font-semibold text-slate-900">**** **** **** {card.number.slice(-4)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Expiry</p>
+                      <p className="mt-1 font-semibold text-slate-900">{card.expiry}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <button className="text-sm font-semibold text-[#0f6cff]">Manage</button>
-          </div>
-
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-              <p className="text-xs text-slate-500">Daily limit</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">₦80,000</p>
+          ) : (
+            <div className="rounded-[20px] border border-dashed border-slate-200 bg-slate-50 p-6 sm:p-8 text-center">
+              <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <h2 className="mt-4 text-lg font-semibold text-slate-900">No cards added yet</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Add a card to start paying from your Wallet.
+              </p>
             </div>
-            <div className="rounded-[20px] border border-slate-200 bg-[#f7faff] p-3">
-              <p className="text-xs text-slate-500">Available balance</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">₦13,079.16</p>
-            </div>
-          </div>
+          )}
         </motion.section>
       </main>
 

@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "dev:https": "concurrently \"npm run dev\" \"npx ngrok http 3000\"",
     "lint": "eslint .",
     "start": "next start"
   },
