@@ -4,11 +4,6 @@ import { motion } from "framer-motion"
 import { Plus, ArrowUpRight, Eye, EyeOff } from "lucide-react"
 import { useUserPreferences } from "@/hooks/use-user-preferences"
 
-const actions = [
-  { label: "Fund Wallet", icon: Plus },
-  { label: "Withdraw Funds", icon: ArrowUpRight },
-]
-
 export function BalanceCard({
   balance,
   onAction,
@@ -24,17 +19,30 @@ export function BalanceCard({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-br from-[#1a2e24] via-[#111814] to-[#0a0a0a] border border-[#1a1a1a]"
+        className="relative overflow-hidden rounded-3xl p-6 bg-white shadow-sm"
       >
-        <div className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 bg-emerald-500/20 rounded-full blur-3xl" />
         <div className="relative mb-6">
-          <p className="text-xs text-white/40 mb-1">Current balance</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500 mb-2">9162919586 | Chukwudi Enoch</p>
           <div className="flex items-center gap-2">
-            <h2 className="text-4xl font-bold text-white tracking-tight">
-              {balance.toLocaleString("en-US")} USD
+            <h2 className="text-4xl font-semibold text-slate-900 tracking-tight">
+              ₦{balance.toLocaleString("en-US")}
             </h2>
           </div>
-          <p className="text-xs text-emerald-400/70 mt-2">Available balance</p>
+          <p className="text-xs text-slate-500 mt-2">Last updated just now</p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+          >
+            <Plus className="w-4 h-4" />
+            Add money
+          </button>
+          <button
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+          >
+            <ArrowUpRight className="w-4 h-4" />
+            History
+          </button>
         </div>
       </motion.div>
     )
@@ -46,41 +54,33 @@ export function BalanceCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-br from-[#1a2e24] via-[#111814] to-[#0a0a0a] border border-[#1a1a1a]"
+      className="relative overflow-hidden rounded-3xl p-6 bg-white shadow-sm"
     >
-      <div className="pointer-events-none absolute -top-16 -right-10 w-56 h-56 bg-emerald-500/20 rounded-full blur-3xl" />
-      
       <div className="relative mb-6">
-        <p className="text-xs text-white/40 mb-1">Current balance</p>
+        <p className="text-xs uppercase tracking-[0.24em] text-slate-500 mb-2">9162919586 | Chukwudi Enoch</p>
         <div className="flex items-center gap-2">
-          <h2 className="text-4xl font-bold text-white tracking-tight">
-            {showBalance ? `${balance.toLocaleString("en-US")} USD` : "••••••"}
+          <h2 className="text-4xl font-semibold text-slate-900 tracking-tight">
+            {showBalance ? `₦${balance.toLocaleString("en-US")}` : "••••••"}
           </h2>
-          <button
-            onClick={() => updatePreference("hide_balance", !preferences.hide_balance)}
-            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-          >
-            {showBalance ? (
-              <EyeOff className="w-5 h-5 text-white/60" />
-            ) : (
-              <Eye className="w-5 h-5 text-white/60" />
-            )}
-          </button>
         </div>
-        <p className="text-xs text-emerald-400/70 mt-2">Available balance</p>
+        <p className="text-xs text-slate-500 mt-2">Last updated just now</p>
       </div>
 
-      <div className="relative flex gap-3">
-        {actions.map(({ label, icon: Icon }) => (
-          <button
-            key={label}
-            onClick={() => onAction(label.toLowerCase().replace(" ", ""))}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/10 border border-white/10 hover:bg-white/20 hover:border-emerald-500/30 transition-all group"
-          >
-            <Icon className="w-4 h-4 text-white" />
-            <span className="text-xs font-medium text-white/80 group-hover:text-white transition-colors">{label}</span>
-          </button>
-        ))}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button
+          onClick={() => onAction("fundwallet")}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-800 text-white px-5 py-3 text-sm font-semibold shadow-[0_10px_30px_rgba(15,99,255,0.12)] transition hover:bg-[#0b57d3]"
+        >
+          <Plus className="w-4 h-4" />
+          Add money
+        </button>
+        <button
+          onClick={() => onAction("history")}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
+        >
+          <ArrowUpRight className="w-4 h-4" />
+          History
+        </button>
       </div>
     </motion.div>
   )

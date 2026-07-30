@@ -146,7 +146,7 @@ export function Footer() {
                     <motion.div whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
                       <button
                         onClick={() => handleFooterClick(item)}
-                        className="text-white/60 hover:text-[#AFFF00] font-mono text-xs transition-colors inline-block cursor-pointer"
+                        className="text-white/60 hover:text-[#0f6cff] font-mono text-xs transition-colors inline-block cursor-pointer"
                       >
                         {item}
                       </button>
@@ -172,7 +172,7 @@ export function Footer() {
           >
             <span className="text-xl font-normal tracking-tighter">
               <span className="text-white">Penny</span>
-              <span className="text-[#AFFF00]">wise</span>
+              <span className="text-[#0f6cff]">wise</span>
             </span>
           </motion.div>
 
@@ -204,7 +204,7 @@ export function Footer() {
           >
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <h3 className="text-lg font-semibold text-gray-900">{showPrivacy ? "Privacy Policy" : "Terms of Service"}</h3>
-              <button className="text-gray-600 hover:text-[#AFFF00] cursor-pointer" onClick={() => { setShowPrivacy(false); setShowTerms(false); }}>Close</button>
+              <button className="text-gray-600 hover:text-[#0f6cff] cursor-pointer" onClick={() => { setShowPrivacy(false); setShowTerms(false); }}>Close</button>
             </div>
 
             <div className="px-6 py-4 overflow-y-auto max-h-[70vh] text-sm text-gray-700 space-y-4">

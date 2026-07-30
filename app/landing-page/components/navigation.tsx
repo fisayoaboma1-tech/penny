@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react"
 
 const DARK_GREEN = "#0B3D2E"
 const DARK_GREEN_LIGHT = "#145C43"
-const LEMON_GREEN = "#AFFF00"
+const BUTTON_BLUE = "#0f6cff"
 
 const linkVariants = {
   hidden: { opacity: 0, y: -10 },
@@ -182,7 +182,7 @@ export function Navigation() {
           >
             <span className={effectiveScrolled ? "text-gray-900" : "text-white"}>
               <span className={effectiveScrolled ? "text-gray-900" : "text-white"}>Penny</span>
-              <span style={{ color: LEMON_GREEN }}>wise</span>
+              <span style={{ color: BUTTON_BLUE }}>wise</span>
             </span>
           </motion.span>
         </Link>
@@ -210,7 +210,7 @@ export function Navigation() {
                 {item.label}
                 <motion.span
                   className="absolute -bottom-1 left-0 w-full h-0.5 origin-left md:hidden"
-                  style={{ backgroundColor: LEMON_GREEN }}
+                  style={{ backgroundColor: BUTTON_BLUE }}
                   initial={{ scaleX: isActive ? 1 : 0 }}
                   animate={{ scaleX: isActive ? 1 : 0 }}
                   whileHover={{ scaleX: 1 }}
@@ -281,7 +281,7 @@ export function Navigation() {
                   <motion.button
                     key={item.label}
                     onClick={() => scrollToSection(item.href)}
-                    className={`block w-full text-left ${effectiveScrolled ? 'text-gray-800/80' : 'text-white/70'} hover:text-white text-lg font-light py-2 cursor-pointer ${mobileActive}`}
+                    className={`block w-full text-left ${effectiveScrolled ? 'text-gray-800/80 hover:text-[#0f6cff]' : 'text-white/70 hover:text-[#0f6cff]'} text-lg font-light py-2 cursor-pointer ${mobileActive}`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.1 }}
@@ -291,10 +291,10 @@ export function Navigation() {
                 )
               })}
               <div className="flex flex-col gap-3 pt-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                <Link href="/signup" className="w-full text-white px-6 py-3 rounded-full font-bold text-sm tracking-wide inline-flex items-center justify-center border border-white/20" style={{ backgroundColor: DARK_GREEN }}>
-                  Open an Account
+                <Link href="/signup" className="relative inline-flex w-full items-center justify-center px-6 py-3 rounded-full font-bold text-sm tracking-wide gap-2 overflow-hidden border border-[#0f6cff]/20 text-white transition" style={{ backgroundColor: BUTTON_BLUE }}>
+                  <span className="relative z-10">Open an Account</span>
                 </Link>
-                <Link href="/login" className="w-full px-6 py-3 rounded-full font-bold text-sm tracking-wide inline-flex items-center justify-center border border-white/20 bg-transparent text-white">
+                <Link href="/login" className="w-full px-6 py-3 rounded-full font-bold text-sm tracking-wide inline-flex items-center justify-center border border-gray-300 bg-transparent text-white hover:bg-gray-100/60 transition">
                   Login
                 </Link>
               </div>

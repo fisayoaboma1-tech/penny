@@ -7,8 +7,9 @@ import Link from "next/link"
 import { useRef, useState } from "react"
 import { ArrowRight, Check, Sparkles, CreditCard, Shield, Zap, TrendingUp } from "lucide-react"
 
-const DARK_GREEN = "#0B3D2E"
-const DARK_GREEN_LIGHT = "#145C43"
+const DARK_BLUE = "#1e40af"
+const DARK_BLUE_LIGHT = "#3d4d82"
+const BUTTON_BLUE = "#0f6cff"
 
   const accounts = [
   {
@@ -20,7 +21,7 @@ const DARK_GREEN_LIGHT = "#145C43"
     description: "Earn up to 4.5% APY with zero fees and instant access to your funds anytime.",
     features: ["No Monthly Fees", "FDIC Insured", "Instant Transfers", "Cashback Rewards"],
     icon: TrendingUp,
-    buttonColor: DARK_GREEN_LIGHT,
+    buttonColor: BUTTON_BLUE,
   },
   {
     id: "business-pro",
@@ -31,7 +32,7 @@ const DARK_GREEN_LIGHT = "#145C43"
     description: "Powerful tools for entrepreneurs — invoicing, payroll, and instant transfers.",
     features: ["Team Accounts", "Invoice Tools", "Payroll", "API Access"],
     icon: CreditCard,
-    buttonColor: "#3b82f6",
+    buttonColor: BUTTON_BLUE,
   },
 ]
 
@@ -93,8 +94,8 @@ function AccountCard({
               <motion.span
                 className="inline-block text-[9px] md:text-[10px] font-medium tracking-[0.15em] uppercase px-1.5 py-0.5 md:px-2 md:py-1 rounded-full mb-1 md:mb-2"
                 style={{
-                  color: DARK_GREEN_LIGHT,
-                  backgroundColor: `${DARK_GREEN_LIGHT}10`,
+                  color: DARK_BLUE_LIGHT,
+                  backgroundColor: `${DARK_BLUE_LIGHT}10`,
                 }}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -106,9 +107,9 @@ function AccountCard({
             </div>
             <div
               className="w-7 h-7 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: `${DARK_GREEN_LIGHT}10` }}
+              style={{ backgroundColor: `${DARK_BLUE_LIGHT}10` }}
             >
-              <account.icon className="w-3 h-3 md:w-4 md:h-4" style={{ color: DARK_GREEN_LIGHT }} />
+              <account.icon className="w-3 h-3 md:w-4 md:h-4" style={{ color: DARK_BLUE_LIGHT }} />
             </div>
           </div>
 
@@ -117,7 +118,7 @@ function AccountCard({
             <div className="flex items-baseline gap-1 md:gap-2">
               <span
                 className="text-xl md:text-2xl font-semibold tracking-tight"
-                style={{ color: DARK_GREEN_LIGHT }}
+              style={{ color: DARK_BLUE_LIGHT }}
               >
                 {account.apy}
               </span>
@@ -132,9 +133,9 @@ function AccountCard({
               <div key={feature} className="flex items-center gap-1.5 md:gap-2">
                 <div
                   className="w-3 h-3 md:w-4 md:h-4 rounded-full flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: `${DARK_GREEN_LIGHT}15` }}
+                  style={{ backgroundColor: `${DARK_BLUE_LIGHT}15` }}
                 >
-                  <Check className="w-2 h-2 md:w-2.5 md:h-2.5" style={{ color: DARK_GREEN_LIGHT }} />
+                  <Check className="w-2 h-2 md:w-2.5 md:h-2.5" style={{ color: DARK_BLUE_LIGHT }} />
                 </div>
                 <span className="text-xs md:text-sm text-gray-600 font-normal">{feature}</span>
               </div>
@@ -142,7 +143,7 @@ function AccountCard({
           </div>
 
           {/* CTA Button */}
-          <Link href="/signup" className="relative w-full py-2 md:py-3 px-3 md:px-6 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm tracking-wide overflow-hidden group/btn inline-flex items-center justify-center" style={{ backgroundColor: account.buttonColor || DARK_GREEN_LIGHT }}>
+          <Link href="/signup" className="relative w-full py-2 md:py-3 px-3 md:px-6 rounded-lg md:rounded-xl font-semibold text-xs md:text-sm tracking-wide overflow-hidden group/btn inline-flex items-center justify-center" style={{ backgroundColor: account.buttonColor || BUTTON_BLUE }}>
             <span className="relative z-10 text-white flex items-center justify-center gap-1 md:gap-2">
               Open Account
               <motion.div
@@ -185,7 +186,7 @@ export function AccountsSection() {
           >
             <motion.span
               className="inline-flex items-center rounded-full px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em]"
-              style={{ color: DARK_GREEN_LIGHT, backgroundColor: `${DARK_GREEN_LIGHT}10` }}
+              style={{ color: DARK_BLUE_LIGHT, backgroundColor: `${DARK_BLUE_LIGHT}10`, border: `1px solid rgba(30, 64, 175, 0.3)` }}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
               transition={{ delay: 0.1 }}
@@ -201,7 +202,7 @@ export function AccountsSection() {
               animate={isInView ? { y: 0 } : { y: 60 }}
               transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1], delay: 0.15 }}
             >
-              Choose your <span style={{ color: DARK_GREEN_LIGHT }}>account</span>
+              Choose your <span style={{ color: DARK_BLUE_LIGHT }}>account</span>
             </motion.h2>
           </div>
 

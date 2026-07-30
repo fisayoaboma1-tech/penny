@@ -6,6 +6,7 @@ import { LenisProvider } from "@/components/lenis-provider"
 import ClickSpark from "@/components/click-spark"
 import { AuthProvider } from "@/contexts/auth-context"
 import { QueryProvider } from "@/components/query-provider"
+import { PageTransition } from "@/components/page-transition"
 import "./globals.css"
 
 const _inter = Inter({
@@ -51,7 +52,9 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              <LenisProvider>{children}</LenisProvider>
+              <LenisProvider>
+                <PageTransition>{children}</PageTransition>
+              </LenisProvider>
             </AuthProvider>
           </QueryProvider>
         </ClickSpark>

@@ -7,8 +7,8 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-const DARK_GREEN = "#0B3D2E"
-const DARK_GREEN_LIGHT = "#145C43"
+const DARK_BLUE = "#1e40af"
+const DARK_BLUE_LIGHT = "#3d4d82"
 
 const offerings = [
   {
@@ -17,8 +17,8 @@ const offerings = [
     tagline: "What We Offer",
     description: "Experience fast, secure, and intuitive banking designed for everyday financial management across all your devices.",
     features: ["Secure Transactions", "Real-Time Transfers", "Smart Dashboard", "24/7 Access"],
-    bgColor: "from-[#0B3D2E]/20 via-[#0B3D2E]/10 to-transparent",
-    accentColor: DARK_GREEN,
+    bgColor: "from-[#1e40af]/20 via-[#1e40af]/10 to-transparent",
+    accentColor: DARK_BLUE,
     mediaType: "video",
     mediaSrc: "https://res.cloudinary.com/qz5m8bhg/video/upload/v1785255405/From_Klickpin.com-_Classic_sewing_room_tips_and_clever_inspiration_with_easy_charm_for_stylish_handmade_days-pin-id-69735494224036154_szbl9i.mp4",
   },
@@ -28,8 +28,8 @@ const offerings = [
     tagline: "What We Offer",
     description: "Accept payments, send money instantly, and automate your financial workflows with powerful payment tools.",
     features: ["Instant Payments", "Bulk Transfers", "Payment Links", "API Integration"],
-    bgColor: "from-[#145C43]/20 via-[#145C43]/10 to-transparent",
-    accentColor: DARK_GREEN_LIGHT,
+    bgColor: "from-[#3d4d82]/20 via-[#3d4d82]/10 to-transparent",
+    accentColor: DARK_BLUE_LIGHT,
     mediaType: "video",
     mediaSrc: "https://res.cloudinary.com/qz5m8bhg/video/upload/v1785255401/From_Klickpin.com-_614952524168155372-pin-id-614952524168155372_lrb2hp.mp4",
   },
@@ -39,8 +39,8 @@ const offerings = [
     tagline: "What We Offer",
     description: "Gain deeper insights into your finances with analytics, budgeting tools, and AI-powered recommendations.",
     features: ["Spending Insights", "Budget Tracking", "Financial Reports", "AI Recommendations"],
-    bgColor: "from-[#0B3D2E]/20 via-[#0B3D2E]/5 to-transparent",
-    accentColor: DARK_GREEN,
+    bgColor: "from-[#1e40af]/20 via-[#1e40af]/5 to-transparent",
+    accentColor: DARK_BLUE,
     mediaType: "video",
     mediaSrc: "https://res.cloudinary.com/qz5m8bhg/video/upload/v1785255401/From_Klickpin.com-_Productivity_Hacks_Ideas_Youll_Keep_Coming_Back_To_6368-pin-id-1086563847592324571_jwkltq.mp4",
   },
@@ -131,7 +131,7 @@ export function WhatWeOfferCarousel() {
         >
           <motion.span
             className="inline-flex items-center rounded-full px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.3em]"
-            style={{ color: DARK_GREEN_LIGHT, backgroundColor: `${DARK_GREEN_LIGHT}10` }}
+            style={{ color: DARK_BLUE_LIGHT, backgroundColor: `${DARK_BLUE_LIGHT}10`, border: `1px solid rgba(30, 64, 175, 0.3)` }}
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -148,7 +148,7 @@ export function WhatWeOfferCarousel() {
             viewport={{ once: true }}
             transition={{ delay: 0.25 }}
           >
-            Discover <span style={{ color: DARK_GREEN_LIGHT }}>service options</span>
+            Discover <span style={{ color: DARK_BLUE_LIGHT }}>service options</span>
           </motion.h3>
 
           <motion.p

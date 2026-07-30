@@ -10,6 +10,7 @@ const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 }
 // Color palette
 const DARK_GREEN = "#0B3D2E"
 const DARK_GREEN_LIGHT = "#145C43"
+const BUTTON_BLUE = "#0f6cff"
 const BLACK = "#121212"
 const LEMON_GREEN = "#AFFF00"
 const GREEN_417548 = "#46812f"
@@ -128,14 +129,14 @@ export function HeroSection() {
               custom={0}
               className="inline-flex items-center gap-2 backdrop-blur-md px-3 py-1.5 rounded-full text-xs font-mono tracking-wider border"
               style={{
-                backgroundColor: "rgba(65, 117, 72, 0.1)",
-                color: GREEN_417548,
-                borderColor: "rgba(65, 117, 72, 0.2)"
+                backgroundColor: "rgba(15, 108, 255, 0.12)",
+                color: "#ffffff",
+                borderColor: "rgba(15, 108, 255, 0.2)"
               }}
             >
                 <motion.span
                   className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: GREEN_417548 }}
+                  style={{ backgroundColor: BUTTON_BLUE }}
                   animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
                   transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
                 />
@@ -166,8 +167,7 @@ export function HeroSection() {
                   initial="hidden"
                   animate="visible"
                   custom={2}
-                  className="inline-block"
-                  style={{ color: GREEN_417548 }}
+                  className="inline-block text-blue-200"
                 >
                   Reimagined
                 </motion.span>
@@ -190,7 +190,7 @@ export function HeroSection() {
               custom={4}
               className="flex flex-wrap gap-3 pt-2"
             >
-              <Link href="/signup" className="relative inline-flex items-center px-6 py-3 rounded-full font-bold text-sm tracking-wide gap-2 overflow-hidden border border-white/20 text-white" style={{ backgroundColor: "#0B3D2E" }}>
+              <Link href="/signup" className="relative inline-flex items-center px-6 py-3 rounded-full font-bold text-sm tracking-wide gap-2 overflow-hidden border border-[#0f6cff]/20 text-white transition" style={{ backgroundColor: BUTTON_BLUE }}>
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
                   whileHover={{ x: "200%" }}
@@ -209,7 +209,7 @@ export function HeroSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </motion.svg>
               </Link>
-              <Link href="/login" className="px-6 py-3 rounded-full font-bold text-sm tracking-wide relative overflow-hidden border border-white/40 bg-transparent text-white inline-flex items-center justify-center">
+              <Link href="/login" className="px-6 py-3 rounded-full font-bold text-sm tracking-wide relative overflow-hidden border border-gray-300 bg-transparent text-white inline-flex items-center justify-center transition hover:bg-gray-100/60">
                 Login
               </Link>
             </motion.div>
@@ -229,7 +229,7 @@ export function HeroSection() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8 + i * 0.1 }}
                 >
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: GREEN_417548 }} />
+                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
                   {benefit}
                 </motion.div>
               ))}

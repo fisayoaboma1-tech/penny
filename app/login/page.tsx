@@ -66,21 +66,24 @@ export default function LoginPage() {
     <div className="min-h-screen bg-white relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />
       <div className="absolute inset-x-0 top-0 h-[28vh] bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="absolute left-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
-          aria-label="Go back"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-        <motion.div
-          className="mt-10 w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-        >
+      <div className="relative z-10">
+        <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-start px-4 py-4 sm:px-6">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
+            aria-label="Go back"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="flex min-h-screen items-center justify-center px-4 pt-24 pb-12">
+          <motion.div
+            className="w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
           <div className="px-8 py-10 sm:px-10">
             <div className="mb-8 text-center">
               <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
@@ -93,20 +96,20 @@ export default function LoginPage() {
               <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
                 PENNY<span className="text-[#0f6cff]">WISE</span>
               </p>
-              <h1 className="mt-4 text-3xl font-semibold text-slate-900">Login your account</h1>
+              <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-slate-900">Login to your wallet</h1>
               <p className="mt-3 text-xs leading-5 text-slate-400">
-                Username or phone number and password to access your wallet.
+                Use your email address and password to access your wallet.
               </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Username or Phone No</label>
+                <label className="text-sm font-medium text-slate-700">Email address</label>
                 <input
-                  type="text"
+                  type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Username or Phone No"
+                  placeholder="Email address"
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
                 />
               </div>
@@ -177,5 +180,6 @@ export default function LoginPage() {
         onClose={() => setIsForgotPasswordOpen(false)}
       />
     </div>
+  </div>
   )
 }

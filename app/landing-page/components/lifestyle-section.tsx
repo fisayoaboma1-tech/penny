@@ -3,8 +3,8 @@
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 
-const DARK_GREEN = "#0B3D2E"
-const DARK_GREEN_LIGHT = "#145C43"
+const DARK_BLUE = "#1e40af"
+const DARK_BLUE_LIGHT = "#3d4d82"
 
 const lifestyleImages = [
   { query: "professional reviewing finances laptop cafe", aspect: "portrait" },
@@ -78,7 +78,7 @@ export function LifestyleSection() {
         >
           <motion.span
             className="font-mono text-sm tracking-widest inline-block"
-            style={{ color: DARK_GREEN_LIGHT }}
+            style={{ color: DARK_BLUE_LIGHT }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

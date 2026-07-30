@@ -108,18 +108,21 @@ export default function SignupPage() {
     <div className="min-h-screen bg-white relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />
       <div className="absolute inset-x-0 top-0 h-[28vh] bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="absolute left-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
-          aria-label="Go back"
-        >
-          <span className="text-xl leading-none">‹</span>
-        </button>
+      <div className="relative z-10">
+        <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-start px-4 py-4 sm:px-6">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
+            aria-label="Go back"
+          >
+            <span className="text-xl leading-none">‹</span>
+          </button>
+        </div>
 
-        <motion.div
-          className="mt-10 w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
+        <div className="flex min-h-screen items-center justify-center px-4 pt-24 pb-12">
+          <motion.div
+            className="w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.8 }}
@@ -136,7 +139,7 @@ export default function SignupPage() {
               <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
                 PENNY<span className="text-[#0f6cff]">WISE</span>
               </p>
-              <h1 className="mt-4 text-3xl font-semibold text-slate-900">Create your account</h1>
+              <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-slate-900">Create your account</h1>
               <p className="mt-3 text-xs leading-5 text-slate-400">
                 Use your details to register and secure your wallet access.
               </p>
@@ -266,5 +269,6 @@ export default function SignupPage() {
         </motion.div>
       </div>
     </div>
+  </div>
   )
 }
