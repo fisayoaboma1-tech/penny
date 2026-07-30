@@ -20,7 +20,11 @@ import {
   ArrowRight,
   Radio,
   ReceiptText,
+  Home,
+  Grid,
+  Sparkles,
 } from "lucide-react"
+import WalletBottomNav from "@/components/wallet-bottom-nav"
 
 const serviceGroups = [
   {
@@ -61,7 +65,7 @@ export default function WalletServicesPage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-[#f4f7ff] pb-28 text-slate-900">
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col bg-[#f4f7ff] text-slate-900">
       <div className="sticky top-0 z-30 border-b border-blue-100 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center gap-2.5 px-3 py-3 sm:px-4 lg:px-6">
           <button
@@ -77,7 +81,7 @@ export default function WalletServicesPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-5xl space-y-3 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+      <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl space-y-3 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -140,6 +144,8 @@ export default function WalletServicesPage() {
           </div>
         </motion.section>
       </main>
+
+      <WalletBottomNav />
     </div>
   )
 }

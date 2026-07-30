@@ -28,6 +28,7 @@ import {
   LifeBuoy,
   Gift,
 } from "lucide-react"
+import WalletBottomNav from "@/components/wallet-bottom-nav"
 import { ProtectedRoute } from "@/components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
 
@@ -150,7 +151,7 @@ export default function WalletPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 pb-28 text-slate-900">
+      <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col bg-slate-50 text-slate-900">
         <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-3 sm:px-5 lg:px-6">
             <div className="flex min-w-0 items-center gap-3">
@@ -186,7 +187,7 @@ export default function WalletPage() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-3 py-3 sm:px-5 sm:py-5 lg:px-6">
+        <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-6xl px-3 py-3 sm:px-5 sm:py-5 lg:px-6">
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -372,30 +373,7 @@ export default function WalletPage() {
           </motion.section>
         </main>
 
-        <nav className="fixed bottom-0 left-0 right-0 border-t border-slate-200 bg-white px-3 py-2 shadow-[0_-10px_30px_rgba(15,23,42,0.08)]">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-1">
-            {[
-              { label: "Home", icon: Home, path: "/wallet" },
-              { label: "Card", icon: CreditCard, path: "/wallet/card" },
-              { label: "Services", icon: Grid, path: "/wallet/services" },
-              { label: "Rewards", icon: Sparkles, path: "/wallet/rewards" },
-            ].map((item) => {
-              const Icon = item.icon
-              const isActive = item.path === "/wallet"
-              return (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => router.push(item.path)}
-                  className={`inline-flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[10px] font-semibold transition ${isActive ? "bg-[#eef5ff] text-[#0f6cff]" : "text-slate-500 hover:bg-[#f8faff]"}`}
-                >
-                  <Icon className="h-4.5 w-4.5" />
-                  <span>{item.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </nav>
+        <WalletBottomNav />
       </div>
     </ProtectedRoute>
   )
