@@ -208,7 +208,7 @@ export default function WalletPage() {
                         <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Add money
                       </button>
                       <button
-                        onClick={() => router.push("/wallet/transfer")}
+                        onClick={() => router.push("/wallet/history")}
                         className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-white transition hover:bg-white/20 sm:px-4 sm:py-2 sm:text-xs"
                       >
                         <Clock3 className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> History
@@ -290,7 +290,7 @@ export default function WalletPage() {
                   <button
                     type="button"
                     className="shrink-0 text-xs font-semibold text-[#0f6cff] hover:underline"
-                    onClick={() => router.push("/wallet/transfer")}
+                    onClick={() => router.push("/wallet/history")}
                   >
                     View All
                   </button>
