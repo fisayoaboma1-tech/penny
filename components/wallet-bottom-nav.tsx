@@ -17,12 +17,15 @@ export default function WalletBottomNav() {
   const [keyboardOffset, setKeyboardOffset] = useState(0)
 
   useEffect(() => {
+    if (typeof window === "undefined") return
+
     const viewport = window.visualViewport
 
-    if (!viewport) return
-
     const updateKeyboardOffset = () => {
-      const nextOffset = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+      const nextOffset = viewport
+        ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop)
+        : 0
+
       setKeyboardOffset(nextOffset > 120 ? nextOffset : 0)
     }
 
@@ -32,15 +35,35 @@ export default function WalletBottomNav() {
       }
     }
 
+    const handleFocusChange = () => {
+      const activeElement = document.activeElement as HTMLElement | null
+      const isTextInput = activeElement?.tagName && ["INPUT", "TEXTAREA", "SELECT"].includes(activeElement.tagName)
+
+      if (isTextInput) {
+        updateKeyboardOffset()
+      } else {
+        setKeyboardOffset(0)
+      }
+    }
+
     updateKeyboardOffset()
-    viewport.addEventListener("resize", updateKeyboardOffset)
+
+    viewport?.addEventListener("resize", updateKeyboardOffset)
+    viewport?.addEventListener("scroll", updateKeyboardOffset)
     window.addEventListener("resize", updateKeyboardOffset)
+    window.addEventListener("orientationchange", updateKeyboardOffset)
     document.addEventListener("visibilitychange", handleVisibilityChange)
+    document.addEventListener("focusin", handleFocusChange)
+    document.addEventListener("focusout", handleFocusChange)
 
     return () => {
-      viewport.removeEventListener("resize", updateKeyboardOffset)
+      viewport?.removeEventListener("resize", updateKeyboardOffset)
+      viewport?.removeEventListener("scroll", updateKeyboardOffset)
       window.removeEventListener("resize", updateKeyboardOffset)
+      window.removeEventListener("orientationchange", updateKeyboardOffset)
       document.removeEventListener("visibilitychange", handleVisibilityChange)
+      document.removeEventListener("focusin", handleFocusChange)
+      document.removeEventListener("focusout", handleFocusChange)
     }
   }, [])
 
@@ -48,8 +71,13 @@ export default function WalletBottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 backdrop-blur-xl shadow-[0_-10px_30px_rgba(15,23,42,0.08)] pb-3"
       style={{
-        bottom: keyboardOffset > 0 ? `${keyboardOffset}px` : 0,
-        paddingBottom: keyboardOffset > 0 ? "calc(0.75rem + env(safe-area-inset-bottom))" : "0.75rem",
+        visibility: keyboardOffset > 0 ? "hidden" : "visible",
+        opacity: keyboardOffset > 0 ? 0 : 1,
+        pointerEvents: keyboardOffset > 0 ? "none" : "auto",
+        transform: keyboardOffset > 0 ? "translateY(120%)" : "translateY(0)",
+        bottom: 0,
+        paddingBottom: "0.75rem",
+        transition: "opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease",
       }}
     >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-1 px-3 py-2 sm:px-4">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ChevronLeft, ChevronDown, Search } from "lucide-react"
@@ -501,7 +501,7 @@ export default function WalletTransferPage() {
   const [bankSearch, setBankSearch] = useState("")
   const [isBankOpen, setIsBankOpen] = useState(false)
   const [bankCatalog, setBankCatalog] = useState<BankCatalog>({})
-  const [isBankLoading, setIsBankLoading] = useState(false)
+  const [bankCatalogLoaded, setBankCatalogLoaded] = useState(false)
   const [bankError, setBankError] = useState<string | null>(null)
   const [countrySearch, setCountrySearch] = useState("")
   const [isCountryOpen, setIsCountryOpen] = useState(false)
@@ -514,6 +514,7 @@ export default function WalletTransferPage() {
   const [sortCode, setSortCode] = useState("")
   const [country, setCountry] = useState("United Kingdom")
   const [bankAddress, setBankAddress] = useState("")
+  const mainRef = useRef<HTMLElement | null>(null)
   const [reference, setReference] = useState("")
   const [amount, setAmount] = useState("")
   const accountName = useMemo(() => {
@@ -539,11 +540,10 @@ export default function WalletTransferPage() {
     let isActive = true
 
     const loadBankCatalog = async () => {
-      setIsBankLoading(true)
       setBankError(null)
 
       try {
-        const response = await fetch("/data/bank-catalog.json")
+        const response = await fetch("/data/bank-catalog.json", { cache: "force-cache" })
         if (!response.ok) {
           throw new Error("Unable to load bank catalog")
         }
@@ -553,15 +553,13 @@ export default function WalletTransferPage() {
 
         if (isActive) {
           setBankCatalog(catalog as BankCatalog)
+          setBankCatalogLoaded(true)
         }
       } catch {
         if (isActive) {
           setBankCatalog({})
+          setBankCatalogLoaded(true)
           setBankError("We couldn't load bank options for this country right now.")
-        }
-      } finally {
-        if (isActive) {
-          setIsBankLoading(false)
         }
       }
     }
@@ -585,15 +583,61 @@ export default function WalletTransferPage() {
     return combinedBanks.length > 0 ? combinedBanks : defaultBanks
   }
 
-  const countryBanks = resolveCountryBanks(country, bankCatalog)
-  const filteredBanks = countryBanks.filter((bank) => bank.toLowerCase().includes(bankSearch.toLowerCase()))
-  const filteredCountries = countries.filter((countryOption) => countryOption.toLowerCase().includes(countrySearch.toLowerCase()))
+  const countryBanks = useMemo(() => resolveCountryBanks(country, bankCatalog), [country, bankCatalog])
+  const filteredBanks = useMemo(() => countryBanks.filter((bank) => bank.toLowerCase().includes(bankSearch.toLowerCase())), [countryBanks, bankSearch])
+  const filteredCountries = useMemo(() => countries.filter((countryOption) => countryOption.toLowerCase().includes(countrySearch.toLowerCase())), [countrySearch])
+
+  const scrollToTopAndRefresh = () => {
+    if (typeof window === "undefined") return
+
+    const restore = () => {
+      if (mainRef.current) {
+        mainRef.current.scrollTop = 0
+      }
+      window.scrollTo({ top: 0, behavior: "auto" })
+      document.documentElement.style.scrollBehavior = "auto"
+    }
+
+    requestAnimationFrame(() => {
+      restore()
+      window.setTimeout(restore, 0)
+      window.setTimeout(restore, 25)
+      window.setTimeout(() => {
+        router.refresh()
+      }, 50)
+    })
+  }
+
+  useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return
+
+    const handleViewportResize = () => {
+      const keyboardVisible = window.innerHeight - viewport.height - viewport.offsetTop > 120
+      if (keyboardVisible) {
+        window.scrollTo({ top: 0, behavior: "auto" })
+        mainRef.current?.scrollTo({ top: 0, behavior: "auto" })
+      }
+    }
+
+    viewport.addEventListener("resize", handleViewportResize)
+    return () => viewport.removeEventListener("resize", handleViewportResize)
+  }, [])
 
   const handleCountrySelect = (countryOption: string) => {
+    if (typeof document !== "undefined") {
+      const activeElement = document.activeElement as HTMLElement | null
+      activeElement?.blur()
+    }
+
     setCountry(countryOption)
     setSelectedBank("Select bank")
+    setBankSearch("")
     setCountrySearch("")
     setIsCountryOpen(false)
+    setIsBankOpen(false)
+
+    scrollToTopAndRefresh()
   }
 
   const countryRequirements: Record<string, { requiresIban: boolean; requiresSwift: boolean; requiresRouting: boolean; requiresSortCode: boolean; requiresBankAddress: boolean }> = {
@@ -681,7 +725,7 @@ export default function WalletTransferPage() {
         </div>
       </div>
 
-      <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6">
+      <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -744,7 +788,13 @@ export default function WalletTransferPage() {
                 <div className="relative mt-2">
                   <button
                     type="button"
-                    onClick={() => setIsCountryOpen((prev) => !prev)}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onTouchStart={(event) => event.preventDefault()}
+                    onPointerDown={(event) => event.preventDefault()}
+                    onClick={() => {
+                      setIsCountryOpen((prev) => !prev)
+                      setIsBankOpen(false)
+                    }}
                     className="flex w-full items-center justify-between gap-3 rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-left text-sm font-semibold text-slate-900"
                   >
                     <span className="flex-1 truncate">{country}</span>
@@ -770,6 +820,9 @@ export default function WalletTransferPage() {
                             <button
                               key={countryOption}
                               type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onTouchStart={(event) => event.preventDefault()}
+                              onPointerDown={(event) => event.preventDefault()}
                               onClick={() => handleCountrySelect(countryOption)}
                               className="flex w-full items-center rounded-[12px] px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
                             >
@@ -828,7 +881,10 @@ export default function WalletTransferPage() {
                 <div className="relative mt-2">
                   <button
                     type="button"
-                    onClick={() => setIsBankOpen((prev) => !prev)}
+                    onClick={() => {
+                      setIsBankOpen((prev) => !prev)
+                      setIsCountryOpen(false)
+                    }}
                     className="flex w-full items-center justify-between gap-3 rounded-[16px] border border-slate-200 bg-[#f8fafc] px-4 py-3 text-left text-sm font-semibold text-slate-900"
                   >
                     <span className="flex-1 truncate">{selectedBank}</span>
@@ -849,9 +905,7 @@ export default function WalletTransferPage() {
                       </div>
 
                       <div className="mt-2 max-h-56 overflow-y-auto">
-                        {isBankLoading ? (
-                          <p className="px-3 py-2 text-sm text-slate-500">Loading banks…</p>
-                        ) : filteredBanks.length > 0 ? (
+                        {filteredBanks.length > 0 ? (
                           filteredBanks.map((bank) => (
                             <button
                               key={bank}
@@ -860,6 +914,10 @@ export default function WalletTransferPage() {
                                 setSelectedBank(bank)
                                 setBankSearch("")
                                 setIsBankOpen(false)
+                                setCountrySearch("")
+                                setTimeout(() => {
+                                  setIsBankOpen(false)
+                                }, 0)
                               }}
                               className="flex w-full items-center rounded-[12px] px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-slate-50"
                             >
@@ -867,7 +925,7 @@ export default function WalletTransferPage() {
                             </button>
                           ))
                         ) : (
-                          <p className="px-3 py-2 text-sm text-slate-500">{bankError || "No banks found"}</p>
+                          <p className="px-3 py-2 text-sm text-slate-500">{bankError || (!bankCatalogLoaded ? "Updating bank options..." : "No banks found")}</p>
                         )}
                       </div>
                     </div>
