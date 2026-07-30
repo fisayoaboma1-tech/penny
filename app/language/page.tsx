@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ChevronLeft, Globe, Check } from "lucide-react"
+import { Globe, Check } from "lucide-react"
+import { PageHeader } from "@/components/wallet/page-header"
 import { ProtectedRoute } from "../../components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
 import { useUserPreferences } from "../../hooks/use-user-preferences"
@@ -36,19 +37,7 @@ export default function LanguagePage() {
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-slate-50">
-          <div className="bg-white/95 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center h-16 sm:h-20">
-                <button
-                  onClick={() => router.back()}
-                  className="p-2 -ml-2 hover:bg-slate-100 rounded-xl transition-colors mr-3 sm:mr-4"
-                >
-                  <ChevronLeft className="w-5 h-5 text-slate-500" />
-                </button>
-                <h1 className="text-lg sm:text-xl font-bold text-slate-900">Language</h1>
-              </div>
-            </div>
-          </div>
+          <PageHeader variant="sub" title="Language" onBack={() => router.back()} />
           <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 space-y-5 sm:space-y-6 pb-24 sm:pb-8">
             <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-sm">
               <div className="text-slate-500 text-base sm:text-lg">Loading preferences...</div>
@@ -64,19 +53,7 @@ export default function LanguagePage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-slate-50 text-slate-900">
         {/* Header */}
-        <div className="bg-white/95 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center h-16 sm:h-20">
-              <button
-                onClick={() => router.back()}
-                className="p-2 -ml-2 hover:bg-slate-100 rounded-xl transition-colors mr-3 sm:mr-4"
-              >
-                <ChevronLeft className="w-5 h-5 text-slate-500" />
-              </button>
-              <h1 className="text-lg sm:text-xl font-bold text-slate-900">Language</h1>
-            </div>
-          </div>
-        </div>
+        <PageHeader variant="sub" title="Language" onBack={() => router.back()} />
 
         <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 space-y-5 sm:space-y-6 pb-24 sm:pb-8">
           <motion.div
