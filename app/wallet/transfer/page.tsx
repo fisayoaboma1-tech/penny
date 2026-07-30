@@ -670,7 +670,7 @@ export default function WalletTransferPage() {
   return (
     <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f6f8] text-slate-900">
       <div className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3 sm:px-5 lg:px-6">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 pb-4 pt-3 sm:px-5 lg:px-6">
           <button
             onClick={() => router.back()}
             className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 transition hover:bg-slate-200"

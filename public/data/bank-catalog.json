@@ -1,0 +1,330 @@
+{
+  "regions": {
+    "Africa": {
+      "default": [
+        "Access Bank",
+        "Standard Chartered",
+        "Wise",
+        "Revolut",
+        "Ecobank",
+        "GTBank"
+      ],
+      "Nigeria": [
+        "Access Bank",
+        "Zenith Bank",
+        "GTBank",
+        "First Bank of Nigeria",
+        "UBA Nigeria",
+        "Sterling Bank",
+        "Fidelity Bank",
+        "Ecobank Nigeria",
+        "Providus Bank",
+        "Flutterwave"
+      ],
+      "Ghana": [
+        "GCB Bank",
+        "Absa Bank Ghana",
+        "Ecobank Ghana",
+        "Stanbic Bank Ghana",
+        "Zenith Bank Ghana",
+        "Fidelity Bank Ghana",
+        "Republic Bank Ghana",
+        "MTN MoMo",
+        "AirtelTigo Money",
+        "Vodafone Cash"
+      ],
+      "Kenya": [
+        "KCB Bank Kenya",
+        "Equity Bank",
+        "Co-operative Bank of Kenya",
+        "NCBA Bank",
+        "Absa Bank Kenya",
+        "Stanbic Bank Kenya",
+        "M-Pesa",
+        "Tala",
+        "Airtel Money",
+        "Safaricom"
+      ],
+      "South Africa": [
+        "Standard Bank",
+        "Absa",
+        "Nedbank",
+        "First National Bank",
+        "Capitec Bank",
+        "TymeBank",
+        "Investec",
+        "PayFast",
+        "Ozow",
+        "Peach Payments"
+      ],
+      "Egypt": [
+        "Commercial International Bank",
+        "Banque Misr",
+        "National Bank of Egypt",
+        "QNB Alahli",
+        "HSBC Egypt",
+        "Arab African International Bank",
+        "Fawry",
+        "Vodafone Cash Egypt",
+        "Orange Money Egypt",
+        "CIB Egypt"
+      ],
+      "Morocco": [
+        "Attijariwafa Bank",
+        "BMCE Bank",
+        "Bank of Africa Morocco",
+        "CIH Bank",
+        "Société Générale Morocco",
+        "Crédit Agricole Maroc",
+        "Wafa Bank",
+        "M2A",
+        "Yupi",
+        "Caisse de Dépôt et de Gestion"
+      ],
+      "Tanzania": [
+        "CRDB Bank",
+        "NMB Bank",
+        "NBC Bank",
+        "Stanbic Bank Tanzania",
+        "Absa Bank Tanzania",
+        "M-Pesa Tanzania",
+        "Tigo Pesa",
+        "Airtel Money Tanzania"
+      ],
+      "Uganda": [
+        "Stanbic Bank Uganda",
+        "Centenary Bank",
+        "DFCU Bank",
+        "PostBank Uganda",
+        "ABSA Bank Uganda",
+        "MTN Mobile Money Uganda",
+        "Airtel Money Uganda"
+      ],
+      "Rwanda": [
+        "Bank of Kigali",
+        "I&M Bank Rwanda",
+        "KCB Rwanda",
+        "Ecobank Rwanda",
+        "ABSA Bank Rwanda",
+        "MTN Mobile Money Rwanda",
+        "Airtel Money Rwanda"
+      ],
+      "Zambia": [
+        "ZANACO",
+        "Standard Chartered Zambia",
+        "ABSA Bank Zambia",
+        "Access Bank Zambia",
+        "First National Bank Zambia",
+        "MTN Mobile Money Zambia",
+        "Airtel Money Zambia"
+      ],
+      "Ethiopia": [
+        "Commercial Bank of Ethiopia",
+        "Awash Bank",
+        "Dashen Bank",
+        "Bank of Abyssinia",
+        "United Bank",
+        "Telebirr"
+      ],
+      "Algeria": [
+        "Banque Nationale d Algerie",
+        "Société Générale Algérie",
+        "Al Baraka Bank Algeria",
+        "Arab Bank Algeria",
+        "Banque Extérieure d Algérie"
+      ],
+      "Cameroon": [
+        "Ecobank Cameroon",
+        "UBA Cameroon",
+        "Commercial Bank of Cameroon",
+        "Société Générale Cameroon",
+        "BICEC"
+      ],
+      "Senegal": [
+        "Ecobank Senegal",
+        "Société Générale Sénégal",
+        "UBA Senegal",
+        "Banque Internationale pour le Commerce et l Industrie du Sénégal",
+        "Orange Money Senegal"
+      ],
+      "Tunisia": [
+        "Banque de Tunisie",
+        "BIAT",
+        "Banque de l Habitat",
+        "STB",
+        "Attijari Bank Tunisia"
+      ],
+      "Botswana": [
+        "Bank Gaborone",
+        "First National Bank Botswana",
+        "Stanbic Bank Botswana",
+        "Absa Bank Botswana",
+        "BancABC"
+      ],
+      "Namibia": [
+        "Standard Bank Namibia",
+        "Bank Windhoek",
+        "Nedbank Namibia",
+        "FNB Namibia",
+        "Capricorn Investment Holdings"
+      ],
+      "Mauritius": [
+        "Mauritius Commercial Bank",
+        "State Bank of Mauritius",
+        "SBM Bank Mauritius",
+        "MauBank",
+        "Barclays Mauritius"
+      ]
+    },
+    "North America": {
+      "default": [
+        "Bank of America",
+        "JPMorgan Chase",
+        "Wells Fargo",
+        "TD Bank",
+        "Wise"
+      ],
+      "United States": [
+        "Bank of America",
+        "JPMorgan Chase",
+        "Wells Fargo",
+        "Citibank",
+        "Capital One",
+        "PNC Bank",
+        "TD Bank",
+        "U.S. Bank",
+        "Goldman Sachs Bank",
+        "Wise"
+      ],
+      "Canada": [
+        "Royal Bank of Canada",
+        "Scotiabank",
+        "Toronto-Dominion Bank",
+        "Bank of Montreal",
+        "Canadian Imperial Bank of Commerce",
+        "National Bank of Canada",
+        "HSBC Canada",
+        "Wise",
+        "Interac",
+        "PayPal"
+      ]
+    },
+    "Europe": {
+      "default": [
+        "Barclays",
+        "HSBC UK",
+        "Wise",
+        "Revolut",
+        "Standard Chartered"
+      ],
+      "United Kingdom": [
+        "Barclays",
+        "HSBC UK",
+        "Lloyds Bank",
+        "NatWest",
+        "Santander UK",
+        "Monzo",
+        "Starling Bank",
+        "Revolut",
+        "Wise",
+        "Metro Bank"
+      ],
+      "Germany": [
+        "Deutsche Bank",
+        "Commerzbank",
+        "Sparkasse",
+        "Postbank",
+        "ING Germany",
+        "DZ BANK",
+        "Volksbank",
+        "Wise",
+        "PayPal",
+        "N26"
+      ],
+      "France": [
+        "BNP Paribas",
+        "Société Générale",
+        "Crédit Agricole",
+        "La Banque Postale",
+        "Boursorama Banque",
+        "Orange Bank",
+        "Wise",
+        "PayPal",
+        "Revolut",
+        "N26"
+      ],
+      "Netherlands": [
+        "ING",
+        "Rabobank",
+        "ABN AMRO",
+        "SNS Bank",
+        "Triodos Bank",
+        "bunq",
+        "Wise",
+        "PayPal",
+        "Revolut",
+        "N26"
+      ],
+      "Ireland": [
+        "AIB",
+        "Bank of Ireland",
+        "Permanent TSB",
+        "Ulster Bank",
+        "An Post Money",
+        "Wise",
+        "Revolut",
+        "PayPal",
+        "N26",
+        "AvantMoney"
+      ]
+    },
+    "Oceania": {
+      "default": [
+        "Commonwealth Bank",
+        "ANZ",
+        "Wise",
+        "PayPal"
+      ],
+      "Australia": [
+        "Commonwealth Bank",
+        "ANZ",
+        "Westpac",
+        "NAB",
+        "Macquarie Bank",
+        "ING Australia",
+        "Wise",
+        "PayPal",
+        "POLi",
+        "PayID"
+      ]
+    },
+    "Middle East": {
+      "default": [
+        "Emirates NBD",
+        "Mashreq Bank",
+        "Wise",
+        "Revolut"
+      ],
+      "United Arab Emirates": [
+        "Emirates NBD",
+        "Dubai Islamic Bank",
+        "Mashreq Bank",
+        "ADCB",
+        "Abu Dhabi Islamic Bank",
+        "RAKBANK",
+        "Standard Chartered UAE",
+        "Wise",
+        "PayPal",
+        "Revolut"
+      ]
+    }
+  },
+  "international": [
+    "Wise",
+    "Revolut",
+    "PayPal",
+    "Western Union",
+    "MoneyGram",
+    "Xoom"
+  ]
+}
