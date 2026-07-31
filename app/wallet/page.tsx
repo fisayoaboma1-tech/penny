@@ -44,12 +44,25 @@ export default function WalletPage() {
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null)
   const [lastUpdatedLabel, setLastUpdatedLabel] = useState("Last updated just now")
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [showBalance, setShowBalance] = useState(true)
+  const [showBalance, setShowBalance] = useState<boolean | null>(null) // null = not loaded yet
   const [greeting, setGreeting] = useState("Good Morning")
   const [showRestrictedModal, setShowRestrictedModal] = useState(false)
   const [recentTransactions, setRecentTransactions] = useState<WalletTransaction[]>([])
   const [moneyFlow, setMoneyFlow] = useState({ moneyIn: 0, moneyOut: 0 })
   const supabase = createClient()
+
+  // Load hide_balance preference from profile
+  useEffect(() => {
+    if (!loading && profile) {
+      // Profile is loaded, set the preference
+      if (profile.hide_balance !== undefined) {
+        setShowBalance(!profile.hide_balance)
+      } else {
+        // Default to showing balance if no preference set
+        setShowBalance(true)
+      }
+    }
+  }, [profile?.hide_balance, loading, profile])
 
   const userName = useMemo(() => {
     if (!user) return "Chukwudi Enoch"
@@ -271,6 +284,19 @@ export default function WalletPage() {
     }
   }, [user, isAdmin, supabase])
 
+  const handleToggleBalanceVisibility = async () => {
+    const newShowBalance = !showBalance
+    setShowBalance(newShowBalance)
+    
+    // Save preference to database
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ hide_balance: !newShowBalance })
+        .eq("id", user.id)
+    }
+  }
+
   const handleTransferClick = () => {
     if (profile?.restricted) {
       setShowRestrictedModal(true)
@@ -319,7 +345,7 @@ export default function WalletPage() {
                     <p className="text-[10px] uppercase tracking-[0.3em] text-slate-400">Available balance</p>
                     <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
                       <p className="truncate text-2xl font-bold tracking-tight text-white sm:text-3xl md:text-4xl lg:text-5xl">
-                        {showBalance ? `$${balance.toLocaleString("en-US")}` : "••••••"}
+                        {showBalance === null ? "••••••" : showBalance ? `$${balance.toLocaleString("en-US")}` : "••••••"}
                       </p>
                       <div className="flex shrink-0 items-center gap-1">
                         <span className="text-[11px] font-medium uppercase tracking-wider text-slate-300">
@@ -327,7 +353,7 @@ export default function WalletPage() {
                         </span>
                         <button
                           type="button"
-                          onClick={() => setShowBalance((prev) => !prev)}
+                          onClick={handleToggleBalanceVisibility}
                           className="p-1 text-slate-300 transition hover:text-white"
                           aria-label={showBalance ? "Hide balance" : "Show balance"}
                         >

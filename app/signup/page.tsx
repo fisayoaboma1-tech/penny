@@ -2,12 +2,13 @@
 
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { countries } from "@/lib/countries"
 import { CountrySelector } from "@/components/ui/country-selector"
+import { useAuth } from "@/contexts/auth-context"
 
 const fadeUpVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -34,6 +35,7 @@ export default function SignupPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { refreshProfile } = useAuth()
 
   const handleFullNameChange = (value: string) => {
     // Reject if contains any numbers
@@ -110,8 +112,21 @@ export default function SignupPage() {
           throw profileError
         }
 
-        // Redirect to login page (or wallet if email confirmation is disabled)
-        router.push("/login?message=Account created successfully! Please log in.")
+        // Auto-login and redirect to wallet
+        const { error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (loginError) {
+          // If auto-login fails, redirect to login page
+          router.push("/login?message=Account created successfully! Please log in.")
+          return
+        }
+
+        // Refresh profile and redirect to wallet
+        await refreshProfile()
+        router.push("/wallet")
       }
     } catch (err: any) {
       setError(err.message || "An error occurred during signup")

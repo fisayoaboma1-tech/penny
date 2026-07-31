@@ -31,6 +31,7 @@ interface AuthContextType {
   profile: ProfileRow | null
   isAdmin: boolean | null
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
   theme: string | undefined
   setTheme: (theme: string) => void
 }
@@ -187,6 +188,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false)
   }
 
+  const refreshProfile = async () => {
+    if (!user) return
+    const profileRow = await fetchProfile(user.id)
+    applyProfile(profileRow)
+  }
+
   // Load theme preference when user changes
   useEffect(() => {
     if (user) {
@@ -200,7 +207,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, setThemeMode])
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, profile, isAdmin, signOut, theme, setTheme: updateTheme }}>
+    <AuthContext.Provider value={{ user, session, loading, profile, isAdmin, signOut, refreshProfile, theme, setTheme: updateTheme }}>
       {children}
     </AuthContext.Provider>
   )
