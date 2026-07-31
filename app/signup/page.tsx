@@ -112,19 +112,27 @@ export default function SignupPage() {
           throw profileError
         }
 
-        // Auto-login and redirect to wallet
-        const { error: loginError } = await supabase.auth.signInWithPassword({
+        // If signup already returned an active session, we are already logged in.
+        if (data.session) {
+          await refreshProfile()
+          router.push("/wallet")
+          return
+        }
+
+        // Otherwise attempt to sign in automatically after registration.
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
 
-        if (loginError) {
-          // If auto-login fails, redirect to login page
-          router.push("/login?message=Account created successfully! Please log in.")
+        if (loginError || !loginData.session) {
+          // If auto-login fails, take the user to login page instead of requiring manual signup.
+          router.push(
+            "/login?message=Account created successfully! Please log in."
+          )
           return
         }
 
-        // Refresh profile and redirect to wallet
         await refreshProfile()
         router.push("/wallet")
       }

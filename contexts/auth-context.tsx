@@ -55,14 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single()
+        .maybeSingle()
 
-      if (error || !data) {
+      if (error) {
         console.error("Failed to load profile for auth user:", error)
         return null
       }
 
-      return data as ProfileRow
+      return data as ProfileRow | null
     } catch (error) {
       console.error("Error loading profile:", error)
       return null
