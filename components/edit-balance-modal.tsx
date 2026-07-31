@@ -17,19 +17,47 @@ interface EditBalanceModalProps {
 export function EditBalanceModal({ isOpen, onClose, user, onSave }: EditBalanceModalProps) {
   const [balance, setBalance] = useState("")
 
+  const formatCurrencyValue = (value: string) => {
+    const sanitized = value.replace(/[^\d.]/g, "")
+    if (!sanitized) return ""
+
+    const [wholePart, decimalPart] = sanitized.split(".")
+    const cleanedWhole = wholePart.replace(/^0+(?=\d)/, "") || "0"
+    const formattedWhole = cleanedWhole.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+
+    if (decimalPart === undefined) return formattedWhole
+    return `${formattedWhole}.${decimalPart.slice(0, 2)}`
+  }
+
+  const parseCurrencyValue = (value: string) => {
+    const sanitized = value.replace(/,/g, "")
+    const parsed = Number.parseFloat(sanitized)
+    return Number.isFinite(parsed) ? parsed : NaN
+  }
+
+  const formatCurrencyDisplay = (value: number | string) => {
+    const amount = typeof value === "number" ? value : parseCurrencyValue(value)
+    if (Number.isNaN(amount)) return "0.00"
+
+    return new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount)
+  }
+
   useEffect(() => {
     if (user) {
-      setBalance(user.balance.toFixed(2))
+      setBalance(formatCurrencyValue(user.balance.toFixed(2)))
     }
   }, [user?.id])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!user) return
 
-    const newBalance = parseFloat(balance)
-    if (isNaN(newBalance) || newBalance < 0) {
+    const newBalance = parseCurrencyValue(balance)
+    if (Number.isNaN(newBalance) || newBalance < 0) {
       alert("Please enter a valid balance amount")
       return
     }
@@ -39,108 +67,101 @@ export function EditBalanceModal({ isOpen, onClose, user, onSave }: EditBalanceM
   }
 
   const getPreviewBalance = () => {
-    if (!user || !balance) return user?.balance.toFixed(2) || "0.00"
-    
-    const amount = parseFloat(balance)
-    if (isNaN(amount)) return user.balance.toFixed(2)
-
-    return amount.toFixed(2)
+    if (!user || !balance) return formatCurrencyDisplay(user.balance)
+    return formatCurrencyDisplay(balance)
   }
 
   return (
     <AnimatePresence>
       {isOpen && user && (
         <>
-          {/* Backdrop with blur effect */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md"
+            className="fixed inset-0 z-50 bg-slate-950/55 backdrop-blur-sm"
             onClick={onClose}
           />
 
-          {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
             transition={{
-              duration: 0.4,
+              duration: 0.35,
               ease: [0.16, 1, 0.3, 1],
             }}
             className="fixed top-[50%] left-[50%] z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2"
           >
-            <div className="relative mx-4 rounded-2xl border border-[#1a1a1a] bg-[#111111]/95 backdrop-blur-xl p-8 shadow-2xl">
-              {/* Close button */}
+            <div className="relative mx-4 rounded-3xl border border-slate-300 bg-white p-7 shadow-[0_24px_80px_-24px_rgba(15,23,42,0.4)]">
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+                className="absolute right-4 top-4 rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
 
-              {/* Content */}
               <div className="space-y-6">
-                {/* Icon */}
                 <div className="flex justify-center">
-                  <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                    <DollarSign className="w-8 h-8 text-emerald-400" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-slate-50">
+                    <DollarSign className="h-8 w-8 text-[#0f6cff]" />
                   </div>
                 </div>
 
-                {/* Title and description */}
                 <div className="text-center space-y-2">
-                  <h2 className="text-3xl font-medium text-white tracking-tight">
+                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
                     Edit Balance
                   </h2>
-                  <p className="text-gray-400 text-sm font-light">
+                  <p className="text-sm font-medium text-slate-500">
                     Update balance for {user.full_name}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Current balance: <span className="text-emerald-400 font-semibold">${user.balance.toFixed(2)}</span>
+                  <p className="text-sm text-slate-500">
+                    Current balance: <span className="font-semibold text-[#0f6cff]">${formatCurrencyDisplay(user.balance)}</span>
                   </p>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="space-y-2">
-                    <Label className="text-gray-300 text-sm font-medium">
+                    <Label className="text-sm font-medium text-slate-700">
                       New Balance
                     </Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={balance}
-                      onChange={(e) => setBalance(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full px-4 py-3 appearance-none bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-white placeholder:text-gray-500 text-sm font-normal focus:outline-none focus:border-emerald-500/30 transition-all"
-                    />
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        $
+                      </span>
+                      <Input
+                        type="text"
+                        inputMode="decimal"
+                        value={balance}
+                        onChange={(e) => setBalance(formatCurrencyValue(e.target.value))}
+                        placeholder="0.00"
+                        className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-9 pr-4 text-sm font-medium text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-100"
+                      />
+                    </div>
                   </div>
 
-                  {/* Preview */}
-                  <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-4">
-                    <p className="text-xs text-gray-400 mb-1">Preview</p>
-                    <p className="text-lg font-semibold text-emerald-400">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                      Preview
+                    </p>
+                    <p className="text-xl font-semibold text-[#0f6cff]">
                       ${getPreviewBalance()}
                     </p>
                   </div>
 
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-white py-3.5 rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-emerald-950/40 hover:shadow-emerald-950/60 transition-all"
+                    className="w-full rounded-xl bg-gradient-to-br from-[#0f6cff] to-[#4da3ff] py-3.5 text-sm font-semibold tracking-wide text-white shadow-lg shadow-blue-200 transition-all hover:shadow-blue-300"
                   >
                     Save Changes
                   </Button>
                 </form>
 
-                {/* Cancel button */}
                 <div className="text-center">
                   <button
                     onClick={onClose}
-                    className="text-gray-400 text-sm font-medium hover:text-white transition-colors"
+                    className="text-sm font-medium text-slate-500 transition hover:text-slate-900"
                   >
                     Cancel
                   </button>

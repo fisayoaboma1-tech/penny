@@ -11,24 +11,28 @@ import WalletBottomNav from "@/components/wallet-bottom-nav"
 
 const faqs = [
   {
-    question: "How do I reset my password?",
-    answer: "You can reset your password by going to Settings > Security > Change Password. Follow the prompts to create a new password."
+    question: "How do I add money to my wallet?",
+    answer: "Open the Wallet section, tap Add money, and share the account details shown on the page with the sender so they can transfer funds into your wallet."
   },
   {
-    question: "How do I add a payment method?",
-    answer: "Navigate to the Cards section in your wallet and click 'Add Card'. Follow the instructions to link your payment method."
+    question: "How do I send money to someone?",
+    answer: "Go to Wallet > Transfer, enter the recipient details, review the transfer summary, and submit the payment."
+  },
+  {
+    question: "How do I check my recent transactions?",
+    answer: "Open Wallet > History to review your credit, debit, and transfer activity in one place."
   },
   {
     question: "Is my account secure?",
-    answer: "Yes! We use industry-standard encryption and security measures. You can also enable two-factor authentication for extra protection."
+    answer: "Yes. Your wallet uses protected account access and secure transfer flows, and you should always keep your login details private."
   },
   {
     question: "How do I contact support?",
-    answer: "You can reach our support team via email at support@bankii.com or through the in-app chat feature available 24/7."
+    answer: "Use the contact options below in the Help Center to reach our team by live chat, email, or phone support."
   },
   {
-    question: "What are the transaction limits?",
-    answer: "Transaction limits vary based on your account type. Premium members enjoy higher limits. Check your account settings for details."
+    question: "What does the Convert feature do?",
+    answer: "The Convert option is currently available soon in the wallet services section, so it is not active yet."
   },
 ]
 

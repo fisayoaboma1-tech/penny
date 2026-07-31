@@ -150,7 +150,7 @@ export default function WalletPage() {
         />
 
         {/* ─── MAIN CONTENT ─── */}
-        <main className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pb-28 pt-20 sm:px-6 md:gap-5 md:pt-24 lg:pl-28 lg:pr-6 lg:pt-6 xl:px-8">
+        <main className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pb-28 pt-20 sm:px-6 md:gap-5 md:pt-24 lg:pl-28 lg:pr-6 lg:pt-20 xl:px-8">
           {/* ── BALANCE CARD ── */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}

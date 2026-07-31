@@ -232,7 +232,35 @@ input:-moz-autofill:focus {
   -webkit-text-fill-color: #111827 !important;
 }
 
-/* Green caret color for input fields */
-input {
-  caret-color: #10b981;
+/* Input caret and focus styling: neutralize lemon/green accents */
+input,
+textarea,
+select {
+  caret-color: #0f6cff; /* brand blue caret */
+}
+
+/* Ensure browser autofill doesn't add a colored background or glow (keeps inputs neutral) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-background-clip: text;
+  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: #111827 !important;
+  color: #111827 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Remove any lemon/green focus rings and replace with subtle brand blue ring */
+input:focus,
+textarea:focus,
+select:focus,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 6px rgba(15,108,255,0.08) !important;
+  border-color: rgba(15,108,255,0.8) !important;
 }

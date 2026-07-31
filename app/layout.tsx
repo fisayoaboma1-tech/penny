@@ -8,6 +8,7 @@ import ClickSpark from "@/components/click-spark"
 import { AuthProvider } from "@/contexts/auth-context"
 import { QueryProvider } from "@/components/query-provider"
 import { PageTransition } from "@/components/page-transition"
+import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"
 
 const _inter = Inter({
@@ -41,25 +42,32 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <ClickSpark
-          sparkColor="#091738"
-          sparkSize={12}
-          sparkRadius={20}
-          sparkCount={8}
-          duration={400}
-          easing="ease-out"
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          <QueryProvider>
-            <AuthProvider>
-              <LenisProvider>
-                <PageTransition>{children}</PageTransition>
-                <Toaster />
-              </LenisProvider>
-            </AuthProvider>
-          </QueryProvider>
-        </ClickSpark>
+          <ClickSpark
+            sparkColor="#091738"
+            sparkSize={12}
+            sparkRadius={20}
+            sparkCount={8}
+            duration={400}
+            easing="ease-out"
+          >
+            <QueryProvider>
+              <AuthProvider>
+                <LenisProvider>
+                  <PageTransition>{children}</PageTransition>
+                  <Toaster />
+                </LenisProvider>
+              </AuthProvider>
+            </QueryProvider>
+          </ClickSpark>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>
