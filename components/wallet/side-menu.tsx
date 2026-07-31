@@ -155,24 +155,27 @@ export function SideMenu({
                     {section.label}
                   </p>
                   <div className="space-y-0.5">
-                    {section.items.map((item) => (
-                      <button
-                        key={item.label}
-                        onClick={() => handleNavigate(item.path)}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[#1a1a1a] transition-all text-left group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center">
-                          <item.icon className="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
-                            {item.label}
-                          </p>
-                          <p className="text-[10px] text-gray-600">{item.sub}</p>
-                        </div>
-                        <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-400 transition-colors shrink-0" />
-                      </button>
-                    ))}
+                    {section.items.map((item) => {
+                      const Icon = item.icon
+                        return (
+                        <button
+                          key={item.label}
+                          onClick={() => handleNavigate(item.path)}
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-[#1a1a1a] transition-all text-left group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center">
+                            <Icon className="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
+                              {item.label}
+                            </p>
+                            <p className="text-[10px] text-gray-600">{item.sub}</p>
+                          </div>
+                          <ChevronRight className="w-3.5 h-3.5 text-gray-600 group-hover:text-gray-400 transition-colors shrink-0" />
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
               ))}

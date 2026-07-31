@@ -49,6 +49,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          storageKey="pennywise-theme"
         >
           <ClickSpark
             sparkColor="#091738"

@@ -94,6 +94,22 @@ export default function SignupPage() {
       }
 
       if (data.user) {
+        // Create a profile row in the database linked to the auth user id
+        const { error: profileError } = await supabase.from("profiles").insert([
+          {
+            id: data.user.id,
+            full_name: fullName,
+            phone_number: phone,
+            country_code: selectedCountry.dialCode,
+            email,
+            profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
+          },
+        ])
+
+        if (profileError) {
+          throw profileError
+        }
+
         // Redirect to login page (or wallet if email confirmation is disabled)
         router.push("/login?message=Account created successfully! Please log in.")
       }
@@ -167,6 +183,9 @@ export default function SignupPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     autoComplete="off"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     data-lpignore="true"
                     data-form-type="other"
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"

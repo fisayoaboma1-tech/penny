@@ -52,6 +52,17 @@ export default function LoginPage() {
       }
 
       if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", data.user.id)
+          .single()
+
+        if (profileError || profileData?.is_admin) {
+          await supabase.auth.signOut()
+          throw new Error("Admins are not permitted to sign in here. Use the admin portal instead.")
+        }
+
         router.push("/wallet")
         router.refresh()
       }
@@ -110,6 +121,12 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Email address"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
                   className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
                 />
               </div>

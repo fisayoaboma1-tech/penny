@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server"
 import { v2 as cloudinary } from "cloudinary"
 
-// Configure Cloudinary
+export const runtime = "nodejs"
+
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+const apiKey = process.env.CLOUDINARY_API_KEY
+const apiSecret = process.env.CLOUDINARY_API_SECRET
+
 cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
+  secure: true,
 })
 
 export async function POST(request: Request) {
@@ -20,16 +26,28 @@ export async function POST(request: Request) {
       )
     }
 
-    // Convert file to buffer
+    if (!cloudName || !apiKey || !apiSecret) {
+      return NextResponse.json(
+        { error: "Cloudinary is not configured. Check your environment variables." },
+        { status: 500 }
+      )
+    }
+
+    console.log("Cloudinary upload request", {
+      cloudName,
+      contentType: file.type,
+      fileSize: file.size,
+    })
+
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
+    const result = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
         {
           folder: "profiles",
           resource_type: "image",
+          timeout: 15000,
           transformation: [
             { width: 500, height: 500, crop: "fill", gravity: "face" },
             { quality: "auto" },
@@ -43,7 +61,9 @@ export async function POST(request: Request) {
             resolve(result)
           }
         }
-      ).end(buffer)
+      )
+
+      uploadStream.end(buffer)
     })
 
     return NextResponse.json({
@@ -51,9 +71,10 @@ export async function POST(request: Request) {
       publicId: (result as any).public_id,
     })
   } catch (error) {
-    console.error("Cloudinary upload error:", error)
+    const message = error instanceof Error ? error.message : JSON.stringify(error)
+    console.error("Cloudinary upload error:", message)
     return NextResponse.json(
-      { error: "Failed to upload image" },
+      { error: message || "Failed to upload image" },
       { status: 500 }
     )
   }

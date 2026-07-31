@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 const fadeUpVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -33,10 +34,36 @@ export default function AdminLoginPage() {
     setLoading(true)
 
     try {
-      await new Promise((resolve) => window.setTimeout(resolve, 350))
-      router.push("/dashboard")
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.")
+      if (!email || !password) {
+        throw new Error("Please enter both email and password")
+      }
+
+      const supabase = createClient("admin")
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error || !data.user) {
+        throw error || new Error("Login failed")
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", data.user.id)
+        .single()
+
+      if (profileError || !profile?.is_admin) {
+        await supabase.auth.signOut()
+        throw new Error("Only admin accounts can log in here. Use the normal user login page.")
+      }
+
+      // Force a hard refresh to ensure clean state
+      window.location.href = "/dashboard"
+    } catch (err: any) {
+      setError(err.message || "Invalid email or password")
+    } finally {
       setLoading(false)
     }
   }
@@ -55,7 +82,7 @@ export default function AdminLoginPage() {
             Admin Login
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            Preview the admin dashboard style now, then wire the real auth later.
+            Sign in with your admin account to access the protected dashboard.
           </p>
         </div>
 
@@ -89,7 +116,7 @@ export default function AdminLoginPage() {
               animate="visible"
               custom={1}
             >
-              <p className="text-sm text-slate-500">Enter your admin preview credentials to continue.</p>
+              <p className="text-sm text-slate-500">Enter your admin credentials to continue.</p>
             </motion.div>
 
             <motion.div
@@ -106,6 +133,12 @@ export default function AdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@pennywise.com"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
                   className="w-full px-4 py-3 appearance-none bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 text-sm font-normal focus:outline-none focus:border-[#0f6cff]/30 transition-all"
                 />
               </div>

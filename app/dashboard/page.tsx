@@ -33,6 +33,7 @@ import { createClient } from "@/lib/supabase/client"
 import { EditBalanceModal } from "../../components/edit-balance-modal"
 import { DeleteUserModal } from "../../components/delete-user-modal"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
+import { recordBalanceAdjustmentTransaction } from "@/lib/wallet/transactions"
 
 interface User {
   id: string
@@ -46,60 +47,36 @@ interface User {
   restricted?: boolean
 }
 
-const ITEMS_PER_PAGE = 10
-
-const PREVIEW_NAMES = [
-  "Maya Johnson",
-  "Daniel Okafor",
-  "Aisha Bello",
-  "Liam Carter",
-  "Nneka Adebayo",
-  "Owen Brooks",
-  "Chiamaka Musa",
-  "Noah Kim",
-  "Grace Thompson",
-  "Samuel Peters",
-  "Ifeoluwa Ahmed",
-  "Emily Clarke",
-  "Kelechi Nwosu",
-  "David Wilson",
-  "Ruth Sanni",
-  "James Moore",
-  "Favour Eze",
-  "Amara Lewis",
-  "Theo Martin",
-  "Bola Yusuf",
-  "Hannah Scott",
-  "Tunde Cole",
-  "Sophia Davis",
-  "Efe Johnson",
-  "Micheal Green",
-  "Tosin Akin",
-  "Lola Reed",
-  "Ben Carter",
-  "Zainab Ali",
-]
-
-const PREVIEW_USERS: User[] = Array.from({ length: 30 }, (_, index) => {
-  const name = PREVIEW_NAMES[index % PREVIEW_NAMES.length]
-  const email = `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`
-  const balance = 1200 + index * 340 + (index % 3) * 125
-
-  return {
-    id: `preview-${String(index + 1).padStart(3, "0")}`,
-    full_name: name,
-    email,
-    phone_number: `+${234 + (index % 7)} ${700 + index} ${1000 + index}`,
-    balance,
-    created_at: new Date(Date.now() - index * 86400000).toISOString(),
-    profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
-  }
+const normalizeUser = (user: any): User => ({
+  id: user.id,
+  full_name: user.full_name ?? "Unknown User",
+  email: user.email ?? "No email",
+  phone_number: user.phone_number ?? "",
+  country_code: user.country_code ?? "",
+  balance: typeof user.balance === "number" ? user.balance : Number(user.balance) || 0,
+  created_at: user.created_at ?? new Date().toISOString(),
+  profile_image_url: user.profile_image_url ?? "",
+  restricted: user.restricted ?? false,
 })
+
+const getBalance = (user: User) => (typeof user.balance === "number" ? user.balance : 0)
+
+const formatPhoneNumber = (user: User) => {
+  const phone = user.phone_number?.trim() || ""
+  const countryCode = user.country_code?.trim() || ""
+  if (!phone) return "—"
+  if (phone.startsWith("+")) return phone
+  return countryCode ? `${countryCode} ${phone}` : phone
+}
+
+const ITEMS_PER_PAGE = 10
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(true)
   const [adminProfile, setAdminProfile] = useState<any>(null)
+  const [authorized, setAuthorized] = useState<boolean | null>(null)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [selectedUserDetails, setSelectedUserDetails] = useState<User | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -114,11 +91,52 @@ export default function AdminDashboard() {
   const [chartType, setChartType] = useState<"area" | "bar">("area")
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createClient("admin")
   const { theme, setTheme } = useTheme()
 
-  if (typeof window !== "undefined" && !mounted) {
+  useEffect(() => {
     setMounted(true)
+  }, [])
+
+  const checkAdminAccess = async () => {
+    try {
+      setAuthLoading(true)
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+      if (sessionError || !session?.access_token) {
+        setAuthorized(false)
+        router.replace("/dashboard/login")
+        return
+      }
+
+      const userId = session.user?.id
+      if (!userId) {
+        setAuthorized(false)
+        router.replace("/dashboard/login")
+        return
+      }
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", userId)
+        .single()
+
+      if (error || !profile?.is_admin) {
+        setAuthorized(false)
+        router.replace("/dashboard/login")
+        return
+      }
+
+      // Admin is authenticated - set authorized to true
+      setAuthorized(true)
+    } catch (error) {
+      console.error("Admin auth check failed:", error)
+      setAuthorized(false)
+      router.replace("/dashboard/login")
+    } finally {
+      setAuthLoading(false)
+    }
   }
 
   const fetchUsers = async () => {
@@ -130,26 +148,17 @@ export default function AdminDashboard() {
         .eq("is_admin", false)
         .order("created_at", { ascending: false })
 
-      if (error || !data || data.length === 0) {
-        console.warn("Using preview users because Supabase returned no live data.")
-        setUsers(PREVIEW_USERS)
+      if (error) {
+        console.error("Error fetching users:", error)
+        setUsers([])
         return
       }
 
-      const usersWithEmails = await Promise.all(
-        data.map(async (user) => {
-          const { data: authUser } = await supabase.auth.admin.getUserById(user.id)
-          return {
-            ...user,
-            email: authUser?.user?.email || user.email || "No email",
-          }
-        })
-      )
-
-      setUsers(usersWithEmails)
+      const normalizedUsers = (data ?? []).map((user) => normalizeUser(user))
+      setUsers(normalizedUsers)
     } catch (error) {
       console.error("Error fetching users:", error)
-      setUsers(PREVIEW_USERS)
+      setUsers([])
     } finally {
       setLoading(false)
     }
@@ -157,36 +166,87 @@ export default function AdminDashboard() {
 
   const fetchAdminProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single()
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
 
-        setAdminProfile(data)
-      } else {
-        setAdminProfile({
-          full_name: "Preview Admin",
-          email: "admin@pennywise.com",
-          profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
-        })
+      if (!user) {
+        router.replace("/dashboard/login")
+        return
       }
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single()
+
+      if (!data) {
+        router.replace("/dashboard/login")
+        return
+      }
+
+      setAdminProfile(data)
     } catch (error) {
       console.error("Error fetching admin profile:", error)
-      setAdminProfile({
-        full_name: "Preview Admin",
-        email: "admin@pennywise.com",
-        profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
-      })
+      router.replace("/dashboard/login")
     }
   }
 
   useEffect(() => {
-    fetchAdminProfile()
-    fetchUsers()
+    checkAdminAccess()
   }, [supabase])
+
+  useEffect(() => {
+    if (authorized) {
+      fetchAdminProfile()
+      fetchUsers()
+    }
+  }, [authorized, supabase])
+
+  // Real-time subscription for profile updates (non-admin users only)
+  useEffect(() => {
+    if (!authorized) return
+
+    const channel = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: 'is_admin=eq.false',
+        },
+        (payload) => {
+          console.log('Profile change received:', payload)
+          
+          if (payload.eventType === 'UPDATE') {
+            const updatedProfile = payload.new as any
+            const normalizedProfile = normalizeUser(updatedProfile)
+            
+            // Update users list
+            setUsers(users.map(u => 
+              u.id === normalizedProfile.id ? normalizedProfile : u
+            ))
+            
+            // Update selected user details if it's the same user
+            if (selectedUserDetails?.id === normalizedProfile.id) {
+              setSelectedUserDetails(normalizedProfile)
+            }
+            
+            // Update selected user for edit modal if it's the same user
+            if (selectedUser?.id === normalizedProfile.id) {
+              setSelectedUser(normalizedProfile)
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [authorized, supabase, users, selectedUserDetails, selectedUser])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -201,6 +261,29 @@ export default function AdminDashboard() {
     router.push("/dashboard/login")
   }
 
+  const fetchUserDetails = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single()
+
+      if (error || !data) {
+        console.error("Error fetching user details:", error)
+        return
+      }
+
+      const { data: authUser } = await supabase.auth.admin.getUserById(userId)
+      setSelectedUserDetails(normalizeUser({
+        ...data,
+        email: authUser?.user?.email || data.email || "No email",
+      }))
+    } catch (error) {
+      console.error("Error fetching user details:", error)
+    }
+  }
+
   const handleEditBalance = async (user: User) => {
     setSelectedUser(user)
     setIsEditModalOpen(true)
@@ -211,11 +294,25 @@ export default function AdminDashboard() {
     setIsDeleteModalOpen(true)
   }
 
-  const handleToggleRestrict = (user: User) => {
-    setUsers(users.map(u => u.id === user.id ? { ...u, restricted: !u.restricted } : u))
-    // keep selected details in sync
-    if (selectedUserDetails && selectedUserDetails.id === user.id) {
-      setSelectedUserDetails({ ...selectedUserDetails, restricted: !selectedUserDetails.restricted })
+  const handleToggleRestrict = async (user: User) => {
+    const newRestricted = !user.restricted
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ restricted: newRestricted })
+        .eq("id", user.id)
+
+      if (error) {
+        console.error("Error updating restriction:", error)
+        return
+      }
+
+      setUsers(users.map(u => u.id === user.id ? { ...u, restricted: newRestricted } : u))
+      if (selectedUserDetails && selectedUserDetails.id === user.id) {
+        setSelectedUserDetails({ ...selectedUserDetails, restricted: newRestricted })
+      }
+    } catch (error) {
+      console.error("Error toggling restriction:", error)
     }
   }
 
@@ -257,17 +354,17 @@ export default function AdminDashboard() {
     }
 
     if (filterBy === "high-balance") {
-      result = result.filter((user) => user.balance >= 10000)
+      result = result.filter((user) => getBalance(user) >= 10000)
     }
 
     if (filterBy === "low-balance") {
-      result = result.filter((user) => user.balance < 10000)
+      result = result.filter((user) => getBalance(user) < 10000)
     }
 
     result.sort((a, b) => {
       switch (sortBy) {
         case "balance":
-          return b.balance - a.balance
+          return getBalance(b) - getBalance(a)
         case "newest":
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         case "name":
@@ -284,7 +381,7 @@ export default function AdminDashboard() {
   const endIndex = startIndex + ITEMS_PER_PAGE
   const currentUsers = filteredUsers.slice(startIndex, endIndex)
 
-  const totalBalance = users.reduce((sum, user) => sum + user.balance, 0)
+  const totalBalance = users.reduce((sum, user) => sum + getBalance(user), 0)
 
   const activeUsers = useMemo(() => {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
@@ -369,6 +466,17 @@ export default function AdminDashboard() {
       )
     }
     return null
+  }
+
+  if (authLoading || !authorized || !adminProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="flex flex-col items-center gap-3 text-slate-600 dark:text-slate-300">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <p className="text-sm font-medium">Loading admin dashboard…</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -596,14 +704,14 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-4 sm:px-5 py-3">
-                            <p className="text-sm text-slate-700 dark:text-slate-300">{user.phone_number || "—"}</p>
+                            <p className="text-sm text-slate-700 dark:text-slate-300">{formatPhoneNumber(user)}</p>
                           </td>
                           <td className="px-4 sm:px-5 py-3">
-                            <span className="text-sm font-medium text-slate-900 dark:text-white">${user.balance.toFixed(2)}</span>
+                            <span className="text-sm font-medium text-slate-900 dark:text-white">${getBalance(user).toFixed(2)}</span>
                           </td>
                           <td className="px-4 sm:px-5 py-3">
                             <button
-                              onClick={() => setSelectedUserDetails(user)}
+                              onClick={() => fetchUserDetails(user.id)}
                               className="inline-flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-2 py-1 text-[10px] sm:text-xs font-medium text-slate-600 dark:text-slate-400 transition hover:border-blue-500 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-300"
                             >
                               <Eye className="w-3 h-3 mr-1" />
@@ -678,13 +786,13 @@ export default function AdminDashboard() {
                                   Restricted
                                 </span>
                               )}
-                              <span className="text-sm font-semibold text-slate-900 dark:text-white whitespace-nowrap">${user.balance.toFixed(2)}</span>
+                              <span className="text-sm font-semibold text-slate-900 dark:text-white whitespace-nowrap">${getBalance(user).toFixed(2)}</span>
                             </div>
                           </div>
                           <div className="flex items-center justify-between mt-1.5">
                             <p className="text-[11px] text-slate-400 dark:text-slate-500">{user.phone_number || "—"}</p>
                             <button
-                              onClick={() => setSelectedUserDetails(user)}
+                              onClick={() => fetchUserDetails(user.id)}
                               className="inline-flex items-center gap-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1 text-[10px] font-medium text-slate-600 dark:text-slate-400 transition hover:border-blue-500 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-300"
                             >
                               <Eye className="w-3 h-3" />
@@ -790,7 +898,7 @@ export default function AdminDashboard() {
                 <div className="space-y-2">
                   <div className="rounded-lg bg-slate-50/50 dark:bg-slate-800/20 p-3">
                     <p className="text-[9px] font-medium uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">Phone</p>
-                    <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">{selectedUserDetails.phone_number || "Not provided"}</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">{formatPhoneNumber(selectedUserDetails)}</p>
                   </div>
                   <div className="rounded-lg bg-slate-50/50 dark:bg-slate-800/20 p-3">
                     <p className="text-[9px] font-medium uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">Account ID</p>
@@ -798,7 +906,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="rounded-lg bg-slate-50/50 dark:bg-slate-800/20 p-3">
                     <p className="text-[9px] font-medium uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">Balance</p>
-                    <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">${selectedUserDetails.balance.toFixed(2)}</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900 dark:text-white">${getBalance(selectedUserDetails).toFixed(2)}</p>
                   </div>
                   <div className="rounded-lg bg-slate-50/50 dark:bg-slate-800/20 p-3 flex items-center justify-between">
                     <div>
@@ -873,6 +981,7 @@ export default function AdminDashboard() {
         onSave={async (newBalance) => {
           if (selectedUser) {
             try {
+              const previousBalance = selectedUser.balance
               const { error } = await supabase
                 .from("profiles")
                 .update({ balance: newBalance })
@@ -883,9 +992,24 @@ export default function AdminDashboard() {
                 return
               }
 
+              const { error: transactionError } = await recordBalanceAdjustmentTransaction({
+                supabase,
+                userId: selectedUser.id,
+                previousBalance,
+                newBalance,
+                actorLabel: "Admin",
+              })
+
+              if (transactionError) {
+                console.error("Error recording balance adjustment:", transactionError)
+              }
+
               setUsers(users.map(u => 
                 u.id === selectedUser.id ? { ...u, balance: newBalance } : u
               ))
+              if (selectedUserDetails?.id === selectedUser.id) {
+                setSelectedUserDetails({ ...selectedUserDetails, balance: newBalance })
+              }
               setIsEditModalOpen(false)
               setSelectedUser(null)
             } catch (error) {

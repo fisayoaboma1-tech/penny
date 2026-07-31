@@ -7,6 +7,7 @@ import { ChevronDown, Search } from "lucide-react"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
 import { WalletPageHeader } from "@/components/wallet/page-header"
 import { useAuth } from "@/contexts/auth-context"
+import { createClient } from "@/lib/supabase/client"
 
 type BankCatalog = {
   regions?: Record<string, Record<string, string[]>>
@@ -295,7 +296,7 @@ const regionForCountry: Record<string, string> = {
   "Trinidad and Tobago": "Latin America",
   Uruguay: "Latin America",
   Venezuela: "Latin America",
-};
+}
 
 
 const countries = [
@@ -496,8 +497,9 @@ const countries = [
 
 export default function WalletTransferPage() {
   const router = useRouter()
-  const { user } = useAuth()
-  const walletBalance = 657000
+  const { user, profile } = useAuth()
+  const walletBalance = profile?.balance ?? 0
+  const isRestricted = profile?.restricted ?? false
   const [selectedBank, setSelectedBank] = useState("Select bank")
   const [bankSearch, setBankSearch] = useState("")
   const [isBankOpen, setIsBankOpen] = useState(false)
@@ -518,6 +520,7 @@ export default function WalletTransferPage() {
   const mainRef = useRef<HTMLElement | null>(null)
   const [reference, setReference] = useState("")
   const [amount, setAmount] = useState("")
+
   const accountName = useMemo(() => {
     if (!user) return "Chukwudi Enoch"
     return user.user_metadata?.full_name || user.email?.split("@")[0] || "Chukwudi Enoch"
@@ -525,11 +528,12 @@ export default function WalletTransferPage() {
 
   const profileImageUrl = useMemo(() => {
     return (
+      profile?.profile_image_url ||
       user?.user_metadata?.avatar_url ||
       user?.user_metadata?.profile_image ||
       "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785158069/unnamed_f9ug3t.png"
     )
-  }, [user])
+  }, [profile, user])
 
   const formattedBalance = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -653,6 +657,34 @@ export default function WalletTransferPage() {
     "United Arab Emirates": { requiresIban: true, requiresSwift: true, requiresRouting: false, requiresSortCode: false, requiresBankAddress: true },
   }
 
+  // Real-time subscription for restriction and balance updates
+  useEffect(() => {
+    if (!user) return
+
+    const supabaseClient = createClient()
+    const channel = supabaseClient
+      .channel('transfer-page-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Profile update received:', payload)
+          // This will trigger a re-render via the auth context
+          // The useAuth hook will automatically refresh the profile
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabaseClient.removeChannel(channel)
+    }
+  }, [user])
+
   const africanCountries = new Set([
     "Algeria",
     "Angola",
@@ -773,6 +805,15 @@ export default function WalletTransferPage() {
               <p className="mt-1 text-sm text-slate-500">Complete the recipient and banking details below for a secure transfer.</p>
             </div>
 
+            {isRestricted && (
+              <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <p className="font-semibold">Transfer blocked</p>
+                <p className="mt-1 text-sm text-amber-900">
+                  Your account is currently restricted. To transfer, please contact support for assistance.
+                </p>
+              </div>
+            )}
+
             <div className="grid gap-4 md:grid-cols-2">
               <div className="md:col-span-2">
                 <label className="text-sm font-semibold text-slate-900">Country being sent to</label>
@@ -847,6 +888,12 @@ export default function WalletTransferPage() {
                   value={recipientEmail}
                   onChange={(event) => setRecipientEmail(event.target.value)}
                   placeholder="Enter recipient email"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
                   className="mt-2 w-full rounded-[20px] border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
                 />
               </div>
@@ -1027,7 +1074,8 @@ export default function WalletTransferPage() {
 
             <button
               type="button"
-              className="mt-5 w-full rounded-[16px] bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 shadow-[0_10px_20px_rgba(15,23,42,0.12)]"
+              disabled={isRestricted}
+              className={`mt-5 w-full rounded-[16px] px-4 py-3 text-sm font-semibold text-white transition shadow-[0_10px_20px_rgba(15,23,42,0.12)] ${isRestricted ? "bg-slate-400 cursor-not-allowed hover:bg-slate-400" : "bg-slate-900 hover:bg-slate-800"}`}
             >
               Review transfer
             </button>

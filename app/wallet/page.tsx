@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import type { WalletTransaction, WalletTransactionType } from "@/lib/wallet/transactions"
 import {
   ArrowUpRight,
   Eye,
@@ -14,12 +15,15 @@ import {
   ArrowDown,
   Banknote,
   Send,
+  X,
 } from "lucide-react"
 import { PageHeader } from "@/components/wallet/page-header"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
 import { toast } from "@/hooks/use-toast"
 import { ProtectedRoute } from "@/components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
+import { createClient } from "@/lib/supabase/client"
+import { formatWalletAmount, getTransactionTimeLabel, getWalletTransactionBadge, getWalletTransactionIcon } from "@/lib/wallet/transactions"
 
 const services = [
   { label: "Transfer", icon: Send, path: "/wallet/transfer" },
@@ -27,50 +31,25 @@ const services = [
   { label: "Convert", icon: Repeat, path: "/wallet/card", comingSoon: true },
 ]
 
-const transactions = [
-  {
-    id: "1",
-    title: "Stamp Duty",
-    subtitle: "DEBIT",
-    amount: "-$50.00",
-    time: "29 Jul, 08:12 PM",
-    icon: ArrowDown,
-  },
-  {
-    id: "2",
-    title: "Value Added Tax",
-    subtitle: "DEBIT",
-    amount: "-$0.75",
-    time: "29 Jul, 08:12 PM",
-    icon: ArrowDown,
-  },
-  {
-    id: "3",
-    title: "Transfer to CHUKWUDI THANKG...",
-    subtitle: "TRANSFER",
-    amount: "-$10,000.00",
-    time: "Today",
-    icon: ArrowDown,
-  },
-  {
-    id: "4",
-    title: "from ACTIVITY CONTINUITY...",
-    subtitle: "CREDIT",
-    amount: "+$5,000.00",
-    time: "Today",
-    icon: ArrowUpRight,
-  },
-]
+const buildRecentTransactions = (transactions: WalletTransaction[]) =>
+  transactions.slice(0, 4).map((tx) => ({
+    ...tx,
+    icon: tx.icon === "up" ? ArrowUpRight : ArrowDown,
+  }))
 
 export default function WalletPage() {
   const router = useRouter()
-  const { user, loading } = useAuth()
-  const [trend, setTrend] = useState<"week" | "month">("week")
-  const [balance, setBalance] = useState(657000)
-  const [lastUpdatedAt, setLastUpdatedAt] = useState(Date.now())
+  const { user, loading, profile, isAdmin } = useAuth()
+  const [balance, setBalance] = useState(0)
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null)
   const [lastUpdatedLabel, setLastUpdatedLabel] = useState("Last updated just now")
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [showBalance, setShowBalance] = useState(true)
+  const [greeting, setGreeting] = useState("Good Morning")
+  const [showRestrictedModal, setShowRestrictedModal] = useState(false)
+  const [recentTransactions, setRecentTransactions] = useState<WalletTransaction[]>([])
+  const [moneyFlow, setMoneyFlow] = useState({ moneyIn: 0, moneyOut: 0 })
+  const supabase = createClient()
 
   const userName = useMemo(() => {
     if (!user) return "Chukwudi Enoch"
@@ -78,19 +57,14 @@ export default function WalletPage() {
   }, [user])
 
   const profileImageUrl =
+    profile?.profile_image_url ||
     user?.user_metadata?.avatar_url ||
     user?.user_metadata?.profile_image ||
     "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785158069/unnamed_f9ug3t.png"
 
-  const currentHour = new Date().getHours()
-  const greeting =
-    currentHour >= 12 && currentHour <= 15
-      ? "Good Afternoon"
-      : currentHour >= 17 && currentHour <= 23
-        ? "Good Evening"
-        : "Good Morning"
+  const formatLastUpdated = (timestamp: number | null) => {
+    if (timestamp === null) return "Last updated just now"
 
-  const formatLastUpdated = (timestamp: number) => {
     const diffMinutes = Math.floor((Date.now() - timestamp) / 60000)
 
     if (diffMinutes < 1) return "Last updated just now"
@@ -103,22 +77,108 @@ export default function WalletPage() {
     return `Last updated ${diffDays} day${diffDays === 1 ? "" : "s"} ago`
   }
 
-  const refreshBalance = () => {
+  const refreshBalance = async () => {
     setIsRefreshing(true)
-    setBalance(657000)
-    setLastUpdatedAt(Date.now())
-    setLastUpdatedLabel("Last updated just now")
 
-    window.setTimeout(() => {
-      setIsRefreshing(false)
-    }, 900)
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser?.id) {
+        throw new Error("No authenticated user")
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("balance")
+        .eq("id", authUser.id)
+        .single()
+
+      if (error) {
+        throw error
+      }
+
+      const nextBalance = typeof data?.balance === "number"
+        ? data.balance
+        : Number(data?.balance) || 0
+
+      setBalance(nextBalance)
+      setLastUpdatedAt(Date.now())
+      setLastUpdatedLabel("Last updated just now")
+    } catch (error) {
+      console.error("Failed to refresh wallet balance:", error)
+      setBalance(profile?.balance ?? 0)
+    } finally {
+      window.setTimeout(() => {
+        setIsRefreshing(false)
+      }, 900)
+    }
+  }
+
+  const formatCurrency = (value: number) =>
+    `$${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+  const fetchTransactions = async () => {
+    if (!user?.id) return
+
+    const { data, error } = await supabase
+      .from("wallet_transactions")
+      .select("id, user_id, type, amount, title, subtitle, detail_title, detail_description, detail_footer, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+
+    if (error) {
+      console.error("Failed to load wallet transactions:", error)
+      return
+    }
+
+    const mapped = (data ?? []).map((tx: any) => {
+      const type = tx.type as WalletTransactionType
+      const amount = Number(tx.amount) || 0
+      const formattedAmount = formatWalletAmount(type, amount)
+      const badgeLabel = getWalletTransactionBadge(type)
+      const icon = getWalletTransactionIcon(type)
+
+      return {
+        id: tx.id,
+        title: tx.title,
+        subtitle: tx.subtitle || "Transaction processing",
+        amount: formattedAmount,
+        type,
+        time: getTransactionTimeLabel(tx.created_at),
+        icon,
+        badgeLabel,
+        detailTitle: tx.detail_title,
+        detailDescription: tx.detail_description,
+        detailFooter: tx.detail_footer,
+        createdAt: tx.created_at,
+      } as WalletTransaction
+    })
+
+    const totals = (data ?? []).reduce(
+      (acc, tx) => {
+        const amount = Number(tx.amount) || 0
+
+        if (tx.type === "credit") {
+          acc.moneyIn += amount
+        } else {
+          acc.moneyOut += amount
+        }
+
+        return acc
+      },
+      { moneyIn: 0, moneyOut: 0 },
+    )
+
+    setMoneyFlow(totals)
+    setRecentTransactions(mapped.slice(0, 4))
   }
 
   useEffect(() => {
-    if (!loading && user) {
-      refreshBalance()
+    if (!loading && user && !isAdmin) {
+      setBalance(profile?.balance ?? 0)
+      void refreshBalance()
+      void fetchTransactions()
     }
-  }, [loading, user])
+  }, [loading, user, profile, isAdmin])
 
   useEffect(() => {
     setLastUpdatedLabel(formatLastUpdated(lastUpdatedAt))
@@ -129,6 +189,96 @@ export default function WalletPage() {
 
     return () => window.clearInterval(interval)
   }, [lastUpdatedAt])
+
+  // Real-time subscription for balance updates
+  useEffect(() => {
+    if (!user || isAdmin) return
+
+    const balanceChannel = supabase
+      .channel('wallet-balance-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('Balance update received:', payload)
+          const newBalance = typeof payload.new.balance === "number"
+            ? payload.new.balance
+            : Number(payload.new.balance) || 0
+          
+          setBalance(newBalance)
+          setLastUpdatedAt(Date.now())
+          setLastUpdatedLabel("Last updated just now")
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(balanceChannel)
+    }
+  }, [user, isAdmin, supabase])
+
+  // Real-time subscription for new transactions
+  useEffect(() => {
+    if (!user || isAdmin) return
+
+    const transactionChannel = supabase
+      .channel('wallet-transaction-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'wallet_transactions',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          console.log('New transaction received:', payload)
+          const tx = payload.new as any
+          const type = tx.type as WalletTransactionType
+          const amount = Number(tx.amount) || 0
+          const formattedAmount = formatWalletAmount(type, amount)
+          const badgeLabel = getWalletTransactionBadge(type)
+          const icon = getWalletTransactionIcon(type)
+
+          const newTransaction: WalletTransaction = {
+            id: tx.id,
+            title: tx.title,
+            subtitle: tx.subtitle || "Transaction processing",
+            amount: formattedAmount,
+            type,
+            time: "Just now",
+            icon,
+            badgeLabel,
+            detailTitle: tx.detail_title,
+            detailDescription: tx.detail_description,
+            detailFooter: tx.detail_footer,
+            createdAt: tx.created_at,
+          }
+
+          // Add new transaction to the beginning of the list
+          setRecentTransactions(prev => [newTransaction, ...prev].slice(0, 4))
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(transactionChannel)
+    }
+  }, [user, isAdmin, supabase])
+
+  const handleTransferClick = () => {
+    if (profile?.restricted) {
+      setShowRestrictedModal(true)
+      return
+    }
+
+    router.push("/wallet/transfer")
+  }
 
   if (loading) {
     return (
@@ -233,26 +383,35 @@ export default function WalletPage() {
                   <h2 className="text-sm font-semibold text-slate-900">Services</h2>
                   <p className="text-xs text-slate-500">Popular actions and shortcuts</p>
                 </div>
+
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {services.map((service) => {
                     const Icon = service.icon
+                    const isDisabled = Boolean(service.comingSoon)
+
                     return (
                       <button
                         key={service.label}
                         type="button"
                         onClick={() => {
-                          if (service.comingSoon) {
+                          if (isDisabled) {
                             toast({
                               title: "Feature available soon",
                               description: "Convert will be available soon.",
                             })
                             return
                           }
+
+                          if (service.label === "Transfer") {
+                            handleTransferClick()
+                            return
+                          }
+
                           router.push(service.path)
                         }}
-                        aria-disabled={service.comingSoon}
+                        aria-disabled={isDisabled}
                         className={`group flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-200/70 bg-slate-50/50 p-2 text-center transition sm:p-4 sm:gap-2.5 ${
-                          service.comingSoon
+                          isDisabled
                             ? "cursor-not-allowed opacity-70"
                             : "hover:-translate-y-0.5 hover:border-[#0f6cff]/20 hover:bg-blue-50/60 hover:shadow-md"
                         }`}
@@ -263,11 +422,11 @@ export default function WalletPage() {
                         <span className="text-[9px] font-semibold leading-tight text-slate-900 sm:text-[11px]">
                           {service.label}
                         </span>
-                        {service.comingSoon && (
+                        {isDisabled ? (
                           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-amber-700">
                             Soon
                           </span>
-                        )}
+                        ) : null}
                       </button>
                     )
                   })}
@@ -296,78 +455,62 @@ export default function WalletPage() {
                   </button>
                 </div>
                 <div className="space-y-2.5">
-                  {transactions.map((tx) => {
-                    const Icon = tx.icon
-                    const isCredit = tx.amount.startsWith("+")
-                    return (
-                      <div
-                        key={tx.id}
-                        className="flex items-center justify-between gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 transition hover:border-slate-300/80 hover:bg-slate-50 sm:gap-3 sm:p-3"
-                      >
-                        <div className="flex min-w-0 items-center gap-3">
-                          <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f6cff] shadow-sm ring-1 ring-slate-200/60 sm:h-10 sm:w-10">
-                            <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
-                          </span>
-                          <div className="min-w-0 max-w-[140px] sm:max-w-none">
-                            <p className="truncate text-[13px] font-medium text-slate-900 sm:text-sm">{tx.title}</p>
-                            <p className="text-[9px] uppercase tracking-wider text-slate-500 sm:text-[10px]">{tx.subtitle}</p>
+                  {recentTransactions.length > 0 ? (
+                    recentTransactions.map((tx) => {
+                      const Icon = tx.icon === "up" ? ArrowUpRight : ArrowDown
+                      const isCredit = tx.amount.startsWith("+")
+                      return (
+                        <div
+                          key={tx.id}
+                          className="flex flex-col gap-2 rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 transition hover:border-slate-300/80 hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-3"
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f6cff] shadow-sm ring-1 ring-slate-200/60 sm:h-10 sm:w-10">
+                              <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="break-words text-[13px] font-medium text-slate-900 sm:text-sm">{tx.title}</p>
+                              <p className="text-[9px] uppercase tracking-wider text-slate-500 sm:text-[10px]">{tx.badgeLabel.toUpperCase()}</p>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 flex-row items-center justify-between gap-3 text-left sm:flex-col sm:items-end sm:text-right">
+                            <p className={`text-[13px] font-semibold sm:text-sm ${isCredit ? "text-emerald-600" : "text-rose-600"}`}>
+                              {tx.amount}
+                            </p>
+                            <p className="text-[9px] text-slate-500 sm:text-[10px]">{tx.time}</p>
                           </div>
                         </div>
-                        <div className="flex shrink-0 flex-col items-end text-right">
-                          <p className={`text-[13px] font-semibold sm:text-sm ${isCredit ? "text-emerald-600" : "text-rose-600"}`}>
-                            {tx.amount}
-                          </p>
-                          <p className="text-[9px] text-slate-500 sm:text-[10px]">{tx.time}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
+                      )
+                    })
+                  ) : (
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-4 text-center text-sm text-slate-500">
+                      No transactions yet.
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.section>
           </div>
 
-          {/* ── SPENDING TRENDS ── */}
+          {/* ── MONEY FLOW ── */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
             <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5 md:p-6">
-                <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-sm font-semibold text-slate-900">Spending trends</h2>
-                  <p className="text-xs text-slate-500">Analyze your weekly and monthly flow.</p>
-                </div>
-                <div className="inline-flex w-full rounded-xl bg-slate-100 p-1 sm:w-auto">
-                  <button
-                    type="button"
-                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition sm:flex-none sm:px-4 ${
-                      trend === "week" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
-                    }`}
-                    onClick={() => setTrend("week")}
-                  >
-                    Week
-                  </button>
-                  <button
-                    type="button"
-                    className={`flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold transition sm:flex-none sm:px-4 ${
-                      trend === "month" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
-                    }`}
-                    onClick={() => setTrend("month")}
-                  >
-                    Month
-                  </button>
-                </div>
+              <div className="mb-3 sm:mb-4">
+                <h2 className="text-sm font-semibold text-slate-900">Money flow</h2>
+                <p className="text-xs text-slate-500">Totals pulled from your transaction history.</p>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-4">
                   <p className="text-[11px] font-medium text-slate-500 sm:text-xs">Money in</p>
-                  <p className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">$6,800.00</p>
+                  <p className="mt-1 text-lg font-bold text-emerald-600 sm:text-xl">{formatCurrency(moneyFlow.moneyIn)}</p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-4">
                   <p className="text-[11px] font-medium text-slate-500 sm:text-xs">Money out</p>
-                  <p className="mt-1 text-lg font-bold text-rose-600 sm:text-xl">$21,693.00</p>
+                  <p className="mt-1 text-lg font-bold text-rose-600 sm:text-xl">{formatCurrency(moneyFlow.moneyOut)}</p>
                 </div>
               </div>
             </div>
@@ -375,6 +518,35 @@ export default function WalletPage() {
         </main>
 
         <WalletBottomNav />
+
+        {showRestrictedModal && (
+          <div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/40 px-4"
+            onClick={() => setShowRestrictedModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">Transfer restricted</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">Your account is currently restricted. Please contact support to enable transfers.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowRestrictedModal(false)}
+                  className="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  aria-label="Close restricted transfer notice"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   )

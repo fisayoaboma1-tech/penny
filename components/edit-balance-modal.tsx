@@ -46,9 +46,7 @@ export function EditBalanceModal({ isOpen, onClose, user, onSave }: EditBalanceM
   }
 
   useEffect(() => {
-    if (user) {
-      setBalance(formatCurrencyValue(user.balance.toFixed(2)))
-    }
+    setBalance("")
   }, [user?.id])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -135,7 +133,7 @@ export function EditBalanceModal({ isOpen, onClose, user, onSave }: EditBalanceM
                         inputMode="decimal"
                         value={balance}
                         onChange={(e) => setBalance(formatCurrencyValue(e.target.value))}
-                        placeholder="0.00"
+                        placeholder="Enter new balance"
                         className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-9 pr-4 text-sm font-medium text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-100"
                       />
                     </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
@@ -22,9 +23,12 @@ import {
   Home,
   Grid,
   Sparkles,
+  X,
 } from "lucide-react"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
 import { WalletPageHeader } from "@/components/wallet/page-header"
+import { useAuth } from "@/contexts/auth-context"
+import { createClient } from "@/lib/supabase/client"
 
 const serviceGroups = [
   {
@@ -63,6 +67,45 @@ const serviceGroups = [
 
 export default function WalletServicesPage() {
   const router = useRouter()
+  const { profile } = useAuth()
+  const [showRestrictedModal, setShowRestrictedModal] = useState(false)
+
+  const handleTransferClick = () => {
+    if (profile?.restricted) {
+      setShowRestrictedModal(true)
+      return
+    }
+
+    router.push("/wallet/transfer")
+  }
+
+  // Real-time subscription for restriction updates
+  useEffect(() => {
+    if (!profile?.id) return
+
+    const supabaseClient = createClient()
+    const channel = supabaseClient
+      .channel('services-page-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${profile.id}`,
+        },
+        (payload) => {
+          console.log('Profile update received:', payload)
+          // This will trigger a re-render via the auth context
+          // The useAuth hook will automatically refresh the profile
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabaseClient.removeChannel(channel)
+    }
+  }, [profile?.id])
 
   return (
     <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f7ff] text-slate-900">
@@ -101,7 +144,14 @@ export default function WalletServicesPage() {
               {group.items.map((item) => (
                 <button
                   key={item.label}
-                  onClick={() => router.push("/wallet/transfer")}
+                  onClick={() => {
+                    if (item.label === "Transfer") {
+                      handleTransferClick()
+                      return
+                    }
+
+                    router.push("/wallet/transfer")
+                  }}
                   className="group rounded-[18px] border border-slate-200 bg-[#f7faff] p-2.5 text-left transition hover:border-[#cfe0ff] hover:bg-[#eef5ff]"
                 >
                   <div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-[#0f6cff] shadow-sm">
@@ -133,6 +183,35 @@ export default function WalletServicesPage() {
       </main>
 
       <WalletBottomNav />
+
+      {showRestrictedModal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/40 px-4"
+          onClick={() => setShowRestrictedModal(false)}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Transfer restricted</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">This account cannot access transfers right now. Contact support to restore access.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRestrictedModal(false)}
+                className="rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close restricted transfer notice"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

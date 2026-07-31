@@ -9,14 +9,22 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { user, loading } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login")
+    if (loading) return
+
+    if (!user) {
+      router.replace("/login")
+      return
     }
-  }, [user, loading, router])
+
+    if (isAdmin) {
+      router.replace("/dashboard")
+      return
+    }
+  }, [user, loading, isAdmin, router])
 
   if (loading) {
     return (
@@ -26,8 +34,18 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  if (!user) {
+  // Only block admin users, allow authenticated non-admin users
+  if (isAdmin) {
     return null
+  }
+
+  // If no user, the useEffect will redirect, but show loading until then
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="text-white text-lg">Loading...</div>
+      </div>
+    )
   }
 
   return <>{children}</>

@@ -1,7 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Headphones, Bell } from "lucide-react"
+import { ChevronLeft, Bell } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 interface PageHeaderProps {
   /** "main" = profile + greeting + actions (wallet home), "sub" = back button + title */
@@ -26,6 +27,7 @@ function PageHeaderComponent({
   onBack,
 }: PageHeaderProps) {
   const router = useRouter()
+  const { user } = useAuth()
 
   if (variant === "main") {
     return (
@@ -35,12 +37,12 @@ function PageHeaderComponent({
             <button
               type="button"
               onClick={() => router.push("/profile")}
-              className="h-10 w-10 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 sm:h-11 sm:w-11"
+              className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 sm:h-11 sm:w-11"
             >
               <img
                 src={profileImageUrl}
                 alt={userName}
-                className="h-full w-full object-cover"
+                className="h-full w-full rounded-full object-cover"
               />
             </button>
             <div className="min-w-0">
@@ -54,13 +56,6 @@ function PageHeaderComponent({
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 sm:h-10 sm:w-10"
-              onClick={() => router.push("/help")}
-            >
-              <Headphones className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
-            </button>
             <button
               type="button"
               className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-50 sm:h-10 sm:w-10"

@@ -9,8 +9,9 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar"
 
 export default function AccountSettings() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createClient("admin")
   const [adminProfile, setAdminProfile] = useState<any>(null)
+  const [authorized, setAuthorized] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -23,7 +24,9 @@ export default function AccountSettings() {
   const fetchAdminProfile = async () => {
     try {
       setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      const user = session?.user
+
       if (user) {
         const { data } = await supabase
           .from("profiles")
@@ -39,47 +42,66 @@ export default function AccountSettings() {
             phone_number: data.phone_number || "",
           })
         } else {
-          setAdminProfile({
-            full_name: "Preview Admin",
-            email: "admin@pennywise.com",
-            phone_number: "+234 800 000 0000",
-            profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
-          })
-          setFormData({
-            full_name: "Preview Admin",
-            email: "admin@pennywise.com",
-            phone_number: "+234 800 000 0000",
-          })
+          router.replace("/dashboard/login")
+          return
         }
       } else {
-        setAdminProfile({
-          full_name: "Preview Admin",
-          email: "admin@pennywise.com",
-          phone_number: "+234 800 000 0000",
-          profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
-        })
-        setFormData({
-          full_name: "Preview Admin",
-          email: "admin@pennywise.com",
-          phone_number: "+234 800 000 0000",
-        })
+        router.replace("/dashboard/login")
+        return
       }
     } catch (error) {
       console.error("Error fetching admin profile:", error)
-      setAdminProfile({
-        full_name: "Preview Admin",
-        email: "admin@pennywise.com",
-        phone_number: "+234 800 000 0000",
-        profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
-      })
+      router.replace("/dashboard/login")
+      return
     } finally {
       setLoading(false)
     }
   }
 
+  const checkAdminAccess = async () => {
+    try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      const userId = session?.user?.id
+
+      if (sessionError || !session?.access_token || !userId) {
+        router.replace("/dashboard/login")
+        setAuthorized(false)
+        return
+      }
+
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", userId)
+        .single()
+
+      if (error || !profile?.is_admin) {
+        setAuthorized(false)
+        router.replace("/dashboard/login")
+        return
+      }
+
+      setAuthorized(true)
+    } catch (error) {
+      console.error("Admin auth check failed:", error)
+      setAuthorized(false)
+      router.replace("/dashboard/login")
+    }
+  }
+
   useEffect(() => {
-    fetchAdminProfile()
+    checkAdminAccess()
   }, [supabase])
+
+  useEffect(() => {
+    if (authorized) {
+      fetchAdminProfile()
+    }
+  }, [authorized, supabase])
+
+  if (authorized === null) {
+    return null
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -237,6 +259,12 @@ export default function AccountSettings() {
                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             className={inputClasses}
                             placeholder="Enter your email"
+                            autoComplete="off"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            spellCheck={false}
+                            data-lpignore="true"
+                            data-form-type="other"
                           />
                         </div>
 
