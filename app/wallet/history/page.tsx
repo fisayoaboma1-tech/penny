@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowUpRight, ArrowDown, X } from "lucide-react"
+import { ArrowUpRight, ArrowDown, X, ChevronDown } from "lucide-react"
 import { PageHeader } from "@/components/wallet/page-header"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
 import { createClient } from "@/lib/supabase/client"
@@ -21,8 +21,8 @@ export default function TransactionHistoryPage() {
   const router = useRouter()
   const supabase = createClient()
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
-  const [activeTab, setActiveTab] = useState<"past" | "upcoming">("past")
   const [selectedTransaction, setSelectedTransaction] = useState<WalletTransaction | null>(null)
+  const [sortBy, setSortBy] = useState<"day" | "week" | "month">("day")
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -82,20 +82,25 @@ export default function TransactionHistoryPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={() => setSelectedTransaction(tx)}
-        className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 text-left shadow-[0_16px_35px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:flex-row sm:items-center"
+        className="group flex w-full items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-[0_2px_8px_rgba(15,23,42,0.04)] transition-all hover:border-slate-300 hover:shadow-[0_4px_12px_rgba(15,23,42,0.08)]"
       >
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconBg}`}>
+        {/* Icon */}
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} />
         </div>
+
+        {/* Text Content */}
         <div className="min-w-0 flex-1">
-          <p className="break-words text-sm font-semibold leading-snug text-slate-900">{tx.title}</p>
-          <p className="mt-1 text-xs text-slate-500">{tx.subtitle}</p>
+          <p className="text-sm font-semibold text-slate-900 uppercase tracking-wide">{tx.title}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{tx.subtitle}</p>
         </div>
-        <div className="flex flex-col items-start gap-1 sm:ml-auto sm:items-end">
+
+        {/* Amount */}
+        <div className="flex shrink-0 flex-col items-end gap-1">
           <p className={`text-sm font-bold ${amountColor}`}>
             {tx.amount}
           </p>
-          <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${typeColors[tx.type]}`}>
+          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${typeColors[tx.type]}`}>
             {tx.badgeLabel}
           </span>
         </div>
@@ -121,98 +126,120 @@ export default function TransactionHistoryPage() {
               </div>
             </div>
 
-            <div className="mb-4 flex items-center gap-1 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1 shadow-sm">
-              <button
-                onClick={() => setActiveTab("past")}
-                className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
-                  activeTab === "past" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                Past
-              </button>
-              <button
-                onClick={() => setActiveTab("upcoming")}
-                className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
-                  activeTab === "upcoming" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                Upcoming
-              </button>
+            <div className="mb-4">
+              <div className="relative w-fit">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as "day" | "week" | "month")}
+                  className="appearance-none rounded-full border border-slate-200 bg-white/90 pl-4 pr-11 py-2.5 text-sm font-semibold text-slate-700 shadow-[0_6px_18px_rgba(15,23,42,0.06)] outline-none transition-all duration-200 focus:border-[#0f6cff] focus:bg-white focus:ring-2 focus:ring-[#0f6cff]/10"
+                >
+                  <option value="day">By Day</option>
+                  <option value="week">By Week</option>
+                  <option value="month">By Month</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center justify-center rounded-full p-1.5 text-slate-500">
+                  <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                </div>
+              </div>
             </div>
 
-            {activeTab === "past" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                {todayTransactions.length > 0 && (
-                  <div>
-                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Today</h3>
-                    <div className="space-y-2.5">
-                      {todayTransactions.map(renderTransaction)}
-                    </div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              {todayTransactions.length > 0 && (
+                <div>
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Today</h3>
+                  <div className="space-y-2.5">
+                    {todayTransactions.map(renderTransaction)}
                   </div>
-                )}
-
-                {yesterdayTransactions.length > 0 && (
-                  <div>
-                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Yesterday</h3>
-                    <div className="space-y-2.5">
-                      {yesterdayTransactions.map(renderTransaction)}
-                    </div>
-                  </div>
-                )}
-
-                {todayTransactions.length === 0 && yesterdayTransactions.length === 0 && (
-                  <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/90 p-8 text-center shadow-[0_20px_45px_rgba(15,23,42,0.06)]">
-                    <p className="text-sm font-medium text-slate-600">No transactions yet</p>
-                    <p className="mt-2 text-sm text-slate-400">Your recent wallet movement will show up here.</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {activeTab === "upcoming" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/90 p-8 text-center shadow-[0_20px_45px_rgba(15,23,42,0.06)]">
-                  <p className="text-sm font-medium text-slate-600">No upcoming transactions</p>
-                  <p className="mt-2 text-sm text-slate-400">Scheduled transfers will appear here.</p>
                 </div>
-              </motion.div>
-            )}
+              )}
+
+              {yesterdayTransactions.length > 0 && (
+                <div>
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Yesterday</h3>
+                  <div className="space-y-2.5">
+                    {yesterdayTransactions.map(renderTransaction)}
+                  </div>
+                </div>
+              )}
+
+              {todayTransactions.length === 0 && yesterdayTransactions.length === 0 && (
+                <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/90 p-8 text-center shadow-[0_20px_45px_rgba(15,23,42,0.06)]">
+                  <p className="text-sm font-medium text-slate-600">No transactions yet</p>
+                  <p className="mt-2 text-sm text-slate-400">Your recent wallet movement will show up here.</p>
+                </div>
+              )}
+            </motion.div>
           </div>
         </main>
 
         {selectedTransaction && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-3 py-4 sm:px-4 backdrop-blur-[2px]">
-            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-[0_30px_90px_rgba(15,23,42,0.24)] sm:p-5">
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Transaction details</p>
-                  <h3 className="mt-1 break-words text-lg font-semibold text-slate-900">{selectedTransaction.title}</h3>
+            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.24)] sm:p-6">
+              {/* Receipt Header */}
+              <div className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white p-6 text-center">
+                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[#0f6cff]/10">
+                  <svg className="h-8 w-8 text-[#0f6cff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedTransaction(null)}
-                  className="shrink-0 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-                  aria-label="Close transaction details"
-                >
-                  <X className="h-4 w-4" />
-                </button>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Transaction Receipt</p>
+                <h3 className="mt-2 break-words text-xl font-bold text-slate-900">{selectedTransaction.title}</h3>
+                <p className="mt-1 text-sm text-slate-500">{selectedTransaction.subtitle}</p>
               </div>
 
-              <div className="rounded-[1.5rem] border border-slate-200 bg-gradient-to-br from-[#f8fbff] to-white p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{selectedTransaction.subtitle}</p>
-                    <p className="mt-1 text-sm text-slate-500">{selectedTransaction.detailTitle}</p>
+              {/* Amount Section */}
+              <div className="border-b border-slate-200 bg-slate-50/50 p-6 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Amount</p>
+                <p className={`mt-2 text-4xl font-bold ${selectedTransaction.amount.startsWith("+") ? "text-emerald-600" : "text-slate-900"}`}>
+                  {selectedTransaction.amount}
+                </p>
+                <span className={`mt-2 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${typeColors[selectedTransaction.type]}`}>
+                  {selectedTransaction.badgeLabel}
+                </span>
+              </div>
+
+              {/* Transaction Details */}
+              <div className="p-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Transaction ID</span>
+                    <span className="text-xs font-mono text-slate-700">{selectedTransaction.id.slice(0, 8)}...</span>
                   </div>
-                  <p className={`text-lg font-semibold ${selectedTransaction.amount.startsWith("+") ? "text-emerald-600" : "text-slate-900"}`}>
-                    {selectedTransaction.amount}
-                  </p>
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Date</span>
+                    <span className="text-xs font-medium text-slate-700">{new Date(selectedTransaction.createdAt || Date.now()).toLocaleDateString()}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Status</span>
+                    <span className="text-xs font-medium text-emerald-600">Completed</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Type</span>
+                    <span className="text-xs font-medium text-slate-700 capitalize">{selectedTransaction.type}</span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Description</p>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-700">{selectedTransaction.detailDescription}</p>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-900">Note</p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-blue-800">{selectedTransaction.detailFooter}</p>
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3 rounded-[1.5rem] border border-slate-200 p-4 text-sm text-slate-600">
-                <p className="leading-6">{selectedTransaction.detailDescription}</p>
-                <p className="font-medium text-slate-900">{selectedTransaction.detailFooter}</p>
+              {/* Close Button */}
+              <div className="border-t border-slate-200 bg-slate-50 p-4">
+                <button
+                  onClick={() => setSelectedTransaction(null)}
+                  className="w-full rounded-xl bg-[#0f6cff] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b57d3]"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>

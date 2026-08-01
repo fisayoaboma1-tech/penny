@@ -31,6 +31,12 @@ const services = [
   { label: "Convert", icon: Repeat, path: "/wallet/card", comingSoon: true },
 ]
 
+const typeColors: Record<WalletTransactionType, string> = {
+  debit: "bg-rose-50 text-rose-700",
+  credit: "bg-emerald-50 text-emerald-700",
+  transfer: "bg-[#eef5ff] text-[#0f6cff]",
+}
+
 const buildRecentTransactions = (transactions: WalletTransaction[]) =>
   transactions.slice(0, 4).map((tx) => ({
     ...tx,
@@ -484,26 +490,35 @@ export default function WalletPage() {
                   {recentTransactions.length > 0 ? (
                     recentTransactions.map((tx) => {
                       const Icon = tx.icon === "up" ? ArrowUpRight : ArrowDown
-                      const isCredit = tx.amount.startsWith("+")
+                      const iconColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-[#0f6cff]"
+                      const iconBg = tx.type === "credit" ? "bg-emerald-50" : tx.type === "debit" ? "bg-rose-50" : "bg-[#eef5ff]"
+                      const amountColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-slate-900"
+
                       return (
                         <div
                           key={tx.id}
-                          className="flex flex-col gap-2 rounded-xl border border-slate-200/80 bg-slate-50/50 p-2.5 transition hover:border-slate-300/80 hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-3"
+                          onClick={() => router.push("/wallet/history")}
+                          className="group flex w-full items-center gap-3 rounded-xl border border-slate-200/80 bg-white p-3 text-left shadow-[0_1px_4px_rgba(15,23,42,0.03)] transition-all hover:border-slate-300 hover:shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
                         >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0f6cff] shadow-sm ring-1 ring-slate-200/60 sm:h-10 sm:w-10">
-                              <Icon className="h-4 w-4 sm:h-4.5 sm:w-4.5" />
-                            </span>
-                            <div className="min-w-0">
-                              <p className="break-words text-[13px] font-medium text-slate-900 sm:text-sm">{tx.title}</p>
-                              <p className="text-[9px] uppercase tracking-wider text-slate-500 sm:text-[10px]">{tx.badgeLabel.toUpperCase()}</p>
-                            </div>
+                          {/* Icon */}
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconBg}`}>
+                            <Icon className={`h-4 w-4 ${iconColor}`} />
                           </div>
-                          <div className="flex shrink-0 flex-row items-center justify-between gap-3 text-left sm:flex-col sm:items-end sm:text-right">
-                            <p className={`text-[13px] font-semibold sm:text-sm ${isCredit ? "text-emerald-600" : "text-rose-600"}`}>
+
+                          {/* Text Content */}
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[13px] font-semibold text-slate-900 uppercase tracking-wide">{tx.title}</p>
+                            <p className="mt-0.5 text-[11px] text-slate-500">{tx.subtitle}</p>
+                          </div>
+
+                          {/* Amount */}
+                          <div className="flex shrink-0 flex-col items-end gap-0.5">
+                            <p className={`text-[13px] font-bold ${amountColor}`}>
                               {tx.amount}
                             </p>
-                            <p className="text-[9px] text-slate-500 sm:text-[10px]">{tx.time}</p>
+                            <span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${typeColors[tx.type]}`}>
+                              {tx.badgeLabel}
+                            </span>
                           </div>
                         </div>
                       )
