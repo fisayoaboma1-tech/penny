@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { ArrowUpRight, ArrowDown, X, ChevronDown } from "lucide-react"
+import { ArrowUpRight, ArrowDown, Clock, Copy, X, ChevronDown } from "lucide-react"
 import { PageHeader } from "@/components/wallet/page-header"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
 import { createClient } from "@/lib/supabase/client"
@@ -31,7 +31,7 @@ export default function TransactionHistoryPage() {
 
       const { data, error } = await supabase
         .from("wallet_transactions")
-        .select("id, user_id, type, amount, title, subtitle, detail_title, detail_description, detail_footer, created_at")
+        .select("id, user_id, type, amount, title, subtitle, detail_title, detail_description, detail_footer, status, created_at")
         .eq("user_id", authUser.id)
         .order("created_at", { ascending: false })
 
@@ -43,6 +43,7 @@ export default function TransactionHistoryPage() {
       const mapped = (data ?? []).map((tx: any) => {
         const type = tx.type as WalletTransactionType
         const amount = Number(tx.amount) || 0
+        const status = type === "transfer" ? "processing" : (tx.status || "completed")
 
         return {
           id: tx.id,
@@ -53,6 +54,7 @@ export default function TransactionHistoryPage() {
           time: getTransactionTimeLabel(tx.created_at),
           icon: getWalletTransactionIcon(type),
           badgeLabel: getWalletTransactionBadge(type),
+          status,
           detailTitle: tx.detail_title,
           detailDescription: tx.detail_description,
           detailFooter: tx.detail_footer,
@@ -74,6 +76,10 @@ export default function TransactionHistoryPage() {
     const iconColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-[#0f6cff]"
     const iconBg = tx.type === "credit" ? "bg-emerald-50" : tx.type === "debit" ? "bg-rose-50" : "bg-[#eef5ff]"
     const amountColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-slate-900"
+    const BadgeIcon = tx.type === "transfer" ? Clock : undefined
+    const badgeClasses = tx.type === "transfer"
+      ? "bg-amber-100 text-amber-800"
+      : typeColors[tx.type]
 
     return (
       <motion.button
@@ -100,7 +106,8 @@ export default function TransactionHistoryPage() {
           <p className={`text-sm font-bold ${amountColor}`}>
             {tx.amount}
           </p>
-          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${typeColors[tx.type]}`}>
+          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${badgeClasses}`}>
+            {BadgeIcon ? <BadgeIcon className="h-3.5 w-3.5" /> : null}
             {tx.badgeLabel}
           </span>
         </div>
@@ -173,10 +180,16 @@ export default function TransactionHistoryPage() {
         </main>
 
         {selectedTransaction && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-3 py-4 sm:px-4 backdrop-blur-[2px]">
-            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.24)] sm:p-6">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-3 py-4 sm:px-4 backdrop-blur-[2px]"
+            onClick={() => setSelectedTransaction(null)}
+          >
+            <div
+              className="max-h-[calc(100vh-2rem)] w-full max-w-lg overflow-visible rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.24)] p-4 sm:p-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              onClick={(event) => event.stopPropagation()}
+            >
               {/* Receipt Header */}
-              <div className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white p-6 text-center">
+              <div className="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white p-5 text-center sm:p-6">
                 <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[#0f6cff]/10">
                   <svg className="h-8 w-8 text-[#0f6cff]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -201,9 +214,16 @@ export default function TransactionHistoryPage() {
               {/* Transaction Details */}
               <div className="p-6">
                 <div className="space-y-3">
-                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <div className="flex flex-col gap-2 border-b border-slate-100 pb-2 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Transaction ID</span>
-                    <span className="text-xs font-mono text-slate-700">{selectedTransaction.id.slice(0, 8)}...</span>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(selectedTransaction.id.replace(/-/g, ""))}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+                    >
+                      <span className="font-mono text-[11px] break-all text-left">{selectedTransaction.id.replace(/-/g, "")}</span>
+                      <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
                   </div>
                   <div className="flex justify-between border-b border-slate-100 pb-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Date</span>
@@ -211,7 +231,9 @@ export default function TransactionHistoryPage() {
                   </div>
                   <div className="flex justify-between border-b border-slate-100 pb-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Status</span>
-                    <span className="text-xs font-medium text-emerald-600">Completed</span>
+                    <span className={`text-xs font-medium ${selectedTransaction.status === 'processing' ? 'text-amber-700' : 'text-emerald-600'}`}>
+                      {selectedTransaction.status ? selectedTransaction.status.charAt(0).toUpperCase() + selectedTransaction.status.slice(1) : 'Completed'}
+                    </span>
                   </div>
                   <div className="flex justify-between border-b border-slate-100 pb-2">
                     <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Type</span>
@@ -225,21 +247,6 @@ export default function TransactionHistoryPage() {
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">{selectedTransaction.detailDescription}</p>
                 </div>
 
-                {/* Footer */}
-                <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-900">Note</p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-blue-800">{selectedTransaction.detailFooter}</p>
-                </div>
-              </div>
-
-              {/* Close Button */}
-              <div className="border-t border-slate-200 bg-slate-50 p-4">
-                <button
-                  onClick={() => setSelectedTransaction(null)}
-                  className="w-full rounded-xl bg-[#0f6cff] py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0b57d3]"
-                >
-                  Close
-                </button>
               </div>
             </div>
           </div>

@@ -140,7 +140,7 @@ export default function WalletPage() {
 
     const { data, error } = await supabase
       .from("wallet_transactions")
-      .select("id, user_id, type, amount, title, subtitle, detail_title, detail_description, detail_footer, created_at")
+      .select("id, user_id, type, amount, title, subtitle, detail_title, detail_description, detail_footer, status, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
 
@@ -155,6 +155,7 @@ export default function WalletPage() {
       const formattedAmount = formatWalletAmount(type, amount)
       const badgeLabel = getWalletTransactionBadge(type)
       const icon = getWalletTransactionIcon(type)
+      const status = type === "transfer" ? "processing" : (tx.status || "completed")
 
       return {
         id: tx.id,
@@ -165,6 +166,7 @@ export default function WalletPage() {
         time: getTransactionTimeLabel(tx.created_at),
         icon,
         badgeLabel,
+        status,
         detailTitle: tx.detail_title,
         detailDescription: tx.detail_description,
         detailFooter: tx.detail_footer,
@@ -493,6 +495,8 @@ export default function WalletPage() {
                       const iconColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-[#0f6cff]"
                       const iconBg = tx.type === "credit" ? "bg-emerald-50" : tx.type === "debit" ? "bg-rose-50" : "bg-[#eef5ff]"
                       const amountColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-slate-900"
+                      const BadgeIcon = tx.type === "transfer" ? Clock3 : undefined
+                      const badgeClasses = tx.type === "transfer" ? "bg-amber-100 text-amber-800" : typeColors[tx.type]
 
                       return (
                         <div
@@ -516,7 +520,8 @@ export default function WalletPage() {
                             <p className={`text-[13px] font-bold ${amountColor}`}>
                               {tx.amount}
                             </p>
-                            <span className={`rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${typeColors[tx.type]}`}>
+                            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${badgeClasses}`}>
+                              {BadgeIcon ? <BadgeIcon className="h-3.5 w-3.5" /> : null}
                               {tx.badgeLabel}
                             </span>
                           </div>

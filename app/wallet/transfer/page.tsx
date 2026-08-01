@@ -673,12 +673,12 @@ export default function WalletTransferPage() {
       const transactionTitle = `Transfer to ${recipientName}`
       const transactionSubtitle = `${selectedBank} - ${country}`
       
-      let detailDescription = `You sent $${amount} to ${recipientName} (${recipientEmail}) via ${selectedBank}.`
+      let detailDescription = `You sent $${amount} USD to ${recipientName} (${recipientEmail}) through ${selectedBank} in ${country}.`
       if (iban) detailDescription += `\nIBAN: ${iban}`
-      if (swiftCode) detailDescription += `\nSWIFT: ${swiftCode}`
-      if (routingNumber) detailDescription += `\nRouting: ${routingNumber}`
-      if (sortCode) detailDescription += `\nSort Code: ${sortCode}`
-      if (bankAddress) detailDescription += `\nBank Address: ${bankAddress}`
+      if (swiftCode) detailDescription += `\nSWIFT/BIC: ${swiftCode}`
+      if (routingNumber) detailDescription += `\nRouting number: ${routingNumber}`
+      if (sortCode) detailDescription += `\nSort code: ${sortCode}`
+      if (bankAddress) detailDescription += `\nBank address: ${bankAddress}`
       if (reference) detailDescription += `\nReference: ${reference}`
 
       // Calculate new balance

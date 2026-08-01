@@ -12,6 +12,7 @@ export interface WalletTransaction {
   detailTitle: string
   detailDescription: string
   detailFooter: string
+  status?: string
   createdAt?: string
 }
 
@@ -23,7 +24,7 @@ export const getWalletTransactionBadge = (type: WalletTransactionType) => {
       return "Debit"
     case "transfer":
     default:
-      return "Transfer"
+      return "Processing"
   }
 }
 
@@ -73,10 +74,15 @@ export const recordBalanceAdjustmentTransaction = async ({
 
   const type: WalletTransactionType = delta > 0 ? "credit" : "debit"
   const amount = Math.abs(delta)
-  const title = delta > 0 ? "Balance added" : "Balance removed"
+  const actorName = actorLabel === "Admin" ? "Pennywise Technologies" : actorLabel
+  const title = delta > 0 ? "Account funded" : "Account debited"
   const subtitle = delta > 0
-    ? `${actorLabel} added funds to your wallet`
-    : `${actorLabel} removed funds from your wallet`
+    ? actorLabel === "System"
+      ? "Account funded"
+      : `Account funded by ${actorName}`
+    : actorLabel === "System"
+      ? "Account debited"
+      : `Account debited by ${actorName}`
   const detailTitle = delta > 0 ? "Wallet balance updated" : "Wallet balance adjusted"
   const detailDescription = delta > 0
     ? `Your wallet balance was increased by $${amount.toFixed(2)}.`
