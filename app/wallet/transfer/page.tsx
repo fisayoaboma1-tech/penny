@@ -520,6 +520,10 @@ export default function WalletTransferPage() {
   const mainRef = useRef<HTMLElement | null>(null)
   const [reference, setReference] = useState("")
   const [amount, setAmount] = useState("")
+  const [amountError, setAmountError] = useState("")
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const accountName = useMemo(() => {
     if (!user) return "Chukwudi Enoch"
@@ -645,6 +649,81 @@ export default function WalletTransferPage() {
     scrollToTopAndRefresh()
   }
 
+  const handleReviewTransfer = () => {
+    setShowReviewModal(true)
+  }
+
+  const handleCancelReview = () => {
+    setShowReviewModal(false)
+  }
+
+  const handleProceedTransfer = async () => {
+    setShowReviewModal(false)
+    setIsProcessing(true)
+
+    // Simulate processing for 5 seconds
+    await new Promise(resolve => setTimeout(resolve, 5000))
+
+    const transferAmount = parseFloat(amount)
+
+    // Save transaction to history and update balance
+    if (user) {
+      const supabase = createClient()
+      
+      const transactionTitle = `Transfer to ${recipientName}`
+      const transactionSubtitle = `${selectedBank} - ${country}`
+      
+      let detailDescription = `You sent $${amount} to ${recipientName} (${recipientEmail}) via ${selectedBank}.`
+      if (iban) detailDescription += `\nIBAN: ${iban}`
+      if (swiftCode) detailDescription += `\nSWIFT: ${swiftCode}`
+      if (routingNumber) detailDescription += `\nRouting: ${routingNumber}`
+      if (sortCode) detailDescription += `\nSort Code: ${sortCode}`
+      if (bankAddress) detailDescription += `\nBank Address: ${bankAddress}`
+      if (reference) detailDescription += `\nReference: ${reference}`
+
+      // Calculate new balance
+      const newBalance = walletBalance - transferAmount
+
+      // Update balance and save transaction in parallel
+      const [balanceUpdate, transactionInsert] = await Promise.all([
+        supabase
+          .from('profiles')
+          .update({ balance: newBalance })
+          .eq('id', user.id),
+        supabase
+          .from('wallet_transactions')
+          .insert([{
+            user_id: user.id,
+            type: 'transfer',
+            amount: transferAmount,
+            title: transactionTitle,
+            subtitle: transactionSubtitle,
+            detail_title: `$${amount} USD sent to ${recipientName}`,
+            detail_description: detailDescription,
+            detail_footer: 'Transaction completed successfully.',
+            status: 'completed',
+          }])
+      ])
+
+      if (balanceUpdate.error) {
+        console.error('Error updating balance:', balanceUpdate.error)
+      }
+
+      if (transactionInsert.error) {
+        console.error('Error saving transaction:', transactionInsert.error)
+      }
+    }
+
+    setIsProcessing(false)
+    setShowSuccess(true)
+
+    // Redirect to wallet home after showing success
+    setTimeout(() => {
+      setShowSuccess(false)
+      router.push('/wallet')
+    }, 2000)
+  }
+
   const countryRequirements: Record<string, { requiresIban: boolean; requiresSwift: boolean; requiresRouting: boolean; requiresSortCode: boolean; requiresBankAddress: boolean }> = {
     "United States": { requiresIban: false, requiresSwift: false, requiresRouting: true, requiresSortCode: false, requiresBankAddress: true },
     "United Kingdom": { requiresIban: true, requiresSwift: false, requiresRouting: false, requiresSortCode: true, requiresBankAddress: true },
@@ -743,6 +822,62 @@ export default function WalletTransferPage() {
   const requirements = africanCountries.has(country)
     ? { requiresIban: false, requiresSwift: false, requiresRouting: false, requiresSortCode: false, requiresBankAddress: false }
     : countryRequirements[country] || countryRequirements["United Kingdom"]
+
+  // Validate amount and show error message
+  useEffect(() => {
+    if (!amount) {
+      setAmountError("")
+      return
+    }
+
+    const amountValue = parseFloat(amount)
+    if (isNaN(amountValue) || amountValue <= 0) {
+      setAmountError("Please enter a valid amount")
+    } else if (amountValue > walletBalance) {
+      setAmountError(`Transfer amount exceeds your balance of $${walletBalance.toFixed(2)}`)
+    } else {
+      setAmountError("")
+    }
+  }, [amount, walletBalance])
+
+  // Validation logic
+  const isFormValid = useMemo(() => {
+    if (!recipientName || !recipientEmail || !amount || selectedBank === "Select bank" || !accountNumber) {
+      return false
+    }
+
+    const amountValue = parseFloat(amount)
+    if (isNaN(amountValue) || amountValue <= 0) {
+      return false
+    }
+
+    if (amountValue > walletBalance) {
+      return false
+    }
+
+    // Country-specific validations
+    if (requirements.requiresIban && !iban) {
+      return false
+    }
+
+    if (requirements.requiresSwift && !swiftCode) {
+      return false
+    }
+
+    if (requirements.requiresRouting && !routingNumber) {
+      return false
+    }
+
+    if (requirements.requiresSortCode && !sortCode) {
+      return false
+    }
+
+    if (requirements.requiresBankAddress && !bankAddress) {
+      return false
+    }
+
+    return true
+  }, [recipientName, recipientEmail, amount, selectedBank, accountNumber, walletBalance, requirements, iban, swiftCode, routingNumber, sortCode, bankAddress])
 
   return (
     <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f6f8] text-slate-900">
@@ -912,6 +1047,9 @@ export default function WalletTransferPage() {
                     USD
                   </span>
                 </div>
+                {amountError && (
+                  <p className="mt-1.5 text-xs text-red-600">{amountError}</p>
+                )}
               </div>
 
               <div className="md:col-span-2">
@@ -1074,8 +1212,13 @@ export default function WalletTransferPage() {
 
             <button
               type="button"
-              disabled={isRestricted}
-              className={`mt-5 w-full rounded-[16px] px-4 py-3 text-sm font-semibold text-white transition shadow-[0_10px_20px_rgba(15,23,42,0.12)] ${isRestricted ? "bg-slate-400 cursor-not-allowed hover:bg-slate-400" : "bg-slate-900 hover:bg-slate-800"}`}
+              onClick={() => setShowReviewModal(true)}
+              disabled={!isFormValid || isRestricted}
+              className={`mt-5 w-full rounded-[16px] px-4 py-3 text-sm font-semibold text-white transition shadow-[0_10px_20px_rgba(15,23,42,0.12)] ${
+                isFormValid && !isRestricted
+                  ? "bg-[#0f6cff] hover:bg-[#0b57d3] cursor-pointer"
+                  : "bg-slate-400 cursor-not-allowed hover:bg-slate-400"
+              }`}
             >
               Review transfer
             </button>
@@ -1085,6 +1228,141 @@ export default function WalletTransferPage() {
       </main>
 
       <WalletBottomNav />
+
+      {/* Review Transfer Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md rounded-[24px] bg-white shadow-[0_32px_80px_rgba(15,23,42,0.22)]"
+          >
+            <div className="border-b border-slate-200 bg-gradient-to-b from-[#f5f9ff] to-white px-6 pb-5 pt-7 text-center">
+              <h3 className="text-lg font-semibold tracking-tight text-slate-900">Review Transfer</h3>
+              <p className="mt-1 text-sm text-slate-500">Please verify all details before proceeding</p>
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto p-6">
+              <div className="space-y-4">
+                <div className="rounded-[16px] border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Paying From</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">{accountName}</p>
+                </div>
+
+                <div className="rounded-[16px] border border-blue-100 bg-blue-50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-600">Transfer Amount</p>
+                  <p className="mt-1 text-2xl font-semibold text-slate-900">${amount} USD</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Recipient Name</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900">{recipientName}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Recipient Email</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900">{recipientEmail}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Country</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900">{country}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Bank</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900">{selectedBank}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Account Number</p>
+                    <p className="mt-1 text-sm font-medium text-slate-900">{accountNumber}</p>
+                  </div>
+                  {iban && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">IBAN</p>
+                      <p className="mt-1 text-sm font-medium text-slate-900">{iban}</p>
+                    </div>
+                  )}
+                  {swiftCode && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">SWIFT / BIC</p>
+                      <p className="mt-1 text-sm font-medium text-slate-900">{swiftCode}</p>
+                    </div>
+                  )}
+                  {routingNumber && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Routing Number</p>
+                      <p className="mt-1 text-sm font-medium text-slate-900">{routingNumber}</p>
+                    </div>
+                  )}
+                  {sortCode && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Sort Code</p>
+                      <p className="mt-1 text-sm font-medium text-slate-900">{sortCode}</p>
+                    </div>
+                  )}
+                  {bankAddress && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Bank Address</p>
+                      <p className="mt-1 text-sm font-medium text-slate-900">{bankAddress}</p>
+                    </div>
+                  )}
+                  {reference && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Reference</p>
+                      <p className="mt-1 text-sm font-medium text-slate-900">{reference}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 border-t border-slate-200 bg-slate-50 px-6 py-5">
+              <button
+                onClick={handleCancelReview}
+                className="flex-1 rounded-[16px] border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleProceedTransfer}
+                className="flex-1 rounded-[16px] bg-[#0f6cff] px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,108,255,0.22)] transition hover:bg-[#0b57d3]"
+              >
+                Proceed
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Processing Modal */}
+      {isProcessing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-6">
+            <div className="loader-login" />
+            <p className="text-sm font-medium text-slate-600">Processing transfer...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center gap-6"
+          >
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+              <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-slate-900">Payment Sent!</h3>
+              <p className="mt-1 text-sm text-slate-500">Check your transaction history for details</p>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   )
 }

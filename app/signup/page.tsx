@@ -143,6 +143,18 @@ export default function SignupPage() {
     }
   }
 
+  // Show creating account overlay
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm">
+        <div className="flex flex-col items-center gap-6">
+          <div className="loader-login" />
+          <p className="text-sm font-medium text-slate-600">Creating account...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-white relative overflow-hidden">
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />

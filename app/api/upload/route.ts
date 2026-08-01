@@ -47,12 +47,10 @@ export async function POST(request: Request) {
         {
           folder: "profiles",
           resource_type: "image",
-          timeout: 15000,
-          transformation: [
-            { width: 500, height: 500, crop: "fill", gravity: "face" },
-            { quality: "auto" },
-            { fetch_format: "auto" },
-          ],
+          timeout: 10000, // Reduced from 15000 to 10000
+          // Removed heavy transformations - image is already compressed client-side
+          quality: "auto:good", // Faster than "auto" with good quality
+          fetch_format: "auto",
         },
         (error, result) => {
           if (error) {

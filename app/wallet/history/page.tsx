@@ -12,9 +12,9 @@ import { formatWalletAmount, getTransactionTimeLabel, getWalletTransactionBadge,
 type TransactionType = WalletTransactionType
 
 const typeColors: Record<TransactionType, string> = {
-  debit: "bg-rose-100 text-rose-700",
-  credit: "bg-emerald-100 text-emerald-700",
-  transfer: "bg-blue-100 text-blue-700",
+  debit: "bg-rose-50 text-rose-700",
+  credit: "bg-emerald-50 text-emerald-700",
+  transfer: "bg-[#eef5ff] text-[#0f6cff]",
 }
 
 export default function TransactionHistoryPage() {
@@ -71,8 +71,9 @@ export default function TransactionHistoryPage() {
 
   const renderTransaction = (tx: WalletTransaction) => {
     const Icon = tx.icon === "up" ? ArrowUpRight : ArrowDown
-    const iconColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-blue-600"
-    const amountColor = tx.amount.startsWith("+") ? "text-emerald-600" : "text-slate-900"
+    const iconColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-[#0f6cff]"
+    const iconBg = tx.type === "credit" ? "bg-emerald-50" : tx.type === "debit" ? "bg-rose-50" : "bg-[#eef5ff]"
+    const amountColor = tx.type === "credit" ? "text-emerald-600" : tx.type === "debit" ? "text-rose-600" : "text-slate-900"
 
     return (
       <motion.button
@@ -81,9 +82,9 @@ export default function TransactionHistoryPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={() => setSelectedTransaction(tx)}
-        className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-sm transition hover:shadow-md sm:flex-row sm:items-center"
+        className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200/80 bg-white p-4 text-left shadow-[0_16px_35px_rgba(15,23,42,0.06)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:flex-row sm:items-center"
       >
-        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${tx.icon === "up" ? "bg-slate-100" : "bg-emerald-50"}`}>
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconBg}`}>
           <Icon className={`h-5 w-5 ${iconColor}`} />
         </div>
         <div className="min-w-0 flex-1">
@@ -94,7 +95,7 @@ export default function TransactionHistoryPage() {
           <p className={`text-sm font-bold ${amountColor}`}>
             {tx.amount}
           </p>
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${typeColors[tx.type]}`}>
+          <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${typeColors[tx.type]}`}>
             {tx.badgeLabel}
           </span>
         </div>
@@ -103,110 +104,122 @@ export default function TransactionHistoryPage() {
   }
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col bg-slate-50 text-slate-900">
-      <PageHeader variant="sub" title="Transactions" onBack={() => router.back()} />
+    <div className="relative min-h-screen overflow-hidden bg-white text-slate-900">
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-[28vh] bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
 
-      <main className="flex-1 min-h-0 overflow-y-auto pb-28">
-        <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6">
-          {/* Tabs */}
-          <div className="mb-4 flex items-center gap-1 rounded-xl bg-slate-200/60 p-1">
-            <button
-              onClick={() => setActiveTab("past")}
-              className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition ${
-                activeTab === "past" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Past
-            </button>
-            <button
-              onClick={() => setActiveTab("upcoming")}
-              className={`flex-1 rounded-lg py-2.5 text-sm font-semibold transition ${
-                activeTab === "upcoming" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Upcoming
-            </button>
-          </div>
+      <div className="relative z-10 flex min-h-screen flex-col">
+        <PageHeader variant="sub" title="Transactions" onBack={() => router.back()} />
 
-          {activeTab === "past" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-              {/* Today Section */}
-              {todayTransactions.length > 0 && (
-                <div>
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Today</h3>
-                  <div className="space-y-2.5">
-                    {todayTransactions.map(renderTransaction)}
-                  </div>
-                </div>
-              )}
-
-              {/* Yesterday Section */}
-              {yesterdayTransactions.length > 0 && (
-                <div>
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Yesterday</h3>
-                  <div className="space-y-2.5">
-                    {yesterdayTransactions.map(renderTransaction)}
-                  </div>
-                </div>
-              )}
-
-              {todayTransactions.length === 0 && yesterdayTransactions.length === 0 && (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                  <p className="text-sm text-slate-500">No transactions yet</p>
-                </div>
-              )}
-            </motion.div>
-          )}
-
-          {activeTab === "upcoming" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                <p className="text-sm text-slate-500">No upcoming transactions</p>
+        <main className="flex-1 min-h-0 overflow-y-auto pb-28">
+          <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-6">
+            <div className="mb-5 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
+              <div className="bg-gradient-to-r from-[#eff7ff] via-white to-[#f8fbff] p-4 sm:p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">Wallet activity</p>
+                <h2 className="mt-2 text-lg font-semibold text-slate-900">Transaction history</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">A calm, easy-to-scan view of your recent money movement.</p>
               </div>
-            </motion.div>
-          )}
-        </div>
-      </main>
+            </div>
 
-      {selectedTransaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 px-3 py-4 sm:px-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-4 shadow-2xl sm:p-5">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Transaction details</p>
-                <h3 className="mt-1 break-words text-lg font-semibold text-slate-900">{selectedTransaction.title}</h3>
-              </div>
+            <div className="mb-4 flex items-center gap-1 rounded-2xl border border-slate-200/80 bg-slate-100/80 p-1 shadow-sm">
               <button
-                type="button"
-                onClick={() => setSelectedTransaction(null)}
-                className="shrink-0 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
-                aria-label="Close transaction details"
+                onClick={() => setActiveTab("past")}
+                className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
+                  activeTab === "past" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
+                }`}
               >
-                <X className="h-4 w-4" />
+                Past
+              </button>
+              <button
+                onClick={() => setActiveTab("upcoming")}
+                className={`flex-1 rounded-xl py-2.5 text-sm font-semibold transition ${
+                  activeTab === "upcoming" ? "bg-white text-[#0f6cff] shadow-sm" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Upcoming
               </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900">{selectedTransaction.subtitle}</p>
-                  <p className="mt-1 text-sm text-slate-500">{selectedTransaction.detailTitle}</p>
+            {activeTab === "past" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                {todayTransactions.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Today</h3>
+                    <div className="space-y-2.5">
+                      {todayTransactions.map(renderTransaction)}
+                    </div>
+                  </div>
+                )}
+
+                {yesterdayTransactions.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Yesterday</h3>
+                    <div className="space-y-2.5">
+                      {yesterdayTransactions.map(renderTransaction)}
+                    </div>
+                  </div>
+                )}
+
+                {todayTransactions.length === 0 && yesterdayTransactions.length === 0 && (
+                  <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/90 p-8 text-center shadow-[0_20px_45px_rgba(15,23,42,0.06)]">
+                    <p className="text-sm font-medium text-slate-600">No transactions yet</p>
+                    <p className="mt-2 text-sm text-slate-400">Your recent wallet movement will show up here.</p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {activeTab === "upcoming" && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white/90 p-8 text-center shadow-[0_20px_45px_rgba(15,23,42,0.06)]">
+                  <p className="text-sm font-medium text-slate-600">No upcoming transactions</p>
+                  <p className="mt-2 text-sm text-slate-400">Scheduled transfers will appear here.</p>
                 </div>
-                <p className={`text-lg font-semibold ${selectedTransaction.amount.startsWith("+") ? "text-emerald-600" : "text-slate-900"}`}>
-                  {selectedTransaction.amount}
-                </p>
+              </motion.div>
+            )}
+          </div>
+        </main>
+
+        {selectedTransaction && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 px-3 py-4 sm:px-4 backdrop-blur-[2px]">
+            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[1.75rem] border border-slate-200/80 bg-white p-4 shadow-[0_30px_90px_rgba(15,23,42,0.24)] sm:p-5">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Transaction details</p>
+                  <h3 className="mt-1 break-words text-lg font-semibold text-slate-900">{selectedTransaction.title}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedTransaction(null)}
+                  className="shrink-0 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                  aria-label="Close transaction details"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-slate-200 bg-gradient-to-br from-[#f8fbff] to-white p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{selectedTransaction.subtitle}</p>
+                    <p className="mt-1 text-sm text-slate-500">{selectedTransaction.detailTitle}</p>
+                  </div>
+                  <p className={`text-lg font-semibold ${selectedTransaction.amount.startsWith("+") ? "text-emerald-600" : "text-slate-900"}`}>
+                    {selectedTransaction.amount}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-3 rounded-[1.5rem] border border-slate-200 p-4 text-sm text-slate-600">
+                <p className="leading-6">{selectedTransaction.detailDescription}</p>
+                <p className="font-medium text-slate-900">{selectedTransaction.detailFooter}</p>
               </div>
             </div>
-
-            <div className="mt-4 space-y-3 rounded-2xl border border-slate-200 p-4 text-sm text-slate-600">
-              <p className="leading-6">{selectedTransaction.detailDescription}</p>
-              <p className="font-medium text-slate-900">{selectedTransaction.detailFooter}</p>
-            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <WalletBottomNav />
+        <WalletBottomNav />
+      </div>
     </div>
   )
 }
