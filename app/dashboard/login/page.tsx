@@ -6,6 +6,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { useAdminAuth } from "@/contexts/admin-auth-context"
 
 const fadeUpVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -27,6 +28,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { signOut } = useAdminAuth()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

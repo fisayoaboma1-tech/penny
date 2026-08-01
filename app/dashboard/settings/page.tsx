@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { ArrowLeft, Camera, Mail, Phone, Calendar, User, Fingerprint, Save, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { useAdminAuth } from "@/contexts/admin-auth-context"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 
 export default function AccountSettings() {
   const router = useRouter()
-  const supabase = createClient("admin")
+  const { user, profile, loading: authLoading, isAdmin } = useAdminAuth()
   const [adminProfile, setAdminProfile] = useState<any>(null)
   const [authorized, setAuthorized] = useState<boolean | null>(null)
   const [loading, setLoading] = useState(true)
@@ -22,82 +23,45 @@ export default function AccountSettings() {
   })
 
   const fetchAdminProfile = async () => {
-    try {
-      setLoading(true)
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
-
-      if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single()
-
-        if (data) {
-          setAdminProfile(data)
-          setFormData({
-            full_name: data.full_name || "",
-            email: data.email || user.email || "",
-            phone_number: data.phone_number || "",
-          })
-        } else {
-          router.replace("/dashboard/login")
-          return
-        }
-      } else {
-        router.replace("/dashboard/login")
-        return
-      }
-    } catch (error) {
-      console.error("Error fetching admin profile:", error)
+    if (!user) {
       router.replace("/dashboard/login")
       return
-    } finally {
-      setLoading(false)
     }
+
+    // Use profile from auth context
+    if (profile) {
+      setAdminProfile(profile)
+      setFormData({
+        full_name: profile.full_name || "",
+        email: profile.email || user.email || "",
+        phone_number: profile.phone_number || "",
+      })
+    }
+    setLoading(false)
   }
 
   const checkAdminAccess = async () => {
-    try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      const userId = session?.user?.id
-
-      if (sessionError || !session?.access_token || !userId) {
-        router.replace("/dashboard/login")
-        setAuthorized(false)
-        return
-      }
-
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", userId)
-        .single()
-
-      if (error || !profile?.is_admin) {
+    // Auth context handles session management
+    // Just wait for loading to complete and check if user is admin
+    if (!authLoading) {
+      if (!user || !isAdmin) {
         setAuthorized(false)
         router.replace("/dashboard/login")
-        return
+      } else {
+        setAuthorized(true)
       }
-
-      setAuthorized(true)
-    } catch (error) {
-      console.error("Admin auth check failed:", error)
-      setAuthorized(false)
-      router.replace("/dashboard/login")
     }
   }
 
   useEffect(() => {
     checkAdminAccess()
-  }, [supabase])
+  }, [user, isAdmin, authLoading])
 
   useEffect(() => {
     if (authorized) {
       fetchAdminProfile()
     }
-  }, [authorized, supabase])
+  }, [authorized])
 
   if (authorized === null) {
     return null

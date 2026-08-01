@@ -1,11 +1,10 @@
 "use client"
 
 import { createContext, useContext, useEffect, useRef, useState } from "react"
-import { useTheme } from "next-themes"
 import { createClient } from "../lib/supabase/client"
 import { User, Session } from "@supabase/supabase-js"
 
-interface ProfileRow {
+interface AdminProfileRow {
   id: string
   full_name: string
   email: string
@@ -24,30 +23,26 @@ interface ProfileRow {
   preferred_language?: string
 }
 
-interface AuthContextType {
+interface AdminAuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
-  profile: ProfileRow | null
-  isAdmin: boolean | null
+  profile: AdminProfileRow | null
+  isAdmin: boolean
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
-  theme: string | undefined
-  setTheme: (theme: string) => void
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<ProfileRow | null>(null)
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null)
-  const [theme, setThemeState] = useState<string | undefined>(undefined)
-  const { setTheme: setThemeMode } = useTheme()
+  const [profile, setProfile] = useState<AdminProfileRow | null>(null)
+  const [isAdmin, setIsAdmin] = useState<boolean>(false)
   // Create client once with lazy initializer to prevent infinite re-renders
-  const [supabase] = useState(() => createClient())
+  const [supabase] = useState(() => createClient("admin"))
   const profileChannel = useRef<any>(null)
   const currentUserIdRef = useRef<string | null>(null)
 
@@ -60,31 +55,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle()
 
       if (error) {
-        console.error("Failed to load profile for auth user:", error)
+        console.error("Failed to load admin profile:", error)
         return null
       }
 
-      return data as ProfileRow | null
+      return data as AdminProfileRow | null
     } catch (error) {
-      console.error("Error loading profile:", error)
+      console.error("Error loading admin profile:", error)
       return null
     }
   }
 
-  const applyProfile = (nextProfile: ProfileRow | null) => {
+  const applyProfile = (nextProfile: AdminProfileRow | null) => {
     setProfile(nextProfile)
-    // Only set isAdmin if this is actually an admin user
-    // This prevents the user context from showing admin users
     setIsAdmin(nextProfile?.is_admin ?? false)
   }
 
-  const subscribeToProfile = (userId: string) => {
-    // Don't subscribe to admin profiles in the user context
-    // This prevents real-time updates from affecting the wrong context
-    if (profile?.is_admin) {
-      return
-    }
+  const isAdminUser = (userId: string): boolean => {
+    // Check if the user is actually an admin
+    // This is used to filter auth state changes
+    return profile?.id === userId && profile?.is_admin === true
+  }
 
+  const subscribeToProfile = (userId: string) => {
     // Unsubscribe from existing channel if any
     if (profileChannel.current) {
       try {
@@ -97,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Create new channel with callbacks BEFORE subscribing
     const channel = supabase
-      .channel(`profile-${userId}`)
+      .channel(`admin-profile-${userId}`)
     
     channel.on(
       "postgres_changes",
@@ -109,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
       (payload: any) => {
         if (payload.new) {
-          const updatedProfile = payload.new as ProfileRow
+          const updatedProfile = payload.new as AdminProfileRow
           applyProfile(updatedProfile)
         }
       }
@@ -187,26 +180,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase])
 
-  const updateTheme = (newTheme: string) => {
-    setThemeState(newTheme)
-    // Save to user metadata
-    if (user) {
-      supabase.auth.updateUser({
-        data: { theme_preference: newTheme }
-      }).catch(err => console.error("Failed to save theme:", err))
-    }
-  }
-
   const signOut = async () => {
     setLoading(true)
     currentUserIdRef.current = null
-    // Only sign out from the user client, not the admin client
+    // Only sign out from the admin client, not the user client
     await supabase.auth.signOut({ scope: 'local' })
     setUser(null)
     setSession(null)
     setProfile(null)
-    setIsAdmin(null)
-    setThemeState(undefined)
+    setIsAdmin(false)
     if (profileChannel.current) {
       profileChannel.current.unsubscribe()
       profileChannel.current = null
@@ -220,29 +202,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     applyProfile(profileRow)
   }
 
-  // Load theme preference when user changes
-  useEffect(() => {
-    if (user) {
-      const savedTheme = user.user_metadata?.theme_preference
-      if (savedTheme) {
-        setThemeState(savedTheme)
-        // Apply the theme using next-themes
-        setThemeMode(savedTheme)
-      }
-    }
-  }, [user, setThemeMode])
-
   return (
-    <AuthContext.Provider value={{ user, session, loading, profile, isAdmin, signOut, refreshProfile, theme, setTheme: updateTheme }}>
+    <AdminAuthContext.Provider value={{ user, session, loading, profile, isAdmin, signOut, refreshProfile }}>
       {children}
-    </AuthContext.Provider>
+    </AdminAuthContext.Provider>
   )
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext)
+export function useAdminAuth() {
+  const context = useContext(AdminAuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error("useAdminAuth must be used within an AdminAuthProvider")
   }
   return context
 }

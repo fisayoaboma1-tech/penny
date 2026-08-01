@@ -30,6 +30,7 @@ import {
 } from "lucide-react"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar } from 'recharts'
 import { createClient } from "@/lib/supabase/client"
+import { useAdminAuth } from "@/contexts/admin-auth-context"
 import { EditBalanceModal } from "../../components/edit-balance-modal"
 import { DeleteUserModal } from "../../components/delete-user-modal"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
@@ -72,9 +73,9 @@ const formatPhoneNumber = (user: User) => {
 const ITEMS_PER_PAGE = 10
 
 export default function AdminDashboard() {
+  const { user, session, loading: authLoading, profile, isAdmin, signOut, refreshProfile } = useAdminAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [authLoading, setAuthLoading] = useState(true)
   const [adminProfile, setAdminProfile] = useState<any>(null)
   const [authorized, setAuthorized] = useState<boolean | null>(null)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
@@ -91,7 +92,8 @@ export default function AdminDashboard() {
   const [chartType, setChartType] = useState<"area" | "bar">("area")
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
-  const supabase = createClient("admin")
+  // Create client once with lazy initializer to prevent infinite re-renders
+  const [supabase] = useState(() => createClient("admin"))
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
@@ -99,43 +101,15 @@ export default function AdminDashboard() {
   }, [])
 
   const checkAdminAccess = async () => {
-    try {
-      setAuthLoading(true)
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-      if (sessionError || !session?.access_token) {
+    // Auth context handles session management
+    // Just wait for loading to complete and check if user is admin
+    if (!authLoading) {
+      if (!user || !isAdmin) {
         setAuthorized(false)
         router.replace("/dashboard/login")
-        return
+      } else {
+        setAuthorized(true)
       }
-
-      const userId = session.user?.id
-      if (!userId) {
-        setAuthorized(false)
-        router.replace("/dashboard/login")
-        return
-      }
-
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", userId)
-        .single()
-
-      if (error || !profile?.is_admin) {
-        setAuthorized(false)
-        router.replace("/dashboard/login")
-        return
-      }
-
-      // Admin is authenticated - set authorized to true
-      setAuthorized(true)
-    } catch (error) {
-      console.error("Admin auth check failed:", error)
-      setAuthorized(false)
-      router.replace("/dashboard/login")
-    } finally {
-      setAuthLoading(false)
     }
   }
 
@@ -165,43 +139,27 @@ export default function AdminDashboard() {
   }
 
   const fetchAdminProfile = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const user = session?.user
-
-      if (!user) {
-        router.replace("/dashboard/login")
-        return
-      }
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single()
-
-      if (!data) {
-        router.replace("/dashboard/login")
-        return
-      }
-
-      setAdminProfile(data)
-    } catch (error) {
-      console.error("Error fetching admin profile:", error)
+    if (!user) {
       router.replace("/dashboard/login")
+      return
+    }
+
+    // Use profile from auth context
+    if (profile) {
+      setAdminProfile(profile)
     }
   }
 
   useEffect(() => {
     checkAdminAccess()
-  }, [supabase])
+  }, [user, isAdmin, authLoading])
 
   useEffect(() => {
     if (authorized) {
       fetchAdminProfile()
       fetchUsers()
     }
-  }, [authorized, supabase])
+  }, [authorized])
 
   // Real-time subscription for profile updates (non-admin users only)
   useEffect(() => {
@@ -246,7 +204,7 @@ export default function AdminDashboard() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [authorized, supabase, users, selectedUserDetails, selectedUser])
+  }, [authorized, users, selectedUserDetails, selectedUser])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -257,7 +215,7 @@ export default function AdminDashboard() {
   }
 
   const confirmLogout = async () => {
-    await supabase.auth.signOut()
+    await signOut()
     router.push("/dashboard/login")
   }
 

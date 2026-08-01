@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   Fingerprint,
 } from "lucide-react"
+import { useAdminAuth } from "@/contexts/admin-auth-context"
 
 interface AdminSidebarProps {
   isOpen: boolean
@@ -32,6 +33,7 @@ export function AdminSidebar({ isOpen, onClose, adminProfile, isDesktop = false 
   const router = useRouter()
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
+  const { signOut } = useAdminAuth()
   const [mounted, setMounted] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
 
@@ -40,7 +42,7 @@ export function AdminSidebar({ isOpen, onClose, adminProfile, isDesktop = false 
   }, [])
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
+    await signOut()
     router.push("/dashboard/login")
   }
 
