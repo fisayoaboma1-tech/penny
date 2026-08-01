@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/auth-context"
 import { QueryProvider } from "@/components/query-provider"
 import { PageTransition } from "@/components/page-transition"
 import { ThemeProvider } from "@/components/theme-provider"
+import { SmartSuppChat } from "@/components/smartsupp-chat"
 import "./globals.css"
 
 const _inter = Inter({
@@ -64,6 +65,7 @@ export default function RootLayout({
                 <LenisProvider>
                   <PageTransition>{children}</PageTransition>
                   <Toaster />
+                  <SmartSuppChat />
                 </LenisProvider>
               </AuthProvider>
             </QueryProvider>
