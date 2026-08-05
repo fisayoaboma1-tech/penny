@@ -552,7 +552,7 @@ export default function WalletTransferPage() {
       setBankError(null)
 
       try {
-        const response = await fetch("/data/bank-catalog.json", { cache: "force-cache" })
+        const response = await fetch("/data/bank-catalog.json", { cache: "no-store" })
         if (!response.ok) {
           throw new Error("Unable to load bank catalog")
         }
@@ -584,10 +584,16 @@ export default function WalletTransferPage() {
     const region = regionForCountry[countryName] || "International"
     const regionBanks = catalog.regions?.[region]
     const countrySpecificBanks = regionBanks?.[countryName]
-    const regionalDefaultBanks = regionBanks?.default
-    const localBanks = [...(countrySpecificBanks || []), ...(regionalDefaultBanks || [])]
+    
+    // If country-specific banks exist, return only those (no international/default banks mixed in)
+    if (countrySpecificBanks && countrySpecificBanks.length > 0) {
+      return countrySpecificBanks
+    }
+    
+    // Otherwise, fall back to regional defaults + international + default banks
+    const regionalDefaultBanks = regionBanks?.default || []
     const internationalBanks = catalog.international || []
-    const combinedBanks = Array.from(new Set([...localBanks, ...internationalBanks, ...defaultBanks]))
+    const combinedBanks = Array.from(new Set([...regionalDefaultBanks, ...internationalBanks, ...defaultBanks]))
 
     return combinedBanks.length > 0 ? combinedBanks : defaultBanks
   }
@@ -734,6 +740,7 @@ export default function WalletTransferPage() {
     Canada: { requiresIban: false, requiresSwift: false, requiresRouting: true, requiresSortCode: false, requiresBankAddress: true },
     Australia: { requiresIban: false, requiresSwift: true, requiresRouting: false, requiresSortCode: false, requiresBankAddress: true },
     "United Arab Emirates": { requiresIban: true, requiresSwift: true, requiresRouting: false, requiresSortCode: false, requiresBankAddress: true },
+    Philippines: { requiresIban: false, requiresSwift: true, requiresRouting: false, requiresSortCode: false, requiresBankAddress: true },
   }
 
   // Real-time subscription for restriction and balance updates

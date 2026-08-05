@@ -317,6 +317,218 @@
         "PayPal",
         "Revolut"
       ]
+    },
+    "Asia": {
+      "default": [
+        "Wise",
+        "Revolut",
+        "PayPal"
+      ],
+      "Philippines": [
+        "BDO Unibank",
+        "Bank of the Philippine Islands (BPI)",
+        "Metrobank",
+        "Land Bank",
+        "UnionBank",
+        "Philippine National Bank (PNB)",
+        "Security Bank",
+        "RCBC",
+        "China Bank",
+        "Development Bank of the Philippines (DBP)"
+      ],
+      "India": [
+        "State Bank of India",
+        "HDFC Bank",
+        "ICICI Bank",
+        "Axis Bank",
+        "Kotak Mahindra Bank",
+        "Wise",
+        "PayPal",
+        "PhonePe",
+        "Google Pay",
+        "Paytm"
+      ],
+      "China": [
+        "Industrial and Commercial Bank of China",
+        "China Construction Bank",
+        "Agricultural Bank of China",
+        "Bank of China",
+        "Wise",
+        "PayPal",
+        "Alipay",
+        "WeChat Pay"
+      ],
+      "Singapore": [
+        "DBS Bank",
+        "OCBC Bank",
+        "United Overseas Bank (UOB)",
+        "Standard Chartered Singapore",
+        "Wise",
+        "PayPal",
+        "GrabPay"
+      ],
+      "Japan": [
+        "MUFG Bank",
+        "SMBC Group",
+        "Mizuho Bank",
+        "Resona Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "South Korea": [
+        "KB Kookmin Bank",
+        "Shinhan Bank",
+        "Woori Bank",
+        "KakaoBank",
+        "Wise",
+        "PayPal"
+      ],
+      "Malaysia": [
+        "Maybank",
+        "CIMB Bank",
+        "Public Bank",
+        "RHB Bank",
+        "Wise",
+        "PayPal",
+        "Touch 'n Go eWallet"
+      ],
+      "Thailand": [
+        "Bangkok Bank",
+        "Kasikorn Bank",
+        "Siam Commercial Bank",
+        "Krung Thai Bank",
+        "Wise",
+        "PayPal",
+        "PromptPay"
+      ],
+      "Indonesia": [
+        "Bank Mandiri",
+        "BCA",
+        "BNI",
+        "BRI",
+        "Wise",
+        "PayPal",
+        "Gojek Pay"
+      ],
+      "Vietnam": [
+        "Vietcombank",
+        "BIDV",
+        "Techcombank",
+        "ACB",
+        "Wise",
+        "PayPal"
+      ],
+      "Pakistan": [
+        "Habib Bank Limited",
+        "National Bank of Pakistan",
+        "MCB Bank",
+        "Allied Bank",
+        "Wise",
+        "PayPal",
+        "JazzCash"
+      ],
+      "Bangladesh": [
+        "Sonali Bank",
+        "Janata Bank",
+        "Agrani Bank",
+        "Rupali Bank",
+        "Wise",
+        "PayPal",
+        "bKash"
+      ],
+      "Sri Lanka": [
+        "Bank of Ceylon",
+        "People's Bank",
+        "Commercial Bank of Ceylon",
+        "Sampath Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Nepal": [
+        "Nepal Rastra Bank",
+        "NIC Asia Bank",
+        "Nabil Bank",
+        "Machhapuchchhre Bank",
+        "Wise",
+        "PayPal",
+        "eSewa"
+      ],
+      "Myanmar": [
+        "Myanmar Economic Bank",
+        "KBZ Bank",
+        "CB Bank",
+        "AYA Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Cambodia": [
+        "ABA Bank",
+        "ACLEDA Bank",
+        "Canadia Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Laos": [
+        "Lao Development Bank",
+        "BCEL",
+        "Lao Viet Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Mongolia": [
+        "Khan Bank",
+        "Trade and Development Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Taiwan": [
+        "Bank of Taiwan",
+        "CTBC Bank",
+        "Taiwan Cooperative Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Hong Kong": [
+        "HSBC Hong Kong",
+        "Bank of China Hong Kong",
+        "Standard Chartered Hong Kong",
+        "Wise",
+        "PayPal"
+      ],
+      "Macau": [
+        "Banco Nacional Ultramarino",
+        "Bank of China Macau",
+        "Wise",
+        "PayPal"
+      ],
+      "Brunei": [
+        "Bank Islam Brunei Darussalam",
+        "Baiduri Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Timor-Leste": [
+        "Banco Nacional Ultramarino Timor",
+        "Wise",
+        "PayPal"
+      ],
+      "Maldives": [
+        "Bank of Maldives",
+        "Maldives Islamic Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Bhutan": [
+        "Bank of Bhutan",
+        "Bhutan National Bank",
+        "Wise",
+        "PayPal"
+      ],
+      "Afghanistan": [
+        "Bank of Afghanistan",
+        "Wise",
+        "PayPal"
+      ]
     }
   },
   "international": [
