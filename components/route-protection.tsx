@@ -21,7 +21,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     }
 
     if (isAdmin) {
-      router.replace("/dashboard")
+      router.replace("/admin-template")
       return
     }
   }, [user, loading, isAdmin, router])

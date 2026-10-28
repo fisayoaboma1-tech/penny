@@ -1,6 +1,14 @@
 # Supabase SQL Migrations
 
-Run these SQL commands in your Supabase SQL Editor in order.
+The timestamped SQL files in this directory are the canonical database migrations. Apply them in order with the Supabase CLI after linking the intended project:
+
+```sh
+supabase link --project-ref <project-ref>
+supabase migration list
+supabase db push
+```
+
+Review the target project and pending migration list before applying changes.
 
 ## Migration 1: Create profiles table
 
@@ -149,9 +157,18 @@ create policy "Admins can manage wallet transactions"
   );
 ```
 
+## Migration 6: Secure and provision profiles
+
+`20261027120000_enable_profile_rls_and_provisioning.sql` enables row-level security on `profiles`, gives users access to their own profile and administrators access to profiles they manage, and prevents regular users from changing admin, balance, or restriction fields. It also creates profiles from Supabase Auth user metadata so signup works when email confirmation is required.
+
+## Migration 7: Restrict administrator access
+
+`20261027142500_lock_admin_to_allowlisted_email.sql` grants administrator status only to `pennywiseadmin@outlook.com`, protects that restriction against profile updates, provisions the same role if that account is created later, and applies the same allowlist check to wallet transaction administration.
+
+## Migration 8: Enable realtime wallet activity
+
+`20261028143800_enable_wallet_transaction_realtime.sql` adds `wallet_transactions` to the Supabase Realtime publication so the authenticated wallet activity feed can receive transaction updates live.
+
 ## How to apply
 
-1. Go to your Supabase dashboard
-2. Navigate to SQL Editor
-3. Run each migration in order (1-5)
-4. All features will be ready to use
+Use the CLI instructions above so Supabase records migration history. Do not re-run migrations that are already recorded as applied.

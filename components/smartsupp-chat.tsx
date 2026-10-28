@@ -21,7 +21,7 @@ function queueOnlineBankingTag() {
 export function SmartSuppChat() {
   const pathname = usePathname()
 
-  const shouldLoad = !pathname?.startsWith('/dashboard') && !pathname?.startsWith('/admin')
+  const shouldLoad = !pathname?.startsWith('/dashboard') && !pathname?.startsWith('/admin-template')
 
   useEffect(() => {
     if (shouldLoad) {

@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react"
 import { createClient } from "../lib/supabase/client"
 import { User, Session } from "@supabase/supabase-js"
+import { toast } from "@/hooks/use-toast"
 
 interface AdminProfileRow {
   id: string
@@ -179,6 +180,40 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [supabase])
+
+  useEffect(() => {
+    if (loading || !user || !isAdmin) return
+
+    const channel = supabase
+      .channel(`admin-new-wallet-accounts-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "profiles",
+          filter: "is_admin=eq.false",
+        },
+        (payload) => {
+          const newProfile = payload.new as Partial<AdminProfileRow>
+          toast({
+            title: "New wallet account",
+            description: newProfile.full_name
+              ? `${newProfile.full_name} just joined Pennywise.`
+              : "A new user just joined Pennywise.",
+          })
+        },
+      )
+      .subscribe((status, error) => {
+        if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          console.error("New account notification subscription failed:", error || status)
+        }
+      })
+
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [loading, user?.id, isAdmin, supabase])
 
   const signOut = async () => {
     setLoading(true)
