@@ -18,6 +18,7 @@ import {
   User,
 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
+import { saveProfileImage } from "@/lib/supabase/profile-images"
 import { useAdminAuth } from "@/contexts/admin-auth-context"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 
@@ -107,19 +108,13 @@ export default function AccountSettings({ embedded = false }: { embedded?: boole
     setUploadingImage(true)
 
     try {
-      const body = new FormData()
-      body.append("file", file)
-      const response = await fetch("/api/upload", { method: "POST", body })
-      const result = await response.json()
-
-      if (!response.ok || typeof result.url !== "string") {
-        throw new Error(result.error || "Unable to upload your profile photo.")
-      }
-
-      const { error } = await supabase.from("profiles").update({ profile_image_url: result.url }).eq("id", user.id)
-      if (error) throw error
-
-      setAdminProfile((current: any) => ({ ...current, profile_image_url: result.url }))
+      const imageUrl = await saveProfileImage(
+        supabase,
+        user.id,
+        file,
+        adminProfile.profile_image_url,
+      )
+      setAdminProfile((current: any) => ({ ...current, profile_image_url: imageUrl }))
       await refreshProfile()
       setSaveMessage("Your profile photo has been updated.")
     } catch (error) {
@@ -183,13 +178,17 @@ export default function AccountSettings({ embedded = false }: { embedded?: boole
           <div className="saas-card p-5">
             <div className="flex flex-col items-center text-center">
               <div className="relative h-24 w-24 overflow-hidden rounded-full ring-4 ring-blue-100 dark:ring-blue-500/20">
-                <img src={adminProfile.profile_image_url || "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg"} alt="Profile" className="h-full w-full object-cover" />
+                {adminProfile.profile_image_url ? (
+                  <img src={adminProfile.profile_image_url} alt="Profile" className="h-full w-full object-cover" />
+                ) : (
+                  <User className="h-full w-full p-5 text-slate-400" aria-hidden="true" />
+                )}
               </div>
               <button onClick={() => imageInputRef.current?.click()} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-500">
                 {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                 {uploadingImage ? "Uploading…" : "Upload photo"}
               </button>
-              <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              <input ref={imageInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleImageChange} className="hidden" />
             </div>
           </div>
 

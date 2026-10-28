@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useRouter, usePathname } from "next/navigation"
 import { useState } from "react"
-import { ChevronLeft, Fingerprint, LayoutDashboard, LogOut, Settings, X } from "lucide-react"
+import { ChevronLeft, Fingerprint, LayoutDashboard, LogOut, Settings, UserRound, X } from "lucide-react"
 import { useAdminAuth } from "@/contexts/admin-auth-context"
 
 interface AdminSidebarProps {
@@ -70,7 +70,11 @@ export function AdminSidebar({ isOpen, onClose, adminProfile, isDesktop = false 
       <div className="relative z-10 px-4 pb-4">
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-3"} rounded-2xl border border-slate-700/80 bg-white/[0.04] p-2.5`}>
           <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full ring-2 ring-blue-400/30">
-            <img src={adminProfile?.profile_image_url || "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg"} alt="Admin" className="h-full w-full object-cover" />
+            {adminProfile?.profile_image_url ? (
+              <img src={adminProfile.profile_image_url} alt="Admin" className="h-full w-full object-cover" />
+            ) : (
+              <UserRound className="h-full w-full p-2 text-slate-400" aria-hidden="true" />
+            )}
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1 overflow-hidden">

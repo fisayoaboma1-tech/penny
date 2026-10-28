@@ -6,6 +6,7 @@ import { X, Upload, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import { getUserAvatarUrl } from "@/components/wallet/user-avatar"
+import { clearProfileImage, saveProfileImage } from "@/lib/supabase/profile-images"
 
 interface ProfileImageModalProps {
   isOpen: boolean
@@ -38,39 +39,12 @@ export function ProfileImageModal({
   }
 
   const handleUpload = async () => {
-    if (!preview || !user) return
+    const file = fileInputRef.current?.files?.[0]
+    if (!file || !user) return
 
     setUploading(true)
     try {
-      const response = await fetch(preview)
-      const blob = await response.blob()
-      const file = new File([blob], "profile-image.jpg", { type: "image/jpeg" })
-
-      const formData = new FormData()
-      formData.append("file", file)
-
-      const uploadResponse = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json()
-        throw new Error(errorData.error || "Upload failed")
-      }
-
-      const data = await uploadResponse.json()
-      const imageUrl = data.url
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ profile_image_url: imageUrl })
-        .eq("id", user.id)
-
-      if (error) {
-        throw error
-      }
-
+      const imageUrl = await saveProfileImage(supabase, user.id, file, currentImageUrl)
       onImageUpdate(imageUrl)
       onClose()
       setPreview(null)
@@ -86,20 +60,7 @@ export function ProfileImageModal({
     if (!user) return
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ profile_image_url: null })
-        .eq("id", user.id)
-
-      if (error) {
-        throw error
-      }
-
-      const { error: metadataError } = await supabase.auth.updateUser({
-        data: { avatar_url: null, profile_image: null },
-      })
-      if (metadataError) throw metadataError
-
+      await clearProfileImage(supabase, user.id, currentImageUrl)
       onImageUpdate(null)
       onClose()
     } catch (error) {
@@ -174,7 +135,7 @@ export function ProfileImageModal({
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
                   onChange={handleFileSelect}
                   className="hidden"
                 />

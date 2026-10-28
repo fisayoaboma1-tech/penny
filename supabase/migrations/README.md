@@ -169,6 +169,10 @@ create policy "Admins can manage wallet transactions"
 
 `20261028143800_enable_wallet_transaction_realtime.sql` adds `wallet_transactions` to the Supabase Realtime publication so the authenticated wallet activity feed can receive transaction updates live.
 
+## Migration 9: Store profile images
+
+`20261028180000_create_profile_image_storage.sql` creates the public `profile-images` bucket for profile photos and limits writes and deletes to the signed-in user's own storage folder. User and administrator profile photos are uploaded directly to this bucket.
+
 ## How to apply
 
 Use the CLI instructions above so Supabase records migration history. Do not re-run migrations that are already recorded as applied.

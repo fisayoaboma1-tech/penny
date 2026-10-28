@@ -20,13 +20,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { createClient } from "@/lib/supabase/client"
+import { clearProfileImage, saveProfileImage } from "@/lib/supabase/profile-images"
 
 export default function ProfilePage() {
   const router = useRouter()
   const { user, loading, signOut, isAdmin, profile: authProfile } = useAuth()
   const supabase = createClient()
   const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
   const [profileImageOverride, setProfileImageOverride] = useState<string | null | undefined>(undefined)
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false)
   const [signOutStage, setSignOutStage] = useState<"idle" | "saving" | "complete" | "error">("idle")
@@ -132,84 +132,30 @@ export default function ProfilePage() {
     }
 
     setUploading(true)
-    setUploadProgress(0)
 
     try {
       // Use setTimeout to allow UI to update before heavy processing
       await new Promise(resolve => setTimeout(resolve, 50))
       
       const optimizedFile = await compressImage(file)
-      const formData = new FormData()
-      formData.append("file", optimizedFile)
-
-      const uploadResponse = await new Promise<Response>((resolve, reject) => {
-        const xhr = new XMLHttpRequest()
-        xhr.open("POST", "/api/upload")
-
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            setUploadProgress(percent)
-          }
-        }
-
-        xhr.onload = () => {
-          resolve(new Response(xhr.responseText || "", {
-            status: xhr.status,
-            headers: { "Content-Type": "application/json" },
-          }))
-        }
-
-        xhr.onerror = () => reject(new Error("Upload failed"))
-        xhr.send(formData)
-      })
-
-      const responseText = await uploadResponse.text()
-      let data: any = {}
-
-      if (responseText) {
-        try {
-          data = JSON.parse(responseText)
-        } catch (parseError) {
-          data = { error: responseText }
-        }
-      }
-
-      if (!uploadResponse.ok) {
-        throw new Error(data.error || data.message || `Upload failed (${uploadResponse.status})`)
-      }
-
-      const imageUrl = data.url
-      if (!imageUrl) {
-        throw new Error("Upload did not return an image URL")
-      }
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ profile_image_url: imageUrl })
-        .eq("id", user.id)
-
-      if (profileError) throw profileError
+      const imageUrl = await saveProfileImage(
+        supabase,
+        user.id,
+        optimizedFile,
+        profileImageUrl,
+      )
       setProfileImageOverride(imageUrl)
 
-      const { error: metadataError } = await supabase.auth.updateUser({
-        data: { avatar_url: imageUrl, profile_image: imageUrl },
-      })
-      if (metadataError) console.error("Couldn’t sync profile photo metadata:", metadataError)
-
-      setUploadProgress(100)
       toast({ title: "Profile photo updated", description: "Your new photo is now on your Pennywise profile." })
     } catch (error) {
       const message = error instanceof Error ? error.message : JSON.stringify(error)
       console.error("Error uploading image:", message)
-      setUploadProgress(0)
       toast({ title: "Photo upload failed", description: message, variant: "destructive" })
     } finally {
       setUploading(false)
       if (fileInputRef.current) {
         fileInputRef.current.value = ""
       }
-      window.setTimeout(() => setUploadProgress(0), 400)
     }
   }
 
@@ -218,17 +164,8 @@ export default function ProfilePage() {
 
     try {
       setUploading(true)
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ profile_image_url: null })
-        .eq("id", user.id)
-      if (profileError) throw profileError
+      await clearProfileImage(supabase, user.id, profileImageUrl)
       setProfileImageOverride(null)
-
-      const { error: metadataError } = await supabase.auth.updateUser({
-        data: { avatar_url: null, profile_image: null },
-      })
-      if (metadataError) console.error("Couldn’t clear profile photo metadata:", metadataError)
 
       toast({ title: "Profile photo removed", description: "Your profile now uses an empty avatar." })
     } catch (error) {
@@ -441,7 +378,7 @@ export default function ProfilePage() {
                               strokeLinecap="round"
                               fill="none"
                               strokeDasharray={289.03}
-                              strokeDashoffset={uploading ? 289.03 - (289.03 * uploadProgress) / 100 : 289.03}
+                              strokeDashoffset={uploading ? 220 : 289.03}
                               style={{ transition: "stroke-dashoffset 0.3s ease-out, opacity 0.3s ease" }}
                               className={uploading ? "opacity-100" : "opacity-0"}
                             />
@@ -468,7 +405,7 @@ export default function ProfilePage() {
                       <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
                         onChange={handleFileSelect}
                         className="hidden"
                       />
@@ -494,7 +431,7 @@ export default function ProfilePage() {
                           className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
                         >
                           {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                          {uploading ? `Uploading ${uploadProgress}%` : profileImageUrl ? "Change photo" : "Add a photo"}
+                          {uploading ? "Uploading…" : profileImageUrl ? "Change photo" : "Add a photo"}
                         </button>
                         {profileImageUrl ? (
                           <button

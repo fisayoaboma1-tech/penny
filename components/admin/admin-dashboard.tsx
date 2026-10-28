@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  UserRound,
   UserRoundPlus,
   Users,
 } from "lucide-react"
@@ -481,7 +482,11 @@ export default function AdminDashboard({ embedded = false }: { embedded?: boolea
                             <td data-label="Customer">
                               <div className="flex items-center gap-3">
                                 <div className="saas-avatar h-10 w-10 ring-2 ring-blue-100 dark:ring-blue-500/20">
-                                  <img src={entry.profile_image_url || "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg"} alt={entry.full_name} />
+                                  {entry.profile_image_url ? (
+                                    <img src={entry.profile_image_url} alt={entry.full_name} />
+                                  ) : (
+                                    <UserRound className="h-full w-full p-2 text-slate-400" aria-hidden="true" />
+                                  )}
                                 </div>
                                 <div>
                                   <p className="font-medium text-slate-900 dark:text-white">{entry.full_name}</p>
@@ -615,10 +620,14 @@ export default function AdminDashboard({ embedded = false }: { embedded?: boolea
             <div className="p-5 sm:p-6">
               <div className="flex items-center gap-4">
                 <div className="saas-avatar h-14 w-14 ring-2 ring-blue-100">
-                  <img
-                    src={selectedUserDetails.profile_image_url || "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg"}
-                    alt={selectedUserDetails.full_name}
-                  />
+                  {selectedUserDetails.profile_image_url ? (
+                    <img
+                      src={selectedUserDetails.profile_image_url}
+                      alt={selectedUserDetails.full_name}
+                    />
+                  ) : (
+                    <UserRound className="h-full w-full p-3 text-slate-400" aria-hidden="true" />
+                  )}
                 </div>
                 <div className="min-w-0">
                   <h3 className="truncate text-lg font-semibold text-slate-900">
