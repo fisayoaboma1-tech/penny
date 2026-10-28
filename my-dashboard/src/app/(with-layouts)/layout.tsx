@@ -56,7 +56,10 @@ export default function WithLayout({ children }: { children: ReactNode }) {
         <div className="flex h-full min-h-0 flex-col overflow-hidden border-[0.5px] border-card-surface-border bg-card-surface-area lg:rounded-2xl lg:shadow-[0_3px_6px_-2px_rgba(0,0,0,0.02),0_1px_1px_0_rgba(0,0,0,0.04)]">
           <Header onMenuClick={() => setIsMobileSheetOpen(true)} />
 
-          <main className="scrollbar-thin min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain">
+          <main
+            data-lenis-prevent
+            className="admin-scroll-area min-h-0 flex-1 touch-pan-y overflow-y-auto overscroll-contain"
+          >
             <div className="mx-auto w-full max-w-384 pb-5">{children}</div>
           </main>
         </div>

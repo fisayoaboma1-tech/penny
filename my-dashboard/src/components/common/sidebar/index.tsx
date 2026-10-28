@@ -87,8 +87,9 @@ export default function Sidebar({
 
             {/* Navigation */}
             <nav
+                data-lenis-prevent
                 className={cn(
-                    'scrollbar-thin min-h-0 flex-1 overflow-y-auto overscroll-contain',
+                    'admin-scroll-area min-h-0 flex-1 overflow-y-auto overscroll-contain',
                     isSidebarOpen ? 'mt-7 space-y-6 px-4' : 'mt-5 px-2',
                 )}
             >
