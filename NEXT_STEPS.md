@@ -67,13 +67,7 @@ Your Supabase credentials have been configured! Here's what you need to do to co
 
 4. Click **Register**
 
-5. You should be redirected to the login page with a success message
-
-6. Log in with your credentials:
-   - **Email**: test@example.com
-   - **Password**: Test@123
-
-7. You should be redirected to `/wallet` (your dashboard)
+5. You should be signed in automatically and redirected to `/wallet` (your dashboard)
 
 ### Step 5: Verify in Supabase
 

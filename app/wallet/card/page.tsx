@@ -61,21 +61,21 @@ export default function WalletCardPage() {
   }
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900">
-      <WalletPageHeader onBack={() => router.back()} />
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900 lg:pl-64">
+      <WalletPageHeader title="Cards" onBack={() => router.back()} />
 
       <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl space-y-3 px-3 py-4 sm:px-4 sm:py-6 lg:px-6">
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-[28px] border border-[#0f6cff]/20 bg-white/90 p-4 shadow-sm sm:p-6"
+          className="rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-6"
         >
           <div className="flex flex-col gap-4 rounded-[24px] bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Cards</p>
-              <h1 className="mt-2 text-2xl font-semibold text-slate-900">Add your card</h1>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">Payment methods</p>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900">Your cards</h1>
               <p className="mt-2 max-w-2xl text-sm text-slate-500">
-                Store your card securely and start using it for payments in the Wallet.
+                Manage the cards connected to your Pennywise wallet.
               </p>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -83,7 +83,7 @@ export default function WalletCardPage() {
                 <Button
                   variant="default"
                   size="lg"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#2563eb] px-4 py-3 text-sm font-semibold text-white shadow-[0_20px_40px_rgba(37,99,235,0.24)] transition hover:bg-[#1d4ed8] sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 sm:w-auto"
                 >
                   <Plus className="h-4 w-4" />
                   Add card

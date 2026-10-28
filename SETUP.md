@@ -102,9 +102,7 @@ Customize the email templates in **Authentication** > **Email Templates**:
    - Password: Test@123 (6-8 chars, letters and special chars only)
    - Repeat Password: Test@123
 
-4. After signup, you should be redirected to login
-5. Log in with your credentials
-6. You should be redirected to `/wallet`
+4. After signup, you should be signed in automatically and redirected to `/wallet`
 
 ## Step 7: Verify Database Records
 

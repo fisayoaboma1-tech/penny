@@ -2,14 +2,44 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CreditCard, Home, User } from "lucide-react"
+import {
+  ArrowLeftRight,
+  Bell,
+  CircleHelp,
+  CreditCard,
+  Globe2,
+  Home,
+  LayoutGrid,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react"
 import { useEffect, useState } from "react"
 
-const items = [
+const primaryItems = [
   { label: "Home", icon: Home, path: "/wallet" },
-  { label: "Card", icon: CreditCard, path: "/wallet/card" },
-  { label: "Profile", icon: User, path: "/profile" },
+  { label: "Activity", icon: Bell, path: "/notifications" },
+  { label: "Cards", icon: CreditCard, path: "/wallet/card" },
+  { label: "Transfer", icon: ArrowLeftRight, path: "/wallet/transfer" },
+  { label: "Services", icon: LayoutGrid, path: "/wallet/services" },
 ]
+
+const accountItems = [
+  { label: "Profile", icon: UserRound, path: "/profile" },
+  { label: "Security", icon: ShieldCheck, path: "/security" },
+  { label: "Language", icon: Globe2, path: "/language" },
+  { label: "Help center", icon: CircleHelp, path: "/help" },
+]
+
+const isItemActive = (pathname: string, path: string) => {
+  if (path === "/wallet") {
+    return pathname === path || ["/wallet/history", "/wallet/add-money"].includes(pathname)
+  }
+  if (path === "/profile") return pathname === path
+  if (path === "/security") return pathname === path
+  if (path === "/language") return pathname === path
+  if (path === "/help") return pathname === path
+  return pathname === path || pathname.startsWith(`${path}/`)
+}
 
 export default function WalletBottomNav() {
   const pathname = usePathname()
@@ -77,22 +107,29 @@ export default function WalletBottomNav() {
           transition: "opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease",
         }}
       >
-        <div className="mx-auto flex max-w-lg items-center justify-around gap-1 px-2 py-1.5">
-          {items.map((item) => {
+        <div className="mx-auto flex max-w-lg items-center justify-around gap-1 px-3 py-2">
+          {[
+            primaryItems[0],
+            primaryItems[2],
+            primaryItems[1],
+            accountItems[0],
+          ].map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.path
+            const isActive = isItemActive(pathname, item.path) ||
+              (item.path === "/profile" && ["/security", "/language"].includes(pathname))
 
             return (
               <Link
                 key={item.label}
                 href={item.path}
-                className={`inline-flex flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-2 text-[10px] font-semibold transition ${
+                aria-current={isActive ? "page" : undefined}
+                className={`inline-flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-semibold transition ${
                   isActive
-                    ? "bg-[#eef5ff] text-[#0f6cff]"
-                    : "text-slate-500 hover:bg-[#f8faff]"
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-slate-500 hover:bg-slate-100"
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-[19px] w-[19px]" strokeWidth={isActive ? 2.3 : 1.8} />
                 <span>{item.label}</span>
               </Link>
             )
@@ -100,33 +137,73 @@ export default function WalletBottomNav() {
         </div>
       </nav>
 
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-28 flex-col border-r border-slate-200/80 bg-white/95 px-3 py-6 shadow-[10px_0_30px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:flex">
-        <div className="mb-6 flex items-center justify-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-[0_12px_30px_rgba(15,23,42,0.08)] ring-1 ring-slate-100">
-            <img
-              src="https://res.cloudinary.com/qz5m8bhg/image/upload/v1785353346/Pngtree_letter_p_icon_8622509_grhaye.png"
-              alt="Pennywise logo"
-              className="h-8 w-8 object-contain"
-            />
-          </div>
-        </div>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-slate-200/80 bg-white px-4 py-6 shadow-[8px_0_30px_rgba(15,23,42,0.035)] lg:flex">
+        <Link href="/wallet" className="mb-9 flex items-center gap-3 px-2" aria-label="Pennywise home">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-600/20">
+            <span className="text-xl font-bold tracking-tight">p</span>
+          </span>
+          <span className="text-[17px] font-semibold tracking-tight text-slate-900">pennywise</span>
+        </Link>
 
-        <div className="flex flex-1 flex-col gap-1.5">
-          {items.map((item) => {
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+          Workspace
+        </p>
+        <nav aria-label="Main navigation" className="flex flex-col gap-1">
+          {primaryItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.path
+            const isActive = isItemActive(pathname, item.path)
 
             return (
               <Link
                 key={item.label}
                 href={item.path}
-                className={`flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-[11px] font-semibold transition ${isActive ? "bg-[#eef5ff] text-[#0f6cff]" : "text-slate-500 hover:bg-[#f8faff] hover:text-slate-900"}`}
+                aria-current={isActive ? "page" : undefined}
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
               >
-                <Icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.25 : 1.8} />
+                {item.label}
+                {isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-600" />}
               </Link>
             )
           })}
+        </nav>
+
+        <div className="mb-2 mt-8 px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+          Account
+        </div>
+        <nav aria-label="Account navigation" className="flex flex-col gap-1">
+          {accountItems.map((item) => {
+            const Icon = item.icon
+            const isActive = isItemActive(pathname, item.path)
+
+            return (
+              <Link
+                key={item.label}
+                href={item.path}
+                aria-current={isActive ? "page" : undefined}
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition ${
+                  isActive
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <Icon className="h-[18px] w-[18px]" strokeWidth={isActive ? 2.25 : 1.8} />
+                {item.label}
+              </Link>
+            )
+          })}
+        </nav>
+
+        <div className="mt-auto rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
+          <p className="text-xs font-semibold text-slate-800">Need a hand?</p>
+          <p className="mt-1 text-[11px] leading-5 text-slate-500">Visit the help center for account support.</p>
+          <Link href="/help" className="mt-2 inline-flex text-xs font-semibold text-blue-700 hover:text-blue-800">
+            Get support
+          </Link>
         </div>
       </aside>
     </>

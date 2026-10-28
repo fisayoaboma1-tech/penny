@@ -31,6 +31,7 @@ interface AuthContextType {
   profile: ProfileRow | null
   isAdmin: boolean | null
   signOut: () => Promise<void>
+  refreshSession: () => Promise<void>
   refreshProfile: () => Promise<void>
   theme: string | undefined
   setTheme: (theme: string) => void
@@ -199,25 +200,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     setLoading(true)
-    currentUserIdRef.current = null
-    // Only sign out from the user client, not the admin client
-    await supabase.auth.signOut({ scope: 'local' })
-    setUser(null)
-    setSession(null)
-    setProfile(null)
-    setIsAdmin(null)
-    setThemeState(undefined)
-    if (profileChannel.current) {
-      profileChannel.current.unsubscribe()
-      profileChannel.current = null
+    try {
+      // Only sign out from the user client, not the admin client
+      const { error } = await supabase.auth.signOut({ scope: "local" })
+      if (error) throw error
+
+      currentUserIdRef.current = null
+      setUser(null)
+      setSession(null)
+      setProfile(null)
+      setIsAdmin(null)
+      setThemeState(undefined)
+      if (profileChannel.current) {
+        profileChannel.current.unsubscribe()
+        profileChannel.current = null
+      }
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const refreshProfile = async () => {
     if (!user) return
     const profileRow = await fetchProfile(user.id)
     applyProfile(profileRow)
+  }
+
+  const refreshSession = async () => {
+    setLoading(true)
+    try {
+      const { data: { session: nextSession }, error } = await supabase.auth.getSession()
+      if (error) {
+        throw error
+      }
+
+      const nextUser = nextSession?.user ?? null
+      currentUserIdRef.current = nextUser?.id ?? null
+      setSession(nextSession)
+      setUser(nextUser)
+
+      if (nextUser) {
+        const nextProfile = await fetchProfile(nextUser.id)
+        applyProfile(nextProfile)
+        if (nextProfile?.id) {
+          subscribeToProfile(nextProfile.id)
+        }
+      } else {
+        if (profileChannel.current) {
+          profileChannel.current.unsubscribe()
+          profileChannel.current = null
+        }
+        applyProfile(null)
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Load theme preference when user changes
@@ -233,7 +270,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, setThemeMode])
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, profile, isAdmin, signOut, refreshProfile, theme, setTheme: updateTheme }}>
+    <AuthContext.Provider value={{ user, session, loading, profile, isAdmin, signOut, refreshSession, refreshProfile, theme, setTheme: updateTheme }}>
       {children}
     </AuthContext.Provider>
   )

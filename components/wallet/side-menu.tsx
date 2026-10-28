@@ -21,6 +21,7 @@ import {
   ArrowUpRight,
   Camera,
 } from "lucide-react"
+import { UserAvatar } from "@/components/wallet/user-avatar"
 
 export function SideMenu({
   isOpen,
@@ -39,8 +40,6 @@ export function SideMenu({
   profileImageUrl?: string
   onImageClick?: () => void
 }) {
-  const defaultImage = "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785158069/unnamed_f9ug3t.png"
-  const imageUrl = profileImageUrl || defaultImage
   const router = useRouter()
 
   useEffect(() => {
@@ -120,13 +119,7 @@ export function SideMenu({
               {/* Profile header */}
               <div className="flex flex-col items-center text-center pt-2">
                 <div className="relative mb-3">
-                  <div className="w-20 h-20 rounded-full overflow-hidden shadow-lg shadow-emerald-500/20 ring-2 ring-emerald-500/30">
-                    <img
-                      src={imageUrl}
-                      alt={userName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <UserAvatar imageUrl={profileImageUrl} name={userName} className="h-20 w-20 shadow-lg ring-2 ring-emerald-500/30" />
                   <button
                     onClick={onImageClick}
                     className="absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#0a0a0a] flex items-center justify-center hover:bg-emerald-400 transition-colors"
@@ -135,17 +128,7 @@ export function SideMenu({
                   </button>
                 </div>
                 <h2 className="text-lg font-bold text-white">{userName}</h2>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-[10px] font-medium text-emerald-400 border border-emerald-500/20">
-                    Premium Member
-                  </span>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/10 text-[10px] font-medium text-blue-400 border border-blue-500/20">
-                    <svg viewBox="0 0 24 24" className="w-3 h-3 fill-blue-400" aria-hidden="true">
-                      <path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.9-.81-3.91s-2.52-1.27-3.91-.81c-.67-1.31-1.91-2.19-3.34-2.19s-2.67.88-3.34 2.19c-1.39-.46-2.9-.2-3.91.81s-1.27 2.52-.81 3.91c-1.31.67-2.19 1.91-2.19 3.34s.88 2.67 2.19 3.34c-.46 1.39-.2 2.9.81 3.91s2.52 1.27 3.91.81c.67 1.31 1.91 2.19 3.34 2.19s2.67-.88 3.34-2.19c1.39.46 2.9.2 3.91-.81s1.27-2.52.81-3.91c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2l-3.54-3.54 1.06-1.06 2.48 2.48 5.48-5.48 1.06 1.06-6.54 6.54z"/>
-                    </svg>
-                    Verified Account
-                  </div>
-                </div>
+                <p className="mt-1 text-xs text-gray-500">{userName}</p>
               </div>
 
               {/* Menu sections */}

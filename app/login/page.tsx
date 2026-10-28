@@ -1,214 +1,218 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { useRef, useState } from "react"
 import Link from "next/link"
-import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Eye, EyeOff } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { motion } from "framer-motion"
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Fingerprint, Loader2, Mail, ShieldCheck } from "lucide-react"
+import { AuthLayout, AuthProgress, AuthSuccess } from "@/components/auth/auth-layout"
 import { ForgotPasswordModal } from "@/components/forgot-password-modal"
-
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.8,
-      ease: "easeInOut" as const,
-    },
-  }),
-}
+import { createClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
+  const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false)
+  const passwordInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError("")
+
+    if (step === 1) {
+      setStep(2)
+      window.setTimeout(() => passwordInputRef.current?.focus(), 100)
+      return
+    }
+
     setLoading(true)
-
     try {
-      if (!email || !password) {
-        throw new Error("Please enter both email and password")
-      }
-
       const supabase = createClient()
+      const { data, error: loginError } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      if (loginError) throw loginError
+      if (!data.user) throw new Error("We couldn't sign you in. Please try again.")
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", data.user.id)
+        .single()
 
-      if (error) {
-        throw error
+      if (profileError || profileData?.is_admin) {
+        await supabase.auth.signOut()
+        throw new Error("Admins are not permitted to sign in here. Use the admin portal instead.")
       }
 
-      if (data.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("is_admin")
-          .eq("id", data.user.id)
-          .single()
-
-        if (profileError || profileData?.is_admin) {
-          await supabase.auth.signOut()
-          throw new Error("Admins are not permitted to sign in here. Use the admin portal instead.")
-        }
-
-        router.push("/wallet")
-        router.refresh()
-      }
-    } catch (err: any) {
-      setError(err.message || "Invalid email or password")
-    } finally {
+      setIsSuccess(true)
+      await new Promise((resolve) => window.setTimeout(resolve, 900))
+      router.replace("/wallet")
+      router.refresh()
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : "Invalid email or password")
       setLoading(false)
     }
   }
 
-  // Show signing in overlay
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm">
-        <div className="flex flex-col items-center gap-6">
-          <div className="loader-login" />
-          <p className="text-sm font-medium text-slate-600">Signing in...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />
-      <div className="absolute inset-x-0 top-0 h-[28vh] bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
-      <div className="relative z-10">
-        <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-start px-4 py-4 sm:px-6">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
-            aria-label="Go back"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="flex min-h-screen items-center justify-center px-4 pt-24 pb-12">
-          <motion.div
-            className="w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-          <div className="px-8 py-10 sm:px-10">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
-                <img
-                  src="https://res.cloudinary.com/qz5m8bhg/image/upload/v1785353346/Pngtree_letter_p_icon_8622509_grhaye.png"
-                  alt="Pennywise logo"
-                  className="h-10 w-10 object-contain"
-                />
+    <>
+      <AuthLayout
+        eyebrow="A better way to manage money"
+        sideTitle="Your money, with a little more clarity."
+        sideDescription="Sign in to pick up where you left off and keep your wallet moving with you."
+      >
+        {isSuccess ? (
+          <AuthSuccess title="You’re signed in" description="Your wallet is ready. Taking you there now…" />
+        ) : (
+          <>
+            <div className="mb-8">
+              <div className="mb-6 hidden h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 lg:flex">
+                <Fingerprint className="h-5 w-5" />
               </div>
-              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
-                PENNY<span className="text-[#0f6cff]">WISE</span>
-              </p>
-              <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-slate-900">Login to your wallet</h1>
-              <p className="mt-3 text-xs leading-5 text-slate-400">
-                Use your email address and password to access your wallet.
+              <p className="text-sm font-semibold text-blue-600">Welcome back</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Login to your wallet</h1>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
+                {step === 1 ? "First, let’s find your account." : "One more step and you’re back in."}
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Email address</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email address"
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  data-lpignore="true"
-                  data-form-type="other"
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
-                />
-              </div>
+            <AuthProgress currentStep={step} steps={["Your email", "Your password"]} />
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-medium text-slate-700">Password</label>
-                  <button
-                    type="button"
-                    onClick={() => setIsForgotPasswordOpen(true)}
-                    className="text-sm font-medium text-[#0f6cff] hover:text-[#0b57d3]"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
+            <form onSubmit={handleLogin} className="space-y-5">
+              {step === 1 ? (
+                <motion.div
+                  key="email-step"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-2"
+                >
+                  <label htmlFor="login-email" className="text-sm font-medium text-slate-700">Email address</label>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="login-email"
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="name@domain.com"
+                      autoComplete="email"
+                      autoCapitalize="none"
+                      required
+                      autoFocus
+                      className="saas-input !bg-white !text-slate-900 !pl-11 min-h-12 rounded-xl border-slate-200 pr-4"
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="password-step"
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-5"
+                >
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <Mail className="h-4 w-4" />
+                      </span>
+                      <span className="truncate text-sm font-medium text-slate-700">{email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => { setError(""); setStep(1) }}
+                      className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <label htmlFor="login-password" className="text-sm font-medium text-slate-700">Password</label>
+                      <button
+                        type="button"
+                        onClick={() => setIsForgotPasswordOpen(true)}
+                        className="text-sm font-medium text-blue-600 transition hover:text-blue-800"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        ref={passwordInputRef}
+                        id="login-password"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        placeholder="Your password"
+                        autoComplete="current-password"
+                        required
+                        className="saas-input !bg-white !text-slate-900 min-h-12 rounded-xl border-slate-200 px-4 pr-12"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((current) => !current)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        aria-controls="login-password"
+                        className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
 
               {error ? (
-                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {error}
                 </div>
               ) : null}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex w-full items-center justify-center rounded-full bg-[#0f6cff] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(15,23,42,0.18)] transition hover:bg-[#0b57d3] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {loading ? "Signing in..." : "Sign in"}
-              </button>
+              <div className="flex gap-3">
+                {step === 2 ? (
+                  <button
+                    type="button"
+                    onClick={() => { setError(""); setStep(1) }}
+                    disabled={loading}
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </button>
+                ) : null}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="saas-button saas-button-primary min-h-12 flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-sm shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30"
+                >
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {loading ? "Checking your details…" : step === 1 ? "Continue" : "Sign in"}
+                  {!loading ? <ArrowRight className="h-4 w-4" /> : null}
+                </button>
+              </div>
             </form>
-          </div>
 
-          <div className="border-t border-slate-200 bg-slate-50 px-8 py-6 text-center">
-            <div className="mb-4">
-              <Link href="/signup" className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-300 hover:bg-slate-50">
+            <p className="mt-7 text-center text-sm text-slate-500">
+              New to Pennywise?{" "}
+              <Link href="/signup" className="font-semibold text-blue-600 transition hover:text-blue-800">
                 Create an account
               </Link>
-            </div>
-            <p className="text-xs leading-5 text-slate-500">
-              By clicking on “Create Profile”, you agree to Moniepoint’s{' '}
-              <Link href="/terms" className="font-medium text-[#0f6cff] hover:text-[#0b57d3]">Terms and Conditions</Link>{' '}
-              and{' '}
-              <Link href="/privacy" className="font-medium text-[#0f6cff] hover:text-[#0b57d3]">Privacy Policy</Link>.
             </p>
-          </div>
-        </motion.div>
-      </div>
 
-      <ForgotPasswordModal
-        isOpen={isForgotPasswordOpen}
-        onClose={() => setIsForgotPasswordOpen(false)}
-      />
-    </div>
-  </div>
+            <div className="mt-8 flex items-center justify-center gap-2 border-t border-slate-200/80 pt-6 text-xs text-slate-400">
+              <ShieldCheck className="h-4 w-4" />
+              Your account details are protected
+            </div>
+          </>
+        )}
+      </AuthLayout>
+      <ForgotPasswordModal isOpen={isForgotPasswordOpen} onClose={() => setIsForgotPasswordOpen(false)} />
+    </>
   )
 }

@@ -67,15 +67,15 @@ export default function WalletAddMoneyPage() {
   }
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 text-slate-900">
-      <WalletPageHeader onBack={() => router.back()} />
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900 lg:pl-64">
+      <WalletPageHeader title="Add money" onBack={() => router.back()} />
 
       <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6">
         <motion.section
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] as const }}
-          className="rounded-[28px] border border-slate-200 bg-white/80 backdrop-blur-sm p-6 shadow-lg sm:p-8"
+          className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.06)] sm:p-8"
         >
           <motion.div
             variants={containerVariants}
@@ -87,41 +87,41 @@ export default function WalletAddMoneyPage() {
             <motion.div
               variants={iconVariants}
               whileHover={{ scale: 1.1, rotate: 5 }}
-              className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 text-white shadow-2xl ring-4 ring-slate-900/10"
+              className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-blue-100 sm:h-[4.5rem] sm:w-[4.5rem]"
             >
-              <Headphones className="h-12 w-12" />
+              <Headphones className="h-8 w-8" />
             </motion.div>
 
             {/* Main message with elegant typography */}
             <motion.div variants={itemVariants} className="mt-8 space-y-3">
-              <h2 className="text-3xl font-bold text-slate-900 sm:text-4xl tracking-tight">
-                Please Contact Support
+              <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+                Add funds with support
               </h2>
-              <p className="max-w-lg text-base text-slate-600 sm:text-lg leading-relaxed">
-                Our dedicated support team is ready to assist you with adding money to your wallet securely and efficiently.
+              <p className="max-w-lg text-sm leading-6 text-slate-500 sm:text-base">
+                Contact our team to arrange a wallet deposit. We’ll confirm the available funding steps with you.
               </p>
             </motion.div>
 
             {/* Support options with refined animations */}
             <motion.div
               variants={containerVariants}
-              className="mt-10 w-full max-w-lg space-y-4"
+              className="mt-8 grid w-full max-w-3xl gap-3 sm:grid-cols-2"
             >
               <motion.div
                 variants={cardVariants}
                 whileHover="hover"
-                className="group rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 transition-all hover:border-slate-300 hover:shadow-xl"
+                className="group rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-blue-200 hover:bg-slate-50 sm:p-5"
               >
                 <div className="flex items-center gap-4">
                   <motion.div
                     whileHover={{ rotate: 10 }}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 text-white shadow-lg"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700"
                   >
                     <Mail className="h-6 w-6" />
                   </motion.div>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-semibold text-slate-900">Email Support</p>
-                    <p className="text-sm text-slate-500">support@pennywise.com</p>
+                    <a href="mailto:support@pennyiseltd@gmail.com" className="text-sm text-slate-500 hover:text-blue-700">support@pennyiseltd@gmail.com</a>
                   </div>
                 </div>
               </motion.div>
@@ -129,18 +129,18 @@ export default function WalletAddMoneyPage() {
               <motion.div
                 variants={cardVariants}
                 whileHover="hover"
-                className="group rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 transition-all hover:border-slate-300 hover:shadow-xl"
+                className="group rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-blue-200 hover:bg-slate-50 sm:p-5"
               >
                 <div className="flex items-center gap-4">
                   <motion.div
                     whileHover={{ rotate: 10 }}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 text-white shadow-lg"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700"
                   >
                     <MessageCircle className="h-6 w-6" />
                   </motion.div>
                   <div className="flex-1 text-left">
                     <p className="text-sm font-semibold text-slate-900">Live Chat</p>
-                    <p className="text-sm text-slate-500">Available 24/7 for instant assistance</p>
+                    <p className="text-sm text-slate-500">Start a conversation with our support team</p>
                   </div>
                 </div>
               </motion.div>
@@ -148,12 +148,12 @@ export default function WalletAddMoneyPage() {
               <motion.div
                 variants={cardVariants}
                 whileHover="hover"
-                className="group rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 transition-all hover:border-slate-300 hover:shadow-xl"
+                className="group rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:border-blue-200 hover:bg-slate-50 sm:p-5"
               >
                 <div className="flex items-center gap-4">
                   <motion.div
                     whileHover={{ rotate: 10 }}
-                    className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-700 text-white shadow-lg"
+                    className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"
                   >
                     <Shield className="h-6 w-6" />
                   </motion.div>
@@ -168,11 +168,10 @@ export default function WalletAddMoneyPage() {
             {/* Additional information */}
             <motion.div
               variants={itemVariants}
-              className="mt-10 rounded-2xl border border-slate-200 bg-slate-50/50 p-6 backdrop-blur-sm"
+              className="mt-6 max-w-3xl rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left sm:p-5"
             >
               <p className="text-sm text-slate-600 leading-relaxed">
-                For security purposes, all funding requests are processed through our verified support channels. 
-                Please reach out using any of the methods above, and our team will guide you through the process.
+                For your safety, please only follow deposit instructions confirmed by Pennywise support. Never share your password or one-time verification codes.
               </p>
             </motion.div>
           </motion.div>

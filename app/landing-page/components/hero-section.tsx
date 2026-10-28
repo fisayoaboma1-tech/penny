@@ -53,12 +53,6 @@ export function HeroSection() {
   const rawY = useTransform(scrollYProgress, [0, 1], [0, 200])
   const y = useSpring(rawY, springConfig)
 
-  const rawTextX1 = useTransform(scrollYProgress, [0, 1], [0, -100])
-  const textX1 = useSpring(rawTextX1, springConfig)
-
-  const rawTextX2 = useTransform(scrollYProgress, [0, 1], [0, 100])
-  const textX2 = useSpring(rawTextX2, springConfig)
-
   const rawScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9])
   const scale = useSpring(rawScale, springConfig)
 
@@ -145,8 +139,7 @@ export function HeroSection() {
 
             <div className="space-y-1 overflow-hidden">
               <motion.h1
-                style={{ x: textX1 }}
-                className="text-5xl md:text-7xl font-light tracking-tighter text-white leading-[0.9]"
+                className="text-[clamp(2.5rem,10vw,4.5rem)] font-light leading-[0.9] tracking-tighter text-white md:text-7xl"
               >
                 <motion.span
                   variants={fadeUpVariants}
@@ -159,8 +152,7 @@ export function HeroSection() {
                 </motion.span>
               </motion.h1>
               <motion.h1
-                style={{ x: textX2 }}
-                className="text-5xl md:text-7xl font-medium tracking-tighter leading-[0.9] text-gray-700"
+                className="text-[clamp(2.5rem,10vw,4.5rem)] font-medium leading-[0.9] tracking-tighter text-gray-700 md:text-7xl"
               >
                 <motion.span
                   variants={fadeUpVariants}
@@ -179,7 +171,7 @@ export function HeroSection() {
                 custom={3}
                 className="text-base md:text-lg text-gray-200 font-light tracking-tight pt-2 max-w-lg"
               >
-                Experience the pinnacle of digital banking s where cutting-edge technology meets unparalleled simplicity.
+                Experience next-generation digital banking, where cutting-edge technology meets everyday simplicity.
               </motion.p>
             </div>
 
@@ -259,7 +251,7 @@ export function HeroSection() {
                   ease: "easeInOut",
                 }}
               >
-                <div className="relative w-[350px] h-[525px]">
+                <div                                 className="relative h-auto w-[350px] max-w-[78vw]">
                   <div
                     aria-hidden
                     style={{
@@ -280,7 +272,7 @@ export function HeroSection() {
                     alt="Digital Banking App"
                     width={350}
                     height={525}
-                    className="relative z-10 drop-shadow-2xl"
+                    className="relative z-10 h-auto w-full drop-shadow-2xl"
                     priority
                     onLoadingComplete={() => setImgLoaded(true)}
                   />

@@ -116,7 +116,7 @@ export default function TransactionHistoryPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-white text-slate-900">
+    <div className="relative min-h-screen overflow-hidden bg-slate-50 text-slate-900 lg:pl-64">
       <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />
       <div className="absolute inset-x-0 top-0 h-[28vh] bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
 
@@ -124,7 +124,7 @@ export default function TransactionHistoryPage() {
         <PageHeader variant="sub" title="Transactions" onBack={() => router.back()} />
 
         <main className="flex-1 min-h-0 overflow-y-auto pb-28">
-          <div className="mx-auto max-w-2xl px-4 py-4 sm:px-6 sm:py-6">
+          <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 sm:py-6 lg:px-10">
             <div className="mb-5 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.10)]">
               <div className="bg-gradient-to-r from-[#eff7ff] via-white to-[#f8fbff] p-4 sm:p-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">Wallet activity</p>

@@ -58,11 +58,11 @@ export default function HelpCenterPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="min-h-screen bg-slate-50 text-slate-900 lg:pl-64">
         {/* Header */}
         <PageHeader variant="sub" title="Help Center" onBack={() => router.back()} />
 
-        <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 space-y-5 sm:space-y-6 pb-24 sm:pb-8">
+        <div className="mx-auto max-w-4xl space-y-5 px-4 py-6 pb-28 sm:space-y-6 sm:px-6 sm:py-8 lg:px-10">
           {/* Search Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

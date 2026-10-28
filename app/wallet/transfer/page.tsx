@@ -6,6 +6,7 @@ import { motion } from "framer-motion"
 import { ChevronDown, Search } from "lucide-react"
 import WalletBottomNav from "@/components/wallet-bottom-nav"
 import { WalletPageHeader } from "@/components/wallet/page-header"
+import { getUserAvatarUrl, UserAvatar } from "@/components/wallet/user-avatar"
 import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
 
@@ -526,16 +527,15 @@ export default function WalletTransferPage() {
   const [showSuccess, setShowSuccess] = useState(false)
 
   const accountName = useMemo(() => {
-    if (!user) return "Chukwudi Enoch"
-    return user.user_metadata?.full_name || user.email?.split("@")[0] || "Chukwudi Enoch"
+    if (!user) return "Your account"
+    return user.user_metadata?.full_name || user.email?.split("@")[0] || "Your account"
   }, [user])
 
   const profileImageUrl = useMemo(() => {
-    return (
-      profile?.profile_image_url ||
-      user?.user_metadata?.avatar_url ||
-      user?.user_metadata?.profile_image ||
-      "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785158069/unnamed_f9ug3t.png"
+    return getUserAvatarUrl(
+      profile?.profile_image_url,
+      user?.user_metadata?.avatar_url,
+      user?.user_metadata?.profile_image,
     )
   }, [profile, user])
 
@@ -887,8 +887,8 @@ export default function WalletTransferPage() {
   }, [recipientName, recipientEmail, amount, selectedBank, accountNumber, walletBalance, requirements, iban, swiftCode, routingNumber, sortCode, bankAddress])
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f6f8] text-slate-900">
-      <WalletPageHeader onBack={() => router.back()} />
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900 lg:pl-64">
+      <WalletPageHeader title="Transfer" onBack={() => router.back()} />
 
       <main ref={mainRef} className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl px-3 py-4 sm:px-4 sm:py-6 lg:px-6">
         <motion.section
@@ -917,9 +917,7 @@ export default function WalletTransferPage() {
               <div className="rounded-[16px] border border-blue-100/70 bg-white/90 p-3 shadow-[0_1px_3px_rgba(15,23,42,0.03)]">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2.5">
-                    <div className="h-9 w-9 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-                      <img src={profileImageUrl} alt={accountName} className="h-full w-full object-cover" />
-                    </div>
+                    <UserAvatar imageUrl={profileImageUrl} name={accountName} className="h-9 w-9 rounded-2xl border border-slate-200" />
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Paying from</p>
                       <p className="truncate text-sm font-semibold text-slate-900">{accountName}</p>

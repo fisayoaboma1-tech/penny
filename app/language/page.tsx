@@ -36,10 +36,10 @@ export default function LanguagePage() {
   if (isLoading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-slate-50 lg:pl-64">
           <PageHeader variant="sub" title="Language" onBack={() => router.back()} />
-          <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 space-y-5 sm:space-y-6 pb-24 sm:pb-8">
-            <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center shadow-sm">
+          <div className="mx-auto max-w-4xl space-y-5 px-4 py-6 pb-28 sm:space-y-6 sm:px-6 sm:py-8 lg:px-10">
+            <div className="rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-12">
               <div className="text-slate-500 text-base sm:text-lg">Loading preferences...</div>
             </div>
         </div>
@@ -51,19 +51,19 @@ export default function LanguagePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="min-h-screen bg-slate-50 text-slate-900 lg:pl-64">
         {/* Header */}
         <PageHeader variant="sub" title="Language" onBack={() => router.back()} />
 
-        <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8 space-y-5 sm:space-y-6 pb-24 sm:pb-8">
+        <div className="mx-auto max-w-4xl space-y-5 px-4 py-6 pb-28 sm:space-y-6 sm:px-6 sm:py-8 lg:px-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-sm"
+            className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.05)] sm:p-7"
           >
             <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-teal-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0">
-                <Globe className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600" />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 sm:h-12 sm:w-12">
+                <Globe className="h-5 w-5 text-blue-700 sm:h-6 sm:w-6" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate">Select Language</h2>
@@ -79,15 +79,15 @@ export default function LanguagePage() {
                   disabled={isLoading}
                   className={`w-full flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-colors disabled:opacity-50 ${
                     selectedLanguage === language.code
-                      ? "bg-teal-500/10 border border-teal-500/30"
-                      : "bg-slate-50 border border-slate-200 hover:bg-slate-100"
+                      ? "border border-blue-200 bg-blue-50"
+                      : "border border-slate-200 bg-white hover:bg-slate-50"
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="text-sm sm:text-base font-medium text-slate-900">{language.name}</span>
                   </div>
                   {selectedLanguage === language.code && (
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-teal-600 shrink-0" />
+                    <Check className="h-4 w-4 shrink-0 text-blue-700 sm:h-5 sm:w-5" />
                   )}
                 </button>
               ))}

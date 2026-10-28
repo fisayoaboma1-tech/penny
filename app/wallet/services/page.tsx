@@ -68,7 +68,16 @@ const serviceGroups = [
 export default function WalletServicesPage() {
   const router = useRouter()
   const { profile } = useAuth()
+  const [searchQuery, setSearchQuery] = useState("")
   const [showRestrictedModal, setShowRestrictedModal] = useState(false)
+  const visibleServiceGroups = serviceGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) =>
+        `${group.title} ${item.label}`.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+      ),
+    }))
+    .filter((group) => group.items.length > 0)
 
   const handleTransferClick = () => {
     if (profile?.restricted) {
@@ -108,8 +117,8 @@ export default function WalletServicesPage() {
   }, [profile?.id])
 
   return (
-    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-[#f4f7ff] text-slate-900">
-      <WalletPageHeader onBack={() => router.back()} />
+    <div className="h-screen min-h-0 w-full overflow-hidden flex flex-col pb-15 bg-slate-50 text-slate-900 lg:pl-64">
+      <WalletPageHeader title="Services" onBack={() => router.back()} />
 
       <main className="flex-1 min-h-0 overflow-y-auto pb-28 w-full mx-auto max-w-5xl space-y-3 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
         <motion.section
@@ -117,16 +126,21 @@ export default function WalletServicesPage() {
           animate={{ opacity: 1, y: 0 }}
           className="rounded-[24px] border border-slate-200 bg-white p-3 shadow-sm"
         >
-          <div className="relative rounded-[20px] border border-slate-200 bg-[#f7faff] p-3 pr-12">
-            <Search className="absolute right-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-slate-400" />
-            <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold text-slate-900">Search services or settings</p>
-              <p className="text-xs text-slate-500">Find the action you need quickly.</p>
-            </div>
-          </div>
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search wallet services"
+              aria-label="Search wallet services"
+              className="min-h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100"
+            />
+            <span className="sr-only">Find an available wallet service</span>
+          </label>
         </motion.section>
 
-        {serviceGroups.map((group) => (
+        {visibleServiceGroups.map((group) => (
           <motion.section
             key={group.title}
             initial={{ opacity: 0, y: 20 }}
@@ -138,7 +152,7 @@ export default function WalletServicesPage() {
               <div>
                 <h2 className="text-sm font-semibold text-slate-900">{group.title}</h2>
               </div>
-              <button className="text-xs font-semibold text-[#0f6cff]">View all</button>
+              <span className="text-xs font-medium text-slate-400">{group.items.length} options</span>
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
               {group.items.map((item) => (
@@ -160,9 +174,18 @@ export default function WalletServicesPage() {
                   <p className="text-xs font-medium text-slate-900">{item.label}</p>
                 </button>
               ))}
+
             </div>
           </motion.section>
         ))}
+
+        {visibleServiceGroups.length === 0 && (
+          <div className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
+            <Search className="mx-auto h-6 w-6 text-slate-400" />
+            <h2 className="mt-3 text-sm font-semibold text-slate-900">No matching services</h2>
+            <p className="mt-1 text-sm text-slate-500">Try another search term.</p>
+          </div>
+        )}
 
         <motion.section
           initial={{ opacity: 0, y: 20 }}

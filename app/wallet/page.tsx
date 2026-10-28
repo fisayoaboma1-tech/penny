@@ -25,6 +25,7 @@ import { ProtectedRoute } from "@/components/route-protection"
 import { useAuth } from "@/contexts/auth-context"
 import { createClient } from "@/lib/supabase/client"
 import { formatWalletAmount, getTransactionTimeLabel, getWalletTransactionBadge, getWalletTransactionIcon } from "@/lib/wallet/transactions"
+import { getUserAvatarUrl } from "@/components/wallet/user-avatar"
 
 const services = [
   { label: "Transfer", icon: Send, path: "/wallet/transfer" },
@@ -73,15 +74,15 @@ export default function WalletPage() {
   }, [profile?.hide_balance, loading, profile])
 
   const userName = useMemo(() => {
-    if (!user) return "Chukwudi Enoch"
-    return user.user_metadata?.full_name || user.email?.split("@")[0] || "Chukwudi Enoch"
+    if (!user) return "Your wallet"
+    return user.user_metadata?.full_name || user.email?.split("@")[0] || "Your wallet"
   }, [user])
 
-  const profileImageUrl =
-    profile?.profile_image_url ||
-    user?.user_metadata?.avatar_url ||
-    user?.user_metadata?.profile_image ||
-    "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785158069/unnamed_f9ug3t.png"
+  const profileImageUrl = getUserAvatarUrl(
+    profile?.profile_image_url,
+    user?.user_metadata?.avatar_url,
+    user?.user_metadata?.profile_image,
+  )
 
   const formatLastUpdated = (timestamp: number | null) => {
     if (timestamp === null) return "Last updated just now"
@@ -345,7 +346,7 @@ export default function WalletPage() {
         />
 
         {/* ─── MAIN CONTENT ─── */}
-        <main className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pb-28 pt-20 sm:px-6 md:gap-5 md:pt-24 lg:pl-28 lg:pr-6 lg:pt-20 xl:px-8">
+        <main className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pb-28 pt-20 sm:px-6 md:gap-5 md:pt-24 lg:max-w-[96rem] lg:pl-64 lg:pr-8 lg:pt-20 xl:pl-64 xl:pr-10">
           {/* ── BALANCE CARD ── */}
           <motion.section
             initial={{ opacity: 0, y: 20 }}

@@ -1,29 +1,18 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { useState } from "react"
 import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Eye, EyeOff } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { countries } from "@/lib/countries"
+import { motion } from "framer-motion"
+import { ArrowLeft, ArrowRight, Check, CircleCheck, Eye, EyeOff, Fingerprint, Loader2, LockKeyhole, Mail, Phone, UserRound } from "lucide-react"
+import { AuthLayout, AuthProgress, AuthSuccess } from "@/components/auth/auth-layout"
 import { CountrySelector } from "@/components/ui/country-selector"
 import { useAuth } from "@/contexts/auth-context"
-
-const fadeUpVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.1,
-      duration: 0.8,
-      ease: "easeInOut" as const,
-    },
-  }),
-}
+import { countries } from "@/lib/countries"
+import { createClient } from "@/lib/supabase/client"
 
 export default function SignupPage() {
+  const [step, setStep] = useState(1)
   const [showPassword, setShowPassword] = useState(false)
   const [showRepeatPassword, setShowRepeatPassword] = useState(false)
   const [fullName, setFullName] = useState("")
@@ -34,295 +23,320 @@ export default function SignupPage() {
   const [selectedCountry, setSelectedCountry] = useState(countries[0])
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
   const router = useRouter()
-  const { refreshProfile } = useAuth()
+  const { refreshSession } = useAuth()
 
   const handleFullNameChange = (value: string) => {
-    // Reject if contains any numbers
-    if (/\d/.test(value)) {
-      return
-    }
+    if (/\d/.test(value)) return
     setFullName(value)
   }
 
   const handlePhoneChange = (value: string) => {
-    // Only allow numbers and spaces
-    const cleaned = value.replace(/[^0-9\s]/g, "")
-    setPhone(cleaned)
+    setPhone(value.replace(/[^0-9\s]/g, ""))
   }
 
-  const validatePassword = (password: string): boolean => {
-    // Minimum 8 characters, at least one letter and one number
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/
-    return passwordRegex.test(password)
-  }
+  const validatePassword = (value: string) => (
+    value.length >= 8 && /[A-Za-z]/.test(value) && /\d/.test(value)
+  )
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSignup = async (event: React.FormEvent) => {
+    event.preventDefault()
     setError("")
+
+    if (step === 1) {
+      setStep(2)
+      return
+    }
+
+    if (password !== repeatPassword) {
+      setError("Those passwords don’t match yet.")
+      return
+    }
+
+    if (!validatePassword(password)) {
+      setError("Choose a password with at least 8 characters, including a letter and a number.")
+      return
+    }
+
     setLoading(true)
-
     try {
-      // Validation
-      if (!fullName || !email || !phone || !password || !repeatPassword) {
-        throw new Error("Please fill in all fields")
-      }
-
-      if (password !== repeatPassword) {
-        throw new Error("Passwords do not match")
-      }
-
-      if (!validatePassword(password)) {
-        throw new Error("Password must be at least 8 characters with at least one letter and one number")
-      }
-
       const supabase = createClient()
-
-      // Sign up user with Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email,
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email: email.trim(),
         password,
         options: {
           data: {
-            full_name: fullName,
+            full_name: fullName.trim(),
             phone_number: phone,
             country_code: selectedCountry.dialCode,
           },
         },
       })
 
-      if (error) {
-        throw error
-      }
+      if (signupError) throw signupError
+      if (!data.user) throw new Error("We couldn’t create your account. Please try again.")
 
-      if (data.user) {
-        // Create a profile row in the database linked to the auth user id
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            id: data.user.id,
-            full_name: fullName,
-            phone_number: phone,
-            country_code: selectedCountry.dialCode,
-            email,
-            profile_image_url: "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg",
-          },
-        ])
-
-        if (profileError) {
-          throw profileError
-        }
-
-        // If signup already returned an active session, we are already logged in.
-        if (data.session) {
-          await refreshProfile()
-          router.push("/wallet")
-          return
-        }
-
-        // Otherwise attempt to sign in automatically after registration.
+      if (!data.session) {
         const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-          email,
+          email: email.trim(),
           password,
         })
 
-        if (loginError || !loginData.session) {
-          // If auto-login fails, take the user to login page instead of requiring manual signup.
-          router.push(
-            "/login?message=Account created successfully! Please log in."
-          )
-          return
+        if (loginError) {
+          throw new Error("Your account was created, but automatic sign-in failed. Please try signing in.")
         }
 
-        await refreshProfile()
-        router.push("/wallet")
+        if (!loginData.session) {
+          throw new Error("Your account was created, but no sign-in session was returned. Please try signing in.")
+        }
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred during signup")
-    } finally {
+
+      await refreshSession()
+      setIsSuccess(true)
+      await new Promise((resolve) => window.setTimeout(resolve, 900))
+      router.replace("/wallet")
+      router.refresh()
+    } catch (signupError) {
+      setError(signupError instanceof Error ? signupError.message : "Something went wrong creating your account.")
       setLoading(false)
     }
   }
 
-  // Show creating account overlay
-  if (loading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-sm">
-        <div className="flex flex-col items-center gap-6">
-          <div className="loader-login" />
-          <p className="text-sm font-medium text-slate-600">Creating account...</p>
-        </div>
-      </div>
-    )
-  }
+  const passwordRequirements = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "One letter and one number", met: /[A-Za-z]/.test(password) && /\d/.test(password) },
+  ]
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[#eff7ff] to-transparent" />
-      <div className="absolute inset-x-0 top-0 h-[28vh] bg-[radial-gradient(circle_at_top,_rgba(15,99,255,0.14),transparent_45%)]" />
-      <div className="relative z-10">
-        <div className="fixed inset-x-0 top-0 z-20 flex items-center justify-start px-4 py-4 sm:px-6">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50"
-            aria-label="Go back"
-          >
-            <span className="text-xl leading-none">‹</span>
-          </button>
-        </div>
-
-        <div className="flex min-h-screen items-center justify-center px-4 pt-24 pb-12">
-          <motion.div
-            className="w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-[0_40px_80px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-        >
-          <div className="px-8 py-10 sm:px-10">
-            <div className="mb-8 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
-                <img
-                  src="https://res.cloudinary.com/qz5m8bhg/image/upload/v1785353346/Pngtree_letter_p_icon_8622509_grhaye.png"
-                  alt="Pennywise logo"
-                  className="h-10 w-10 object-contain"
-                />
-              </div>
-              <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
-                PENNY<span className="text-[#0f6cff]">WISE</span>
-              </p>
-              <h1 className="mt-4 text-2xl sm:text-3xl font-semibold text-slate-900">Create your account</h1>
-              <p className="mt-3 text-xs leading-5 text-slate-400">
-                Use your details to register and secure your wallet access.
-              </p>
+    <AuthLayout
+      eyebrow="A fresh start, made simple"
+      sideTitle="Make more room for what matters."
+      sideDescription="Create your Pennywise account and bring a little more intention to your everyday money."
+    >
+      {isSuccess ? (
+        <AuthSuccess title="Your account is ready" description="Welcome to Pennywise. Taking you to your wallet…" />
+      ) : (
+        <>
+          <div className="mb-7">
+            <div className="mb-6 hidden h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 lg:flex">
+              <Fingerprint className="h-5 w-5" />
             </div>
+            <p className="text-sm font-semibold text-blue-600">Let’s get you started</p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Create your account</h1>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              {step === 1 ? "A few details to make your wallet yours." : "Set a password to keep your account secure."}
+            </p>
+          </div>
 
-            <form onSubmit={handleSignup} autoComplete="off" className="space-y-5">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Full Name</label>
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => handleFullNameChange(e.target.value)}
-                    placeholder="Enter your full name"
-                    autoComplete="off"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
-                  />
-                </div>
+          <AuthProgress currentStep={step} steps={["Your details", "Secure your account"]} />
 
+          <form onSubmit={handleSignup} className="space-y-5">
+            {step === 1 ? (
+              <motion.div
+                key="details-step"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-4"
+              >
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
-                    data-lpignore="true"
-                    data-form-type="other"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Phone Number</label>
-                  <div className="relative flex items-stretch rounded-2xl border border-slate-200 bg-white">
-                    <CountrySelector
-                      value={selectedCountry.code}
-                      onValueChange={(countryCode) => {
-                        const pickedCountry = countries.find((country) => country.code === countryCode) ?? countries[0]
-                        setSelectedCountry(pickedCountry)
-                      }}
-                      className="flex-none w-[100px] overflow-visible"
-                      triggerClassName="h-full w-full rounded-none border-none bg-transparent px-3 text-left text-sm font-medium text-slate-900 shadow-none hover:bg-slate-100"
-                      panelClassName="w-full"
-                    />
-                    <div className="h-full w-px bg-slate-200" />
+                  <label htmlFor="signup-name" className="text-sm font-medium text-slate-700">Full name</label>
+                  <div className="relative">
+                    <UserRound className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => handlePhoneChange(e.target.value)}
-                      placeholder="(123) 456-7890"
-                      autoComplete="off"
-                      className="flex-1 border-none bg-transparent px-4 py-3 text-sm text-slate-900 outline-none focus:ring-0"
+                      id="signup-name"
+                      type="text"
+                      value={fullName}
+                      onChange={(event) => handleFullNameChange(event.target.value)}
+                      placeholder="e.g. Alex Morgan"
+                      autoComplete="name"
+                      required
+                      autoFocus
+                      className="saas-input !bg-white !text-slate-900 !pl-11 min-h-12 rounded-xl border-slate-200 pr-4"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Password</label>
+                  <label htmlFor="signup-email" className="text-sm font-medium text-slate-700">Email address</label>
                   <div className="relative">
+                    <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
+                      id="signup-email"
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="name@domain.com"
+                      autoComplete="email"
+                      autoCapitalize="none"
+                      required
+                      className="saas-input !bg-white !text-slate-900 !pl-11 min-h-12 rounded-xl border-slate-200 pr-4"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="signup-phone" className="text-sm font-medium text-slate-700">Phone number</label>
+                  <div className="flex min-h-12 items-stretch rounded-xl border border-slate-200 bg-white transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
+                    <CountrySelector
+                      value={selectedCountry.code}
+                      onValueChange={(countryCode) => {
+                        const country = countries.find((item) => item.code === countryCode)
+                        if (country) setSelectedCountry(country)
+                      }}
+                      className="w-[105px] flex-none overflow-visible"
+                      triggerClassName="h-full w-full rounded-l-xl border-none bg-transparent px-3 text-left text-sm font-medium text-slate-900 shadow-none hover:bg-slate-50"
+                      panelClassName="w-full"
+                    />
+                    <div className="my-2 w-px bg-slate-200" />
+                    <Phone className="ml-3 h-4 w-4 flex-none self-center text-slate-400" />
+                    <input
+                      id="signup-phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(event) => handlePhoneChange(event.target.value)}
+                      placeholder="e.g. 555 123 4567"
+                      autoComplete="tel-national"
+                      required
+                      className="min-w-0 flex-1 border-none bg-transparent px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:ring-0"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="security-step"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-4"
+              >
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <Mail className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-slate-700">{email}</p>
+                      <p className="text-xs text-slate-400">{fullName}</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setError(""); setStep(1) }}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+                  >
+                    Edit
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="signup-password" className="text-sm font-medium text-slate-700">Create a password</label>
+                  <div className="relative">
+                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="signup-password"
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
+                      onChange={(event) => setPassword(event.target.value)}
+                      placeholder="Create a secure password"
                       autoComplete="new-password"
-                      data-lpignore="true"
-                      data-form-type="other"
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
+                      required
+                      className="saas-input !bg-white !text-slate-900 !pl-11 min-h-12 rounded-xl border-slate-200 pr-12"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      onClick={() => setShowPassword((current) => !current)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-controls="signup-password"
+                      className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
 
+                <ul className="space-y-2 rounded-xl bg-slate-50 px-4 py-3" aria-label="Password requirements">
+                  {passwordRequirements.map(({ label, met }) => (
+                    <li key={label} className={`flex items-center gap-2 text-xs ${met ? "text-emerald-700" : "text-slate-500"}`}>
+                      <CircleCheck className={`h-4 w-4 ${met ? "text-emerald-500" : "text-slate-300"}`} />
+                      {label}
+                    </li>
+                  ))}
+                </ul>
+
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">Repeat Password</label>
+                  <label htmlFor="signup-confirm-password" className="text-sm font-medium text-slate-700">Confirm password</label>
                   <div className="relative">
+                    <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
+                      id="signup-confirm-password"
                       type={showRepeatPassword ? "text" : "password"}
                       value={repeatPassword}
-                      onChange={(e) => setRepeatPassword(e.target.value)}
-                      placeholder="Repeat your password"
+                      onChange={(event) => setRepeatPassword(event.target.value)}
+                      placeholder="Re-enter your password"
                       autoComplete="new-password"
-                      data-lpignore="true"
-                      data-form-type="other"
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 text-sm text-slate-900 outline-none transition focus:border-[#0f6cff] focus:ring-2 focus:ring-[#0f6cff]/10"
+                      required
+                      className="saas-input !bg-white !text-slate-900 !pl-11 min-h-12 rounded-xl border-slate-200 pr-12"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowRepeatPassword(!showRepeatPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      onClick={() => setShowRepeatPassword((current) => !current)}
+                      aria-label={showRepeatPassword ? "Hide password" : "Show password"}
+                      aria-controls="signup-confirm-password"
+                      className="absolute right-2.5 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                     >
                       {showRepeatPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  {repeatPassword && password === repeatPassword ? (
+                    <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                      <Check className="h-3.5 w-3.5" /> Passwords match
+                    </p>
+                  ) : null}
                 </div>
+              </motion.div>
+            )}
 
-                {error && (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex w-full items-center justify-center rounded-full bg-[#0f6cff] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(15,23,42,0.18)] transition hover:bg-[#0b57d3] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {loading ? "Creating account..." : "Create account"}
-                </button>
+            {error ? (
+              <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {error}
               </div>
-            </form>
+            ) : null}
 
-            <div className="mt-6 text-center">
-              <p className="text-xs leading-5 text-slate-500">
-                Already have an account? <Link href="/login" className="font-medium text-[#0f6cff] hover:text-[#0b57d3]">Log in</Link>
-              </p>
+            <div className="flex gap-3">
+              {step === 2 ? (
+                <button
+                  type="button"
+                  onClick={() => { setError(""); setStep(1) }}
+                  disabled={loading}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-60"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
+                </button>
+              ) : null}
+              <button
+                type="submit"
+                disabled={loading}
+                className="saas-button saas-button-primary min-h-12 flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-sm shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                {loading ? "Setting up your wallet…" : step === 1 ? "Continue" : "Create account"}
+                {!loading ? <ArrowRight className="h-4 w-4" /> : null}
+              </button>
             </div>
-          </div>
-        </motion.div>
-      </div>
-    </div>
-  </div>
+          </form>
+
+          <p className="mt-7 text-center text-sm text-slate-500">
+            Already have an account?{" "}
+            <Link href="/login" className="font-semibold text-blue-600 transition hover:text-blue-800">Sign in</Link>
+          </p>
+
+          <p className="mt-8 border-t border-slate-200/80 pt-6 text-center text-xs leading-5 text-slate-400">
+            By creating an account, you agree to keep your sign-in details safe.
+          </p>
+        </>
+      )}
+    </AuthLayout>
   )
 }

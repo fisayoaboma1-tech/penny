@@ -5,12 +5,13 @@ import { motion, AnimatePresence } from "framer-motion"
 import { X, Upload, Trash2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
+import { getUserAvatarUrl } from "@/components/wallet/user-avatar"
 
 interface ProfileImageModalProps {
   isOpen: boolean
   onClose: () => void
   currentImageUrl: string | null
-  onImageUpdate: (url: string) => void
+  onImageUpdate: (url: string | null) => void
 }
 
 export function ProfileImageModal({
@@ -81,22 +82,25 @@ export function ProfileImageModal({
     }
   }
 
-  const defaultImageUrl = "https://res.cloudinary.com/qz5m8bhg/image/upload/v1785215266/profilr_n29abb.jpg"
-
   const handleDelete = async () => {
     if (!user) return
 
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ profile_image_url: defaultImageUrl })
+        .update({ profile_image_url: null })
         .eq("id", user.id)
 
       if (error) {
         throw error
       }
 
-      onImageUpdate(defaultImageUrl)
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: { avatar_url: null, profile_image: null },
+      })
+      if (metadataError) throw metadataError
+
+      onImageUpdate(null)
       onClose()
     } catch (error) {
       console.error("Error deleting image:", error)
@@ -109,7 +113,8 @@ export function ProfileImageModal({
     onClose()
   }
 
-  const showImage = preview || (currentImageUrl && currentImageUrl !== defaultImageUrl)
+  const activeImageUrl = getUserAvatarUrl(currentImageUrl)
+  const showImage = preview || activeImageUrl
 
   return (
     <AnimatePresence>
@@ -152,7 +157,7 @@ export function ProfileImageModal({
                 <div className="w-24 h-24 rounded-xl overflow-hidden bg-[#111111] border border-[#1a1a1a] ring-1 ring-white/[0.02]">
                   {showImage ? (
                     <img
-                      src={preview || currentImageUrl || ""}
+                      src={preview || activeImageUrl || ""}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />
@@ -193,7 +198,7 @@ export function ProfileImageModal({
                   {uploading ? "Uploading..." : "Save"}
                 </button>
 
-                {currentImageUrl && currentImageUrl !== defaultImageUrl && (
+                {currentImageUrl && (
                   <button
                     onClick={handleDelete}
                     className="px-4 py-2.5 rounded-xl text-sm font-medium bg-[#1a1a1a] text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center gap-1.5"
